@@ -457,8 +457,9 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         info_t_varstorunloop = 0
         info_c_varstorunloop = 0
         try:
+            assert len(varstorun), 'Empty list of covariances to run. Check available variables and covariances to be performed.'
             for thisvar_i, thisvar in enumerate(varstorun):
-                info_t_startvarloop = time.time()  
+                info_t_startvarloop = time.time()
                 
                 allvars = thisvar.replace('|', '*').split('*')
                 xy = thisvar.split('|')[0].split('*')
