@@ -504,6 +504,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         μ[v+'D'] = signan *1
                         μ[v+'T'] = signan *1
                         
+                        """
                         # apply Allan deviation (ad-hoc)
                         allan_dev = {'co2': np.array([0.014, 0.014, 0.014, 0.014, 0.013, 0.01,  0.007, 0.005, 0.004, 0.004, 0.003, 0.002, 0.002, 0.001, 0.002, 0.003, 0.003, np.inf]),
                                      'co': np.array([3.095, 3.095, 3.095, 3.095, 2.853, 2.206, 1.393, 0.998, 0.674, 0.544, 0.418, 0.265, 0.168, 0.124, 0.103, 0.067, 0.086, np.inf]),
@@ -511,8 +512,9 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         allan_dev = {k: np.expand_dims(v, 1) for k, v in allan_dev.items()}
                         if (N > 0) and (v.lower() in allan_dev.keys()):
                             # φ[v] needs to be (n, 17)
-                            φ0[v] = np.where((abs(φ[v]) < np.sqrt(allan_dev[v])), 0, φ0[v])
-                        
+                            φ0[v] = np.where((abs(φ[v]) < np.sqrt(allan_dev[v])), 0, φ0[v])                        
+                        """
+
                         # for file length, update later
                         σ[v]  = []
                         σ[v+'D'] = []
