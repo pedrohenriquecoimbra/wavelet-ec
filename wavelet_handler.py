@@ -56,8 +56,6 @@ def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=2
                                     'w*ts|w*co2',  'w*ts|w*co', 'w*ts|w*ch4', 'w*ts|w*h2o',
                                     #'u*w', 'v*w'
                                     ]
-        #ad-hoc
-        interesting_combinations = ['w*co2|w*co|w*ch4', 'w*co2|w*ch4|w*co']
 
         # Reduce interesting to possible
         possible_combinations = [sum([v not in variables_available for v in re.split('[*|]', t)])==0 for t in interesting_combinations]
