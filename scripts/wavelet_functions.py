@@ -332,7 +332,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     
     if method in ['dwt']:
         buffer = hc24.bufferforfrequency_dwt(
-            N=pd.to_timedelta(file_duration)/pd.to_timedelta("1S") * dt**-1,
+            N=pd.to_timedelta(file_duration)/pd.to_timedelta("1s") * dt**-1,
             n_=_f, **wt_kwargs)/2
     else:
         buffer = hc24.bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
@@ -430,7 +430,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         
         # ensure continuity
         info_t_startdatacontinuity = time.time()
-        data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt}S")}),
+        data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt}s")}),
                             data, on="TIMESTAMP", how='outer').reset_index(drop=True)
         logger.debug(f'\tForce data to be continuous took {round(time.time() - info_t_startdatacontinuity)} s (run_wt).')
 

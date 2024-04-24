@@ -1057,7 +1057,7 @@ try:
         n0 = N
         cur_iteration = 0
         while True:
-            n0 += pd.to_timedelta(n_)/pd.to_timedelta("1S") * fs if isinstance(n_, str) else n_
+            n0 += pd.to_timedelta(n_)/pd.to_timedelta("1s") * fs if isinstance(n_, str) else n_
             if lvl <= pywt.dwt_max_level(n0, wave):
                 break
             cur_iteration += 1
