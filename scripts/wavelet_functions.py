@@ -243,7 +243,7 @@ def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=100,
 
 def conditional_sampling(Y12, *args, names=['xy', 'a'], label = {1: "+", -1: "-", 0: "·"}, false=0):
     # guarantee names are enough to name all arguments
-    nargs = len(args)# + 1
+    nargs = len(args)
     if nargs < len(names): names = names[:nargs]
     if nargs > len(names): names = names + ['b']* (nargs-len(names))
     # [Y12] + list(args) 
@@ -289,7 +289,7 @@ def integrate_cospectra(root, pattern, f0, dst_path):
     data0 = data[(np.isnan(data['natural_frequency'])==False) * (data['natural_frequency'] >= f0)].groupby(['variable', 'TIMESTAMP'])['value'].agg(np.nansum).reset_index(drop=False)
     data1 = data[np.isnan(data['natural_frequency'])].drop('natural_frequency', axis=1)
 
-    datai = pd.concat([data1, data0[np.isin(data0['variable'], data1['variable'].unique())==False]]).drop_duplicates()
+    datai = pd.concat([data1[np.isin(data1['variable'], data0['variable'].unique())==False], data0]).drop_duplicates()
     datai = datai.pivot_table('value', 'TIMESTAMP', 'variable').reset_index(drop=False)
     
     if dst_path: datai.to_file(dst_path, index=False)
@@ -301,7 +301,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
            method="dwt", Cφ=1, nan_tolerance=.3,
            averaging=30, condsamp_flat=[], integrating=30*60, 
            overwrite=False, saveraw=False, file_duration="1D",
-           denoise=False, noisecolor=1, deadband={}, verbosity=1):
+           despike=False, denoise=False, noisecolor=1, deadband={}, verbosity=1):
     """
     file_duration -> processing_time_duration
     averaging & integrating at the same unit
@@ -500,7 +500,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         S[v] = signal
 
                         # apply despiking (Mauder et al.)
-                        φ0[v] = np.apply_along_axis(__despike__, 1, φ0[v])
+                        if despike:
+                            φ0[v] = np.apply_along_axis(__despike__, 1, φ0[v])
                         μ[v] = signan *1
                         μ[v+'D'] = signan *1
                         μ[v+'T'] = signan *1
@@ -566,7 +567,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         σ[v] = np.array(σ[v]).reshape(1,-1)
                         σ[v+'D'] = np.array(σ[v+'D']).reshape(1,-1)
                         σ[v+'T'] = np.array(σ[v+'T']).reshape(1,-1)
-                        logger.debug(f'\t\tDecompose all variables took {σ[v].shape} / {σ[v+"D"].shape} s (run_wt).')
+                        #logger.debug(f'\t\tDecompose all variables took {σ[v].shape} / {σ[v+"D"].shape} s (run_wt).')
                         #ζ[v] = np.array(ζ[v]).T
                         ζb[v] = np.array(ζb[v]).reshape(1,-1)
                         S[v] = np.array(S[v]).reshape(1,-1)
@@ -582,6 +583,13 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 for ci, c in enumerate(xy): Y12 = Y12 * φ[c].conjugate() if ci else φ[c] * Cφ
                 for ci, c in enumerate(xy): Y120 = Y120 * φ0[c].conjugate() if ci else φ0[c] * Cφ
                 for ci, c in enumerate(xy): Cov = Cov * σ[c] if ci else copy.deepcopy(σ[c])
+                
+                CovT = {}
+                for t in ['T', 'D']:
+                    for co in set(itertools.combinations(['', t]*len(xy), len(xy))):
+                        for ci, c in enumerate(xy): Cov_ = Cov_ * σ[c+co[ci]] if ci else copy.deepcopy(σ[c+co[0]])
+                        CovT['/'.join([c+co[ci] for ci, c in enumerate(xy)])] = Cov_
+                
                 # addictive so it only remains which is > uncertainty
                 #for ci, c in enumerate(xy): Y12ζ = Y12 * φ[c].conjugate() if ci else φ[c] * Cφ
                 #for ci, c in enumerate(xy): Y12ζ = np.where((abs(φ[c]) > abs(ζ[c])) & (abs(φ[c])>0), 
@@ -593,10 +601,13 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 logger.debug(f"\t\tDecomposed covariance shape: {Y12.shape} ({round(Y12.shape[1] / (24*60*60/dt), 2)} days) (run_wt).")
                 
                 φs = {''.join(xy): Y12, '/'.join(xy)+'_cov': Cov.reshape(1,-1)}
+                φs.update({f'{k}_cov': v.reshape(1,-1) for k, v in CovT.items()})
                 φs.update({f'{k}_var': (v**2).reshape(1,-1) for k, v in σ.items()})
                 μs = {''.join(xy): np.where(np.where(
                     np.array(μ[xy[0]]), 0, 1) * np.where(np.array(μ[xy[1]]), 0, 1), 0, 1).reshape(1,-1)}
                 μs.update({'/'.join(xy)+'_cov': μs[''.join(xy)]})
+                # Ad-hoc solution
+                μs.update({f'{k}_cov': μs[k.replace('D', '').replace('T', '')+'_cov'] for k in CovT.keys()})
                 μs.update({f'{k}_var': np.where(np.array(μ[k]), 0, 1).reshape(1,-1) for k in σ.keys()})
                 
                 logger.debug(f'\t\tCalculate covariances took {round(time.time() - info_t_startcovariance)} s (run_wt).')
@@ -619,7 +630,9 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 φc = [np.array(φ[xy[0]]) * np.array(φ[c]).conjugate() if xy[0] != c else np.array(φ[c]) for c in condsamp_flat]
                 """
                 #Y12ζ
-                φc = conditional_sampling(Y120, *φcs, names=names) if φcs else {}
+                logger.debug(f'\t\tDifference between original and denoised {np.nanmean(abs(Y12 - Y120))} for array w/ shape {Y12.shape} and {Y120.shape} (run_wt).')
+                φc = conditional_sampling(Y12, *φcs, names=names) if φcs else {}
+                if φc: logger.debug(f'\t\tDifference between original and partitioned {np.nanmean(abs(Y12 - np.nansum(list(φc.values()), 0)))} for sum of {φc.keys()} (run_wt).')
                 #φs.update({k.replace("xy", ''.join(xy)).replace('a', ''.join(condsamp_flat)): v for k, v in φc.items()})
                 φs.update(φc)
                 
@@ -631,24 +644,27 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 logger.debug(f'\t\tDone normal conditional sampling took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
                 names0 = [''.join(xy) + '·' + ''.join(condsamp_pair[0])] + [''.join(cs) for cs in condsamp_pair[1:]] if φcs else []
                 φc0 = conditional_sampling(ζY12, *φcs[1:], names=names0) if φcs else {}
-                φs.update({k.replace("xy", ''.join(xy)).replace('a', ''.join(condsamp_flat)): v for k, v in φc.items()})
+                #φs.update({k.replace("xy", ''.join(xy)).replace('a', ''.join(condsamp_flat)): v for k, v in φc.items()})
                 φs.update(φc0)
-
-                logger.debug(f'\t\tConditional sampling took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
+                
+                if φc and φc0: logger.debug(f'\t\tDifference between original and partitioned {np.nanmean(abs(Y12 - np.nansum(list(dict(φc, **φc0).values()), 0)))} for sum of {φc.keys()} (run_wt).')
                 
                 # add noise columns
                 φs.update({''.join(xy) + '·': ζY12})
 
+                logger.debug(f'\t\tConditional sampling took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
+                
                 # repeats nan flag wo/ considering conditional sampling variables
                 μs.update(
                     {k: μs[k if k in μs.keys() else [k_ for k_ in μs.keys() if k.startswith(k_)][0]] for k in φs.keys()})
+                logger.debug(f'\t\tAdding nan flag took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
 
                 info_t_startdataframe = time.time()
                 # array to dataframe for averaging
                 
                 # Integrate arrays are 2D inside dictionary (needed for concatenate)
                 def __integrate_decomposedarrays_in_dictionary__(array_dic):
-                    levels_to_integrate = [dt*2**l < integrating for l in sj]
+                    levels_to_integrate = [1/j2sj(l, 1/dt) >= 1/integrating for l in sj]
                     for k in array_dic.keys(): 
                         if array_dic[k].shape[0] == len(sj):
                             array_dic[k] = np.concatenate([
@@ -733,6 +749,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         hc24.mkdirs(dst_path)
                         with open(dst_path+'.part', 'w+') as part: part.write(header)
                         legitimate_to_write = 1
+                        logger.debug(f'\t\tSaving header of DataFrame took {round(time.time() - info_t_startsaveloop)} ({round(time.time() - info_t_startdataframe)}) s (run_wt).')
                     
                     if not legitimate_to_write: continue
                     
@@ -740,7 +757,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                     __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
                     __tempa__ = pd.concat([__tempa__.pop('variable').str.extract(pattern, expand=True), __tempa__], axis=1)
                     __tempa__['natural_frequency'] = __tempa__['natural_frequency'].apply(lambda j: 1/j2sj(j, 1/dt) if j else np.nan)
-                    with open(dst_path+'.part', 'a+', newline='') as part: __tempa__.to_file(part, header=use_header, index=False)
+                    with open(dst_path+'.part', 'a+', newline='') as part: __tempa__.to_file(part, header=use_header, chunksize=500, index=False)
                     
                     del __tempa__
                 logger.debug(f'\t\tSaving DataFrame for all averaging period took {round(time.time() - info_t_startsaveloop)} ({round(time.time() - info_t_startdataframe)}) s (run_wt).')
