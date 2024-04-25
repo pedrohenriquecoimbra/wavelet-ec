@@ -524,7 +524,9 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         #ζ[v]  = []
                         ζb[v] = []
 
-                        for this_group, this_data in data.groupby(data[_isinfinalrange].TIMESTAMP.dt.floor(_f)):
+                        arr_slice = np.unique(data[_isinfinalrange].TIMESTAMP.dt.floor(_f), return_index=True)
+                        for this_group, this_data in list(zip(arr_slice[0], np.split(data, arr_slice[1][1:]))):
+                            #for this_group, this_data in data.groupby(data[_isinfinalrange].TIMESTAMP.dt.floor(_f)):
                             # Everytime creating working with the whole array, maybe faster to work on a split of the array (redability)
                             # List of T/F to select values that are in the current AVERAGING period
                             this_hh = np.isin(data[_isinfinalrange].index, this_data.index)#np.where(data.TIMESTAMP > this_yl) & (data.TIMESTAMP <= (this_yl + pd.Timedelta(_f))), True, False)
@@ -703,7 +705,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 #__temp__ = __temp__[__temp__.TIMESTAMP >= min(yl)]
                 #__temp__ = __temp__[__temp__.TIMESTAMP < max(yl)]
                 
-                __temp__ = __temp__.melt('TIMESTAMP')
+                #__temp__ = __temp__.melt('TIMESTAMP')
                 #__temp__ = pd.concat([__temp__.pop('variable').str.extract("^(?P<variable>.+?)_?(?P<natural_frequency>(?<=_)\d+)?$", expand=True), __temp__], axis=1)
                 #__temp__['natural_frequency'] = __temp__.variable.apply(lambda x: float(x.rsplit('_', 1)[-1]) if '_' in x and x[-1] in ['0','1','2','3','4','5','6','7','8','9'] else np.nan)
                 #__temp__['natural_frequency'] = __temp__['natural_frequency'].apply(lambda j: 1/j2sj(j, 1/dt) if j else np.nan)
@@ -729,8 +731,10 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 
                 info_t_startsaveloop = time.time()
                 pattern = re.compile(r"^(?P<variable>.+?)_?(?P<natural_frequency>(?<=_)\d+)?$")
-                for __datea__, __tempa__ in __temp__.groupby(__temp__.TIMESTAMP.dt.floor(str(averaging)+'Min')):
-                    dst_path = output_path.format(suffix + "_full_cospectra", __datea__.strftime('%Y%m%d%H%M'))
+                arr_slice = np.unique(__temp__.TIMESTAMP.dt.floor(str(averaging)+'Min'), return_index=True)
+                for __datea__, __tempa__ in list(zip(arr_slice[0], np.split(__temp__, arr_slice[1][1:]))):
+                    #for __datea__, __tempa__ in __temp__.groupby(__temp__.TIMESTAMP.dt.floor(str(averaging)+'Min')):
+                    dst_path = output_path.format(suffix + "_full_cospectra", pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
                     if os.path.exists(dst_path): continue
                     use_header = False
                     if not os.path.exists(dst_path+'.part'):
@@ -753,6 +757,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                     
                     if not legitimate_to_write: continue
                     
+                    __tempa__ = __tempa__.melt('TIMESTAMP')
                     __tempa__.drop('TIMESTAMP', axis=1, inplace=True)
                     __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
                     __tempa__ = pd.concat([__tempa__.pop('variable').str.extract(pattern, expand=True), __tempa__], axis=1)
@@ -806,8 +811,10 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
             logger.info(f'\tArray to DataFrame took {round(info_t_dataframe)} s ({round(info_t_dataframe/(thisvar_i+1))} s/loop) (run_wt).')
             logger.info(f'\tStarting averaging at {round(time.time() - info_t_start)} s (run_wt).')
             
-            for __datea__, _ in data.groupby(data.TIMESTAMP.dt.floor(str(averaging)+'Min')):
-                dst_path = output_path.format(suffix + "_full_cospectra", __datea__.strftime('%Y%m%d%H%M'))
+            arr_slice = np.unique(data.TIMESTAMP.dt.floor(str(averaging)+'Min'), return_index=True)
+            for __datea__ in arr_slice[0]:
+                #for __datea__, _ in data.groupby(data.TIMESTAMP.dt.floor(str(averaging)+'Min')):
+                dst_path = output_path.format(suffix + "_full_cospectra", pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
                 if os.path.exists(dst_path+'.part'): os.rename(dst_path+'.part', dst_path)
 
 
