@@ -1,0 +1,3 @@
+.git
+scripts/__pycache__/*
+deprecated/*
