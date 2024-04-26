@@ -1,0 +1,1224 @@
+2024-04-25 21:13:38,979 root INFO STARTING THE RUN
+2024-04-25 21:13:38,987 wvlt INFO Entered wavelet code (run_wt).
+2024-04-25 21:13:38,987 wvlt DEBUG Buffer (s): 29700.0.
+2024-04-25 21:13:38,987 wvlt INFO Start date loop at 0 s (run_wt).
+2024-04-25 21:15:12,924 wvlt INFO 	Loading data took 94 s (run_wt).
+2024-04-25 21:15:15,483 wvlt DEBUG 	Force data to be continuous took 3 s (run_wt).
+2024-04-25 21:15:15,483 wvlt INFO 	Starting variables loop at 96 s (run_wt).
+2024-04-25 21:15:15,483 wvlt DEBUG 		Call w*co2|w*h2o (w*co2 conditioned by w*h2o).
+2024-04-25 21:15:15,507 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:15:18,279 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:15:48,54 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:15:50,853 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:16:20,687 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:16:23,524 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:16:53,29 wvlt DEBUG 		Decompose all variables took 98 s (run_wt).
+2024-04-25 21:16:54,14 wvlt DEBUG 		Decomposed covariance shape: (19, 1727999) (1.0 days) (run_wt).
+2024-04-25 21:16:54,214 wvlt DEBUG 		Calculate covariances took 1 s (run_wt).
+2024-04-25 21:16:55,39 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1727999) and (19, 1727999) (run_wt).
+2024-04-25 21:17:14,674 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:17:14,856 wvlt DEBUG 		Done normal conditional sampling took 21 s (run_wt).
+2024-04-25 21:17:25,64 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:17:25,64 wvlt DEBUG 		Conditional sampling took 31 s (run_wt).
+2024-04-25 21:17:25,64 wvlt DEBUG 		Adding nan flag took 31 s (run_wt).
+2024-04-25 21:17:32,919 wvlt DEBUG 		Integration took 39 s (run_wt).
+2024-04-25 21:17:32,919 wvlt DEBUG 		Guarantee took 39 s (run_wt).
+2024-04-25 21:17:32,919 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wco2_1`; `wco2_2`; `wco2_3`; `wco2_4`; `wco2_5`; `wco2_6`; `wco2_7`; `wco2_8`; `wco2_9`; `wco2_10`; `wco2_11`; `wco2_12`; `wco2_13`; `wco2_14`; `wco2_15`; `wco2_16`; `wco2_17`; `wco2_18`; `wco2_19`; `wco2`; `w/co2_cov`; `wT/co2_cov`; `wT/co2T_cov`; `w/co2T_cov`; `wD/co2D_cov`; `w/co2D_cov`; `wD/co2_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wco2·wh2o+_1`; `wco2·wh2o+_2`; `wco2·wh2o+_3`; `wco2·wh2o+_4`; `wco2·wh2o+_5`; `wco2·wh2o+_6`; `wco2·wh2o+_7`; `wco2·wh2o+_8`; `wco2·wh2o+_9`; `wco2·wh2o+_10`; `wco2·wh2o+_11`; `wco2·wh2o+_12`; `wco2·wh2o+_13`; `wco2·wh2o+_14`; `wco2·wh2o+_15`; `wco2·wh2o+_16`; `wco2·wh2o+_17`; `wco2·wh2o+_18`; `wco2·wh2o+_19`; `wco2·wh2o+`; `wco2-wh2o-_1`; `wco2-wh2o-_2`; `wco2-wh2o-_3`; `wco2-wh2o-_4`; `wco2-wh2o-_5`; `wco2-wh2o-_6`; `wco2-wh2o-_7`; `wco2-wh2o-_8`; `wco2-wh2o-_9`; `wco2-wh2o-_10`; `wco2-wh2o-_11`; `wco2-wh2o-_12`; `wco2-wh2o-_13`; `wco2-wh2o-_14`; `wco2-wh2o-_15`; `wco2-wh2o-_16`; `wco2-wh2o-_17`; `wco2-wh2o-_18`; `wco2-wh2o-_19`; `wco2-wh2o-`; `wco2·wh2o·_1`; `wco2·wh2o·_2`; `wco2·wh2o·_3`; `wco2·wh2o·_4`; `wco2·wh2o·_5`; `wco2·wh2o·_6`; `wco2·wh2o·_7`; `wco2·wh2o·_8`; `wco2·wh2o·_9`; `wco2·wh2o·_10`; `wco2·wh2o·_11`; `wco2·wh2o·_12`; `wco2·wh2o·_13`; `wco2·wh2o·_14`; `wco2·wh2o·_15`; `wco2·wh2o·_16`; `wco2·wh2o·_17`; `wco2·wh2o·_18`; `wco2·wh2o·_19`; `wco2·wh2o·`; `wco2-wh2o+_1`; `wco2-wh2o+_2`; `wco2-wh2o+_3`; `wco2-wh2o+_4`; `wco2-wh2o+_5`; `wco2-wh2o+_6`; `wco2-wh2o+_7`; `wco2-wh2o+_8`; `wco2-wh2o+_9`; `wco2-wh2o+_10`; `wco2-wh2o+_11`; `wco2-wh2o+_12`; `wco2-wh2o+_13`; `wco2-wh2o+_14`; `wco2-wh2o+_15`; `wco2-wh2o+_16`; `wco2-wh2o+_17`; `wco2-wh2o+_18`; `wco2-wh2o+_19`; `wco2-wh2o+`; `wco2+wh2o+_1`; `wco2+wh2o+_2`; `wco2+wh2o+_3`; `wco2+wh2o+_4`; `wco2+wh2o+_5`; `wco2+wh2o+_6`; `wco2+wh2o+_7`; `wco2+wh2o+_8`; `wco2+wh2o+_9`; `wco2+wh2o+_10`; `wco2+wh2o+_11`; `wco2+wh2o+_12`; `wco2+wh2o+_13`; `wco2+wh2o+_14`; `wco2+wh2o+_15`; `wco2+wh2o+_16`; `wco2+wh2o+_17`; `wco2+wh2o+_18`; `wco2+wh2o+_19`; `wco2+wh2o+`; `wco2+wh2o-_1`; `wco2+wh2o-_2`; `wco2+wh2o-_3`; `wco2+wh2o-_4`; `wco2+wh2o-_5`; `wco2+wh2o-_6`; `wco2+wh2o-_7`; `wco2+wh2o-_8`; `wco2+wh2o-_9`; `wco2+wh2o-_10`; `wco2+wh2o-_11`; `wco2+wh2o-_12`; `wco2+wh2o-_13`; `wco2+wh2o-_14`; `wco2+wh2o-_15`; `wco2+wh2o-_16`; `wco2+wh2o-_17`; `wco2+wh2o-_18`; `wco2+wh2o-_19`; `wco2+wh2o-`; `wco2-wh2o·_1`; `wco2-wh2o·_2`; `wco2-wh2o·_3`; `wco2-wh2o·_4`; `wco2-wh2o·_5`; `wco2-wh2o·_6`; `wco2-wh2o·_7`; `wco2-wh2o·_8`; `wco2-wh2o·_9`; `wco2-wh2o·_10`; `wco2-wh2o·_11`; `wco2-wh2o·_12`; `wco2-wh2o·_13`; `wco2-wh2o·_14`; `wco2-wh2o·_15`; `wco2-wh2o·_16`; `wco2-wh2o·_17`; `wco2-wh2o·_18`; `wco2-wh2o·_19`; `wco2-wh2o·`; `wco2+wh2o·_1`; `wco2+wh2o·_2`; `wco2+wh2o·_3`; `wco2+wh2o·_4`; `wco2+wh2o·_5`; `wco2+wh2o·_6`; `wco2+wh2o·_7`; `wco2+wh2o·_8`; `wco2+wh2o·_9`; `wco2+wh2o·_10`; `wco2+wh2o·_11`; `wco2+wh2o·_12`; `wco2+wh2o·_13`; `wco2+wh2o·_14`; `wco2+wh2o·_15`; `wco2+wh2o·_16`; `wco2+wh2o·_17`; `wco2+wh2o·_18`; `wco2+wh2o·_19`; `wco2+wh2o·`; `wco2·wh2o-_1`; `wco2·wh2o-_2`; `wco2·wh2o-_3`; `wco2·wh2o-_4`; `wco2·wh2o-_5`; `wco2·wh2o-_6`; `wco2·wh2o-_7`; `wco2·wh2o-_8`; `wco2·wh2o-_9`; `wco2·wh2o-_10`; `wco2·wh2o-_11`; `wco2·wh2o-_12`; `wco2·wh2o-_13`; `wco2·wh2o-_14`; `wco2·wh2o-_15`; `wco2·wh2o-_16`; `wco2·wh2o-_17`; `wco2·wh2o-_18`; `wco2·wh2o-_19`; `wco2·wh2o-`; `wco2·_1`; `wco2·_2`; `wco2·_3`; `wco2·_4`; `wco2·_5`; `wco2·_6`; `wco2·_7`; `wco2·_8`; `wco2·_9`; `wco2·_10`; `wco2·_11`; `wco2·_12`; `wco2·_13`; `wco2·_14`; `wco2·_15`; `wco2·_16`; `wco2·_17`; `wco2·_18`; `wco2·_19`; `wco2·`; `wco2_qc`; `w/co2_cov_qc`; `wT/co2_cov_qc`; `wT/co2T_cov_qc`; `w/co2T_cov_qc`; `wD/co2D_cov_qc`; `w/co2D_cov_qc`; `wD/co2_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wco2·wh2o+_qc`; `wco2-wh2o-_qc`; `wco2·wh2o·_qc`; `wco2-wh2o+_qc`; `wco2+wh2o+_qc`; `wco2+wh2o-_qc`; `wco2-wh2o·_qc`; `wco2+wh2o·_qc`; `wco2·wh2o-_qc`; `wco2·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:17:34,795 wvlt DEBUG 		[(20, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (20, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999)].
+2024-04-25 21:17:39,847 wvlt DEBUG 		Matrix to time table took 46 s (run_wt).
+2024-04-25 21:17:39,919 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:17:50,23 wvlt DEBUG 		Saving header of DataFrame took 10 (25) s (run_wt).
+2024-04-25 21:17:51,19 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:17:53,146 wvlt DEBUG 		Saving header of DataFrame took 13 (28) s (run_wt).
+2024-04-25 21:17:54,84 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:17:56,250 wvlt DEBUG 		Saving header of DataFrame took 16 (31) s (run_wt).
+2024-04-25 21:17:57,214 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:17:59,409 wvlt DEBUG 		Saving header of DataFrame took 20 (34) s (run_wt).
+2024-04-25 21:18:00,356 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:02,576 wvlt DEBUG 		Saving header of DataFrame took 23 (38) s (run_wt).
+2024-04-25 21:18:03,528 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:05,650 wvlt DEBUG 		Saving header of DataFrame took 26 (41) s (run_wt).
+2024-04-25 21:18:06,659 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:08,809 wvlt DEBUG 		Saving header of DataFrame took 29 (44) s (run_wt).
+2024-04-25 21:18:09,814 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:11,942 wvlt DEBUG 		Saving header of DataFrame took 32 (47) s (run_wt).
+2024-04-25 21:18:12,954 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:15,183 wvlt DEBUG 		Saving header of DataFrame took 35 (50) s (run_wt).
+2024-04-25 21:18:16,214 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:18,369 wvlt DEBUG 		Saving header of DataFrame took 39 (53) s (run_wt).
+2024-04-25 21:18:19,328 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:21,507 wvlt DEBUG 		Saving header of DataFrame took 42 (56) s (run_wt).
+2024-04-25 21:18:22,512 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:24,715 wvlt DEBUG 		Saving header of DataFrame took 45 (60) s (run_wt).
+2024-04-25 21:18:25,799 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:28,118 wvlt DEBUG 		Saving header of DataFrame took 48 (63) s (run_wt).
+2024-04-25 21:18:29,213 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:31,430 wvlt DEBUG 		Saving header of DataFrame took 52 (66) s (run_wt).
+2024-04-25 21:18:32,404 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:34,544 wvlt DEBUG 		Saving header of DataFrame took 55 (69) s (run_wt).
+2024-04-25 21:18:35,554 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:37,775 wvlt DEBUG 		Saving header of DataFrame took 58 (73) s (run_wt).
+2024-04-25 21:18:38,788 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:40,931 wvlt DEBUG 		Saving header of DataFrame took 61 (76) s (run_wt).
+2024-04-25 21:18:42,4 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:44,154 wvlt DEBUG 		Saving header of DataFrame took 64 (79) s (run_wt).
+2024-04-25 21:18:45,154 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:47,359 wvlt DEBUG 		Saving header of DataFrame took 68 (82) s (run_wt).
+2024-04-25 21:18:48,384 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:50,454 wvlt DEBUG 		Saving header of DataFrame took 71 (85) s (run_wt).
+2024-04-25 21:18:51,446 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:53,584 wvlt DEBUG 		Saving header of DataFrame took 74 (89) s (run_wt).
+2024-04-25 21:18:54,578 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:56,707 wvlt DEBUG 		Saving header of DataFrame took 77 (92) s (run_wt).
+2024-04-25 21:18:57,691 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:18:59,807 wvlt DEBUG 		Saving header of DataFrame took 80 (95) s (run_wt).
+2024-04-25 21:19:00,854 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:03,84 wvlt DEBUG 		Saving header of DataFrame took 83 (98) s (run_wt).
+2024-04-25 21:19:04,104 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:06,201 wvlt DEBUG 		Saving header of DataFrame took 86 (101) s (run_wt).
+2024-04-25 21:19:07,135 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:09,433 wvlt DEBUG 		Saving header of DataFrame took 90 (104) s (run_wt).
+2024-04-25 21:19:10,433 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:12,677 wvlt DEBUG 		Saving header of DataFrame took 93 (108) s (run_wt).
+2024-04-25 21:19:13,690 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:15,872 wvlt DEBUG 		Saving header of DataFrame took 96 (111) s (run_wt).
+2024-04-25 21:19:16,912 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:19,160 wvlt DEBUG 		Saving header of DataFrame took 99 (114) s (run_wt).
+2024-04-25 21:19:20,237 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:22,573 wvlt DEBUG 		Saving header of DataFrame took 103 (118) s (run_wt).
+2024-04-25 21:19:23,655 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:25,857 wvlt DEBUG 		Saving header of DataFrame took 106 (121) s (run_wt).
+2024-04-25 21:19:26,920 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:29,126 wvlt DEBUG 		Saving header of DataFrame took 109 (124) s (run_wt).
+2024-04-25 21:19:30,185 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:32,379 wvlt DEBUG 		Saving header of DataFrame took 113 (127) s (run_wt).
+2024-04-25 21:19:33,448 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:35,814 wvlt DEBUG 		Saving header of DataFrame took 116 (131) s (run_wt).
+2024-04-25 21:19:36,838 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:39,114 wvlt DEBUG 		Saving header of DataFrame took 119 (134) s (run_wt).
+2024-04-25 21:19:40,181 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:42,412 wvlt DEBUG 		Saving header of DataFrame took 123 (137) s (run_wt).
+2024-04-25 21:19:43,489 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:45,647 wvlt DEBUG 		Saving header of DataFrame took 126 (141) s (run_wt).
+2024-04-25 21:19:46,766 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:48,983 wvlt DEBUG 		Saving header of DataFrame took 129 (144) s (run_wt).
+2024-04-25 21:19:50,65 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:52,225 wvlt DEBUG 		Saving header of DataFrame took 132 (147) s (run_wt).
+2024-04-25 21:19:53,290 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:55,521 wvlt DEBUG 		Saving header of DataFrame took 136 (150) s (run_wt).
+2024-04-25 21:19:56,585 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:19:58,755 wvlt DEBUG 		Saving header of DataFrame took 139 (154) s (run_wt).
+2024-04-25 21:19:59,888 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:02,100 wvlt DEBUG 		Saving header of DataFrame took 142 (157) s (run_wt).
+2024-04-25 21:20:03,186 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:05,247 wvlt DEBUG 		Saving header of DataFrame took 145 (160) s (run_wt).
+2024-04-25 21:20:06,285 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:08,322 wvlt DEBUG 		Saving header of DataFrame took 148 (163) s (run_wt).
+2024-04-25 21:20:09,404 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:11,619 wvlt DEBUG 		Saving header of DataFrame took 152 (167) s (run_wt).
+2024-04-25 21:20:12,757 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:15,12 wvlt DEBUG 		Saving header of DataFrame took 155 (170) s (run_wt).
+2024-04-25 21:20:16,138 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:18,362 wvlt DEBUG 		Saving header of DataFrame took 159 (173) s (run_wt).
+2024-04-25 21:20:19,452 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:21,642 wvlt DEBUG 		Saving header of DataFrame took 162 (177) s (run_wt).
+2024-04-25 21:20:22,687 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:25,485 wvlt DEBUG 		Saving DataFrame for all averaging period took 166 (180) s (run_wt).
+2024-04-25 21:20:26,229 wvlt DEBUG 		Moving from array to DataFrame took 181 s (run_wt).
+2024-04-25 21:20:26,232 wvlt DEBUG 		Call w*h2o.
+2024-04-25 21:20:26,232 wvlt DEBUG 		Decompose all variables took 0 s (run_wt).
+2024-04-25 21:20:26,232 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:582: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+  data = data[_isinfinalrange]
+
+2024-04-25 21:20:27,450 wvlt DEBUG 		Decomposed covariance shape: (19, 1727999) (1.0 days) (run_wt).
+2024-04-25 21:20:28,376 wvlt DEBUG 		Calculate covariances took 2 s (run_wt).
+2024-04-25 21:20:29,237 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1727999) and (19, 1727999) (run_wt).
+2024-04-25 21:20:29,882 wvlt DEBUG 		Done normal conditional sampling took 2 s (run_wt).
+2024-04-25 21:20:30,29 wvlt DEBUG 		Conditional sampling took 2 s (run_wt).
+2024-04-25 21:20:30,29 wvlt DEBUG 		Adding nan flag took 2 s (run_wt).
+2024-04-25 21:20:31,512 wvlt DEBUG 		Integration took 3 s (run_wt).
+2024-04-25 21:20:31,515 wvlt DEBUG 		Guarantee took 3 s (run_wt).
+2024-04-25 21:20:31,515 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wh2o_1`; `wh2o_2`; `wh2o_3`; `wh2o_4`; `wh2o_5`; `wh2o_6`; `wh2o_7`; `wh2o_8`; `wh2o_9`; `wh2o_10`; `wh2o_11`; `wh2o_12`; `wh2o_13`; `wh2o_14`; `wh2o_15`; `wh2o_16`; `wh2o_17`; `wh2o_18`; `wh2o_19`; `wh2o`; `w/h2o_cov`; `wT/h2o_cov`; `wT/h2oT_cov`; `w/h2oT_cov`; `wD/h2oD_cov`; `w/h2oD_cov`; `wD/h2o_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wh2o·_1`; `wh2o·_2`; `wh2o·_3`; `wh2o·_4`; `wh2o·_5`; `wh2o·_6`; `wh2o·_7`; `wh2o·_8`; `wh2o·_9`; `wh2o·_10`; `wh2o·_11`; `wh2o·_12`; `wh2o·_13`; `wh2o·_14`; `wh2o·_15`; `wh2o·_16`; `wh2o·_17`; `wh2o·_18`; `wh2o·_19`; `wh2o·`; `wh2o_qc`; `w/h2o_cov_qc`; `wT/h2o_cov_qc`; `wT/h2oT_cov_qc`; `w/h2oT_cov_qc`; `wD/h2oD_cov_qc`; `w/h2oD_cov_qc`; `wD/h2o_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wh2o·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:20:32,39 wvlt DEBUG 		[(20, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (20, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999), (1, 1727999)].
+2024-04-25 21:20:34,337 wvlt DEBUG 		Matrix to time table took 6 s (run_wt).
+2024-04-25 21:20:34,405 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:20:37,282 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:38,193 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:39,87 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:39,937 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:40,857 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:41,787 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:42,717 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:43,687 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:44,617 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:45,546 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:46,432 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:47,348 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:48,342 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:49,243 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:50,106 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:51,6 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:51,971 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:52,951 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:53,946 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:54,892 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:55,795 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:56,663 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:57,536 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:58,538 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:20:59,486 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:00,423 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:01,337 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:02,297 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:03,179 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:04,63 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:05,46 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:05,932 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:06,803 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:07,663 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:08,612 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:09,532 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:10,426 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:11,302 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:12,250 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:13,190 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:14,47 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:14,927 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:15,893 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:16,892 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:17,855 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:18,748 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:19,716 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:20,683 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:21:21,549 wvlt DEBUG 		Saving DataFrame for all averaging period took 47 (52) s (run_wt).
+2024-04-25 21:21:21,748 wvlt DEBUG 		Moving from array to DataFrame took 52 s (run_wt).
+2024-04-25 21:21:21,748 wvlt INFO 	Decomposing all 3 variables took 98 s (33 s/var) (run_wt).
+2024-04-25 21:21:21,748 wvlt INFO 	Array to DataFrame took 233 s (116 s/loop) (run_wt).
+2024-04-25 21:21:21,748 wvlt INFO 	Starting averaging at 463 s (run_wt).
+2024-04-25 21:21:21,942 wvlt INFO 	Finish 20220513 took 463 s, yielded 49 files (run_wt). Progress: 49 0 %
+2024-04-25 21:24:03,549 wvlt INFO 	Loading data took 162 s (run_wt).
+2024-04-25 21:24:06,817 wvlt DEBUG 	Force data to be continuous took 3 s (run_wt).
+2024-04-25 21:24:07,164 wvlt INFO 	Starting variables loop at 628 s (run_wt).
+2024-04-25 21:24:07,164 wvlt DEBUG 		Call w*co2|w*h2o (w*co2 conditioned by w*h2o).
+2024-04-25 21:24:10,537 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:24:11,385 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:24:44,641 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:24:45,533 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:25:19,804 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:25:20,663 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:25:50,133 wvlt DEBUG 		Decompose all variables took 103 s (run_wt).
+2024-04-25 21:25:51,218 wvlt DEBUG 		Decomposed covariance shape: (19, 1728000) (1.0 days) (run_wt).
+2024-04-25 21:25:51,578 wvlt DEBUG 		Calculate covariances took 1 s (run_wt).
+2024-04-25 21:25:52,409 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1728000) and (19, 1728000) (run_wt).
+2024-04-25 21:26:13,109 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:26:13,291 wvlt DEBUG 		Done normal conditional sampling took 22 s (run_wt).
+2024-04-25 21:26:23,670 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:26:23,670 wvlt DEBUG 		Conditional sampling took 32 s (run_wt).
+2024-04-25 21:26:23,670 wvlt DEBUG 		Adding nan flag took 32 s (run_wt).
+2024-04-25 21:26:32,13 wvlt DEBUG 		Integration took 40 s (run_wt).
+2024-04-25 21:26:32,13 wvlt DEBUG 		Guarantee took 40 s (run_wt).
+2024-04-25 21:26:32,13 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wco2_1`; `wco2_2`; `wco2_3`; `wco2_4`; `wco2_5`; `wco2_6`; `wco2_7`; `wco2_8`; `wco2_9`; `wco2_10`; `wco2_11`; `wco2_12`; `wco2_13`; `wco2_14`; `wco2_15`; `wco2_16`; `wco2_17`; `wco2_18`; `wco2_19`; `wco2`; `w/co2_cov`; `wT/co2_cov`; `wT/co2T_cov`; `w/co2T_cov`; `wD/co2D_cov`; `w/co2D_cov`; `wD/co2_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wco2·wh2o+_1`; `wco2·wh2o+_2`; `wco2·wh2o+_3`; `wco2·wh2o+_4`; `wco2·wh2o+_5`; `wco2·wh2o+_6`; `wco2·wh2o+_7`; `wco2·wh2o+_8`; `wco2·wh2o+_9`; `wco2·wh2o+_10`; `wco2·wh2o+_11`; `wco2·wh2o+_12`; `wco2·wh2o+_13`; `wco2·wh2o+_14`; `wco2·wh2o+_15`; `wco2·wh2o+_16`; `wco2·wh2o+_17`; `wco2·wh2o+_18`; `wco2·wh2o+_19`; `wco2·wh2o+`; `wco2-wh2o-_1`; `wco2-wh2o-_2`; `wco2-wh2o-_3`; `wco2-wh2o-_4`; `wco2-wh2o-_5`; `wco2-wh2o-_6`; `wco2-wh2o-_7`; `wco2-wh2o-_8`; `wco2-wh2o-_9`; `wco2-wh2o-_10`; `wco2-wh2o-_11`; `wco2-wh2o-_12`; `wco2-wh2o-_13`; `wco2-wh2o-_14`; `wco2-wh2o-_15`; `wco2-wh2o-_16`; `wco2-wh2o-_17`; `wco2-wh2o-_18`; `wco2-wh2o-_19`; `wco2-wh2o-`; `wco2·wh2o·_1`; `wco2·wh2o·_2`; `wco2·wh2o·_3`; `wco2·wh2o·_4`; `wco2·wh2o·_5`; `wco2·wh2o·_6`; `wco2·wh2o·_7`; `wco2·wh2o·_8`; `wco2·wh2o·_9`; `wco2·wh2o·_10`; `wco2·wh2o·_11`; `wco2·wh2o·_12`; `wco2·wh2o·_13`; `wco2·wh2o·_14`; `wco2·wh2o·_15`; `wco2·wh2o·_16`; `wco2·wh2o·_17`; `wco2·wh2o·_18`; `wco2·wh2o·_19`; `wco2·wh2o·`; `wco2-wh2o+_1`; `wco2-wh2o+_2`; `wco2-wh2o+_3`; `wco2-wh2o+_4`; `wco2-wh2o+_5`; `wco2-wh2o+_6`; `wco2-wh2o+_7`; `wco2-wh2o+_8`; `wco2-wh2o+_9`; `wco2-wh2o+_10`; `wco2-wh2o+_11`; `wco2-wh2o+_12`; `wco2-wh2o+_13`; `wco2-wh2o+_14`; `wco2-wh2o+_15`; `wco2-wh2o+_16`; `wco2-wh2o+_17`; `wco2-wh2o+_18`; `wco2-wh2o+_19`; `wco2-wh2o+`; `wco2+wh2o+_1`; `wco2+wh2o+_2`; `wco2+wh2o+_3`; `wco2+wh2o+_4`; `wco2+wh2o+_5`; `wco2+wh2o+_6`; `wco2+wh2o+_7`; `wco2+wh2o+_8`; `wco2+wh2o+_9`; `wco2+wh2o+_10`; `wco2+wh2o+_11`; `wco2+wh2o+_12`; `wco2+wh2o+_13`; `wco2+wh2o+_14`; `wco2+wh2o+_15`; `wco2+wh2o+_16`; `wco2+wh2o+_17`; `wco2+wh2o+_18`; `wco2+wh2o+_19`; `wco2+wh2o+`; `wco2+wh2o-_1`; `wco2+wh2o-_2`; `wco2+wh2o-_3`; `wco2+wh2o-_4`; `wco2+wh2o-_5`; `wco2+wh2o-_6`; `wco2+wh2o-_7`; `wco2+wh2o-_8`; `wco2+wh2o-_9`; `wco2+wh2o-_10`; `wco2+wh2o-_11`; `wco2+wh2o-_12`; `wco2+wh2o-_13`; `wco2+wh2o-_14`; `wco2+wh2o-_15`; `wco2+wh2o-_16`; `wco2+wh2o-_17`; `wco2+wh2o-_18`; `wco2+wh2o-_19`; `wco2+wh2o-`; `wco2-wh2o·_1`; `wco2-wh2o·_2`; `wco2-wh2o·_3`; `wco2-wh2o·_4`; `wco2-wh2o·_5`; `wco2-wh2o·_6`; `wco2-wh2o·_7`; `wco2-wh2o·_8`; `wco2-wh2o·_9`; `wco2-wh2o·_10`; `wco2-wh2o·_11`; `wco2-wh2o·_12`; `wco2-wh2o·_13`; `wco2-wh2o·_14`; `wco2-wh2o·_15`; `wco2-wh2o·_16`; `wco2-wh2o·_17`; `wco2-wh2o·_18`; `wco2-wh2o·_19`; `wco2-wh2o·`; `wco2+wh2o·_1`; `wco2+wh2o·_2`; `wco2+wh2o·_3`; `wco2+wh2o·_4`; `wco2+wh2o·_5`; `wco2+wh2o·_6`; `wco2+wh2o·_7`; `wco2+wh2o·_8`; `wco2+wh2o·_9`; `wco2+wh2o·_10`; `wco2+wh2o·_11`; `wco2+wh2o·_12`; `wco2+wh2o·_13`; `wco2+wh2o·_14`; `wco2+wh2o·_15`; `wco2+wh2o·_16`; `wco2+wh2o·_17`; `wco2+wh2o·_18`; `wco2+wh2o·_19`; `wco2+wh2o·`; `wco2·wh2o-_1`; `wco2·wh2o-_2`; `wco2·wh2o-_3`; `wco2·wh2o-_4`; `wco2·wh2o-_5`; `wco2·wh2o-_6`; `wco2·wh2o-_7`; `wco2·wh2o-_8`; `wco2·wh2o-_9`; `wco2·wh2o-_10`; `wco2·wh2o-_11`; `wco2·wh2o-_12`; `wco2·wh2o-_13`; `wco2·wh2o-_14`; `wco2·wh2o-_15`; `wco2·wh2o-_16`; `wco2·wh2o-_17`; `wco2·wh2o-_18`; `wco2·wh2o-_19`; `wco2·wh2o-`; `wco2·_1`; `wco2·_2`; `wco2·_3`; `wco2·_4`; `wco2·_5`; `wco2·_6`; `wco2·_7`; `wco2·_8`; `wco2·_9`; `wco2·_10`; `wco2·_11`; `wco2·_12`; `wco2·_13`; `wco2·_14`; `wco2·_15`; `wco2·_16`; `wco2·_17`; `wco2·_18`; `wco2·_19`; `wco2·`; `wco2_qc`; `w/co2_cov_qc`; `wT/co2_cov_qc`; `wT/co2T_cov_qc`; `w/co2T_cov_qc`; `wD/co2D_cov_qc`; `w/co2D_cov_qc`; `wD/co2_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wco2·wh2o+_qc`; `wco2-wh2o-_qc`; `wco2·wh2o·_qc`; `wco2-wh2o+_qc`; `wco2+wh2o+_qc`; `wco2+wh2o-_qc`; `wco2-wh2o·_qc`; `wco2+wh2o·_qc`; `wco2·wh2o-_qc`; `wco2·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:26:34,73 wvlt DEBUG 		[(20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000)].
+2024-04-25 21:26:39,559 wvlt DEBUG 		Matrix to time table took 48 s (run_wt).
+2024-04-25 21:26:39,623 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:26:50,438 wvlt DEBUG 		Saving header of DataFrame took 11 (27) s (run_wt).
+2024-04-25 21:26:51,578 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:26:53,673 wvlt DEBUG 		Saving header of DataFrame took 14 (30) s (run_wt).
+2024-04-25 21:26:54,611 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:26:56,663 wvlt DEBUG 		Saving header of DataFrame took 17 (33) s (run_wt).
+2024-04-25 21:26:57,537 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:26:59,685 wvlt DEBUG 		Saving header of DataFrame took 20 (36) s (run_wt).
+2024-04-25 21:27:00,694 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:02,854 wvlt DEBUG 		Saving header of DataFrame took 23 (39) s (run_wt).
+2024-04-25 21:27:03,826 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:05,830 wvlt DEBUG 		Saving header of DataFrame took 26 (42) s (run_wt).
+2024-04-25 21:27:06,888 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:09,104 wvlt DEBUG 		Saving header of DataFrame took 30 (45) s (run_wt).
+2024-04-25 21:27:10,83 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:12,338 wvlt DEBUG 		Saving header of DataFrame took 33 (49) s (run_wt).
+2024-04-25 21:27:13,348 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:15,605 wvlt DEBUG 		Saving header of DataFrame took 36 (52) s (run_wt).
+2024-04-25 21:27:16,656 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:18,903 wvlt DEBUG 		Saving header of DataFrame took 39 (55) s (run_wt).
+2024-04-25 21:27:19,957 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:22,103 wvlt DEBUG 		Saving header of DataFrame took 43 (58) s (run_wt).
+2024-04-25 21:27:23,145 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:25,446 wvlt DEBUG 		Saving header of DataFrame took 46 (62) s (run_wt).
+2024-04-25 21:27:26,483 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:29,18 wvlt DEBUG 		Saving header of DataFrame took 49 (65) s (run_wt).
+2024-04-25 21:27:30,150 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:32,511 wvlt DEBUG 		Saving header of DataFrame took 53 (69) s (run_wt).
+2024-04-25 21:27:33,568 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:35,744 wvlt DEBUG 		Saving header of DataFrame took 56 (72) s (run_wt).
+2024-04-25 21:27:36,937 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:39,243 wvlt DEBUG 		Saving header of DataFrame took 60 (76) s (run_wt).
+2024-04-25 21:27:40,382 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:42,654 wvlt DEBUG 		Saving header of DataFrame took 63 (79) s (run_wt).
+2024-04-25 21:27:43,703 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:46,134 wvlt DEBUG 		Saving header of DataFrame took 67 (82) s (run_wt).
+2024-04-25 21:27:47,196 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:49,662 wvlt DEBUG 		Saving header of DataFrame took 70 (86) s (run_wt).
+2024-04-25 21:27:50,772 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:52,981 wvlt DEBUG 		Saving header of DataFrame took 73 (89) s (run_wt).
+2024-04-25 21:27:54,28 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:56,218 wvlt DEBUG 		Saving header of DataFrame took 77 (93) s (run_wt).
+2024-04-25 21:27:57,220 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:27:59,454 wvlt DEBUG 		Saving header of DataFrame took 80 (96) s (run_wt).
+2024-04-25 21:28:00,460 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:02,809 wvlt DEBUG 		Saving header of DataFrame took 83 (99) s (run_wt).
+2024-04-25 21:28:03,881 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:06,116 wvlt DEBUG 		Saving header of DataFrame took 87 (102) s (run_wt).
+2024-04-25 21:28:07,193 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:09,406 wvlt DEBUG 		Saving header of DataFrame took 90 (106) s (run_wt).
+2024-04-25 21:28:10,425 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:12,679 wvlt DEBUG 		Saving header of DataFrame took 93 (109) s (run_wt).
+2024-04-25 21:28:13,714 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:15,944 wvlt DEBUG 		Saving header of DataFrame took 96 (112) s (run_wt).
+2024-04-25 21:28:17,9 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:19,209 wvlt DEBUG 		Saving header of DataFrame took 100 (116) s (run_wt).
+2024-04-25 21:28:20,253 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:22,480 wvlt DEBUG 		Saving header of DataFrame took 103 (119) s (run_wt).
+2024-04-25 21:28:23,545 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:25,776 wvlt DEBUG 		Saving header of DataFrame took 106 (122) s (run_wt).
+2024-04-25 21:28:26,888 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:29,175 wvlt DEBUG 		Saving header of DataFrame took 110 (126) s (run_wt).
+2024-04-25 21:28:30,309 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:32,491 wvlt DEBUG 		Saving header of DataFrame took 113 (129) s (run_wt).
+2024-04-25 21:28:33,523 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:35,774 wvlt DEBUG 		Saving header of DataFrame took 116 (132) s (run_wt).
+2024-04-25 21:28:36,914 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:39,124 wvlt DEBUG 		Saving header of DataFrame took 120 (135) s (run_wt).
+2024-04-25 21:28:40,243 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:42,474 wvlt DEBUG 		Saving header of DataFrame took 123 (139) s (run_wt).
+2024-04-25 21:28:43,524 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:45,746 wvlt DEBUG 		Saving header of DataFrame took 126 (142) s (run_wt).
+2024-04-25 21:28:46,784 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:49,79 wvlt DEBUG 		Saving header of DataFrame took 130 (145) s (run_wt).
+2024-04-25 21:28:50,124 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:52,263 wvlt DEBUG 		Saving header of DataFrame took 133 (149) s (run_wt).
+2024-04-25 21:28:53,281 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:55,547 wvlt DEBUG 		Saving header of DataFrame took 136 (152) s (run_wt).
+2024-04-25 21:28:56,608 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:28:58,818 wvlt DEBUG 		Saving header of DataFrame took 139 (155) s (run_wt).
+2024-04-25 21:28:59,855 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:02,63 wvlt DEBUG 		Saving header of DataFrame took 143 (158) s (run_wt).
+2024-04-25 21:29:03,127 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:05,365 wvlt DEBUG 		Saving header of DataFrame took 146 (162) s (run_wt).
+2024-04-25 21:29:06,394 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:08,607 wvlt DEBUG 		Saving header of DataFrame took 149 (165) s (run_wt).
+2024-04-25 21:29:09,622 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:11,828 wvlt DEBUG 		Saving header of DataFrame took 152 (168) s (run_wt).
+2024-04-25 21:29:12,855 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:15,58 wvlt DEBUG 		Saving header of DataFrame took 155 (171) s (run_wt).
+2024-04-25 21:29:16,141 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:18,350 wvlt DEBUG 		Saving header of DataFrame took 159 (175) s (run_wt).
+2024-04-25 21:29:19,373 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:21,651 wvlt DEBUG 		Saving header of DataFrame took 162 (178) s (run_wt).
+2024-04-25 21:29:22,683 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:24,986 wvlt DEBUG 		Saving header of DataFrame took 165 (181) s (run_wt).
+2024-04-25 21:29:26,31 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:28,793 wvlt DEBUG 		Saving DataFrame for all averaging period took 169 (185) s (run_wt).
+2024-04-25 21:29:29,528 wvlt DEBUG 		Moving from array to DataFrame took 186 s (run_wt).
+2024-04-25 21:29:29,528 wvlt DEBUG 		Call w*h2o.
+2024-04-25 21:29:29,528 wvlt DEBUG 		Decompose all variables took 0 s (run_wt).
+2024-04-25 21:29:29,530 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:582: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+  data = data[_isinfinalrange]
+
+2024-04-25 21:29:30,820 wvlt DEBUG 		Decomposed covariance shape: (19, 1728000) (1.0 days) (run_wt).
+2024-04-25 21:29:31,704 wvlt DEBUG 		Calculate covariances took 2 s (run_wt).
+2024-04-25 21:29:32,614 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1728000) and (19, 1728000) (run_wt).
+2024-04-25 21:29:33,318 wvlt DEBUG 		Done normal conditional sampling took 2 s (run_wt).
+2024-04-25 21:29:33,484 wvlt DEBUG 		Conditional sampling took 2 s (run_wt).
+2024-04-25 21:29:33,484 wvlt DEBUG 		Adding nan flag took 2 s (run_wt).
+2024-04-25 21:29:34,969 wvlt DEBUG 		Integration took 3 s (run_wt).
+2024-04-25 21:29:34,969 wvlt DEBUG 		Guarantee took 3 s (run_wt).
+2024-04-25 21:29:34,969 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wh2o_1`; `wh2o_2`; `wh2o_3`; `wh2o_4`; `wh2o_5`; `wh2o_6`; `wh2o_7`; `wh2o_8`; `wh2o_9`; `wh2o_10`; `wh2o_11`; `wh2o_12`; `wh2o_13`; `wh2o_14`; `wh2o_15`; `wh2o_16`; `wh2o_17`; `wh2o_18`; `wh2o_19`; `wh2o`; `w/h2o_cov`; `wT/h2o_cov`; `wT/h2oT_cov`; `w/h2oT_cov`; `wD/h2oD_cov`; `w/h2oD_cov`; `wD/h2o_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wh2o·_1`; `wh2o·_2`; `wh2o·_3`; `wh2o·_4`; `wh2o·_5`; `wh2o·_6`; `wh2o·_7`; `wh2o·_8`; `wh2o·_9`; `wh2o·_10`; `wh2o·_11`; `wh2o·_12`; `wh2o·_13`; `wh2o·_14`; `wh2o·_15`; `wh2o·_16`; `wh2o·_17`; `wh2o·_18`; `wh2o·_19`; `wh2o·`; `wh2o_qc`; `w/h2o_cov_qc`; `wT/h2o_cov_qc`; `wT/h2oT_cov_qc`; `w/h2oT_cov_qc`; `wD/h2oD_cov_qc`; `w/h2oD_cov_qc`; `wD/h2o_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wh2o·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:29:35,484 wvlt DEBUG 		[(20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000)].
+2024-04-25 21:29:37,739 wvlt DEBUG 		Matrix to time table took 6 s (run_wt).
+2024-04-25 21:29:37,809 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:29:40,711 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:41,616 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:42,464 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:43,314 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:44,181 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:45,129 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:46,18 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:46,933 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:47,807 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:48,721 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:49,694 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:50,576 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:51,459 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:52,457 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:53,386 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:54,263 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:55,249 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:56,195 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:57,184 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:58,64 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:58,953 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:29:59,834 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:00,761 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:01,677 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:02,627 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:03,493 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:04,377 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:05,350 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:06,273 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:07,194 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:08,71 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:09,48 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:10,59 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:10,985 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:11,938 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:12,983 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:13,950 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:14,874 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:15,849 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:16,818 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:17,754 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:18,670 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:19,610 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:20,484 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:21,377 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:22,326 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:23,248 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:24,194 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:30:24,989 wvlt DEBUG 		Saving DataFrame for all averaging period took 47 (52) s (run_wt).
+2024-04-25 21:30:25,174 wvlt DEBUG 		Moving from array to DataFrame took 52 s (run_wt).
+2024-04-25 21:30:25,179 wvlt INFO 	Decomposing all 3 variables took 103 s (34 s/var) (run_wt).
+2024-04-25 21:30:25,179 wvlt INFO 	Array to DataFrame took 238 s (119 s/loop) (run_wt).
+2024-04-25 21:30:25,179 wvlt INFO 	Starting averaging at 1006 s (run_wt).
+2024-04-25 21:30:25,394 wvlt INFO 	Finish 20220514 took 543 s, yielded 49 files (run_wt). Progress: 49 25 %
+2024-04-25 21:32:32,319 wvlt INFO 	Loading data took 127 s (run_wt).
+2024-04-25 21:32:34,934 wvlt DEBUG 	Force data to be continuous took 3 s (run_wt).
+2024-04-25 21:32:35,262 wvlt INFO 	Starting variables loop at 1136 s (run_wt).
+2024-04-25 21:32:35,263 wvlt DEBUG 		Call w*co2|w*h2o (w*co2 conditioned by w*h2o).
+2024-04-25 21:32:35,284 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:32:38,107 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:32:38,920 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:33:08,703 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:33:11,521 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:33:12,313 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:33:42,151 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 18 is too high: all coefficients will experience boundary effects.
+  warnings.warn(
+
+2024-04-25 21:33:45,28 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:33:45,865 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:536: RuntimeWarning: Mean of empty slice
+  σv = this_Sv - np.nanmean(this_Sv[this_hh])
+
+2024-04-25 21:34:15,612 wvlt DEBUG 		Decompose all variables took 100 s (run_wt).
+2024-04-25 21:34:16,723 wvlt DEBUG 		Decomposed covariance shape: (19, 1728000) (1.0 days) (run_wt).
+2024-04-25 21:34:17,72 wvlt DEBUG 		Calculate covariances took 1 s (run_wt).
+2024-04-25 21:34:17,936 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1728000) and (19, 1728000) (run_wt).
+2024-04-25 21:34:37,220 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:34:37,448 wvlt DEBUG 		Done normal conditional sampling took 20 s (run_wt).
+2024-04-25 21:34:47,533 wvlt DEBUG 		Difference between original and partitioned 0.0 for sum of dict_keys(['wco2·wh2o+', 'wco2-wh2o-', 'wco2·wh2o·', 'wco2-wh2o+', 'wco2+wh2o+', 'wco2+wh2o-', 'wco2-wh2o·', 'wco2+wh2o·', 'wco2·wh2o-']) (run_wt).
+2024-04-25 21:34:47,533 wvlt DEBUG 		Conditional sampling took 30 s (run_wt).
+2024-04-25 21:34:47,533 wvlt DEBUG 		Adding nan flag took 30 s (run_wt).
+2024-04-25 21:34:55,758 wvlt DEBUG 		Integration took 39 s (run_wt).
+2024-04-25 21:34:55,758 wvlt DEBUG 		Guarantee took 39 s (run_wt).
+2024-04-25 21:34:55,758 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wco2_1`; `wco2_2`; `wco2_3`; `wco2_4`; `wco2_5`; `wco2_6`; `wco2_7`; `wco2_8`; `wco2_9`; `wco2_10`; `wco2_11`; `wco2_12`; `wco2_13`; `wco2_14`; `wco2_15`; `wco2_16`; `wco2_17`; `wco2_18`; `wco2_19`; `wco2`; `w/co2_cov`; `wT/co2_cov`; `wT/co2T_cov`; `w/co2T_cov`; `wD/co2D_cov`; `w/co2D_cov`; `wD/co2_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wco2·wh2o+_1`; `wco2·wh2o+_2`; `wco2·wh2o+_3`; `wco2·wh2o+_4`; `wco2·wh2o+_5`; `wco2·wh2o+_6`; `wco2·wh2o+_7`; `wco2·wh2o+_8`; `wco2·wh2o+_9`; `wco2·wh2o+_10`; `wco2·wh2o+_11`; `wco2·wh2o+_12`; `wco2·wh2o+_13`; `wco2·wh2o+_14`; `wco2·wh2o+_15`; `wco2·wh2o+_16`; `wco2·wh2o+_17`; `wco2·wh2o+_18`; `wco2·wh2o+_19`; `wco2·wh2o+`; `wco2-wh2o-_1`; `wco2-wh2o-_2`; `wco2-wh2o-_3`; `wco2-wh2o-_4`; `wco2-wh2o-_5`; `wco2-wh2o-_6`; `wco2-wh2o-_7`; `wco2-wh2o-_8`; `wco2-wh2o-_9`; `wco2-wh2o-_10`; `wco2-wh2o-_11`; `wco2-wh2o-_12`; `wco2-wh2o-_13`; `wco2-wh2o-_14`; `wco2-wh2o-_15`; `wco2-wh2o-_16`; `wco2-wh2o-_17`; `wco2-wh2o-_18`; `wco2-wh2o-_19`; `wco2-wh2o-`; `wco2·wh2o·_1`; `wco2·wh2o·_2`; `wco2·wh2o·_3`; `wco2·wh2o·_4`; `wco2·wh2o·_5`; `wco2·wh2o·_6`; `wco2·wh2o·_7`; `wco2·wh2o·_8`; `wco2·wh2o·_9`; `wco2·wh2o·_10`; `wco2·wh2o·_11`; `wco2·wh2o·_12`; `wco2·wh2o·_13`; `wco2·wh2o·_14`; `wco2·wh2o·_15`; `wco2·wh2o·_16`; `wco2·wh2o·_17`; `wco2·wh2o·_18`; `wco2·wh2o·_19`; `wco2·wh2o·`; `wco2-wh2o+_1`; `wco2-wh2o+_2`; `wco2-wh2o+_3`; `wco2-wh2o+_4`; `wco2-wh2o+_5`; `wco2-wh2o+_6`; `wco2-wh2o+_7`; `wco2-wh2o+_8`; `wco2-wh2o+_9`; `wco2-wh2o+_10`; `wco2-wh2o+_11`; `wco2-wh2o+_12`; `wco2-wh2o+_13`; `wco2-wh2o+_14`; `wco2-wh2o+_15`; `wco2-wh2o+_16`; `wco2-wh2o+_17`; `wco2-wh2o+_18`; `wco2-wh2o+_19`; `wco2-wh2o+`; `wco2+wh2o+_1`; `wco2+wh2o+_2`; `wco2+wh2o+_3`; `wco2+wh2o+_4`; `wco2+wh2o+_5`; `wco2+wh2o+_6`; `wco2+wh2o+_7`; `wco2+wh2o+_8`; `wco2+wh2o+_9`; `wco2+wh2o+_10`; `wco2+wh2o+_11`; `wco2+wh2o+_12`; `wco2+wh2o+_13`; `wco2+wh2o+_14`; `wco2+wh2o+_15`; `wco2+wh2o+_16`; `wco2+wh2o+_17`; `wco2+wh2o+_18`; `wco2+wh2o+_19`; `wco2+wh2o+`; `wco2+wh2o-_1`; `wco2+wh2o-_2`; `wco2+wh2o-_3`; `wco2+wh2o-_4`; `wco2+wh2o-_5`; `wco2+wh2o-_6`; `wco2+wh2o-_7`; `wco2+wh2o-_8`; `wco2+wh2o-_9`; `wco2+wh2o-_10`; `wco2+wh2o-_11`; `wco2+wh2o-_12`; `wco2+wh2o-_13`; `wco2+wh2o-_14`; `wco2+wh2o-_15`; `wco2+wh2o-_16`; `wco2+wh2o-_17`; `wco2+wh2o-_18`; `wco2+wh2o-_19`; `wco2+wh2o-`; `wco2-wh2o·_1`; `wco2-wh2o·_2`; `wco2-wh2o·_3`; `wco2-wh2o·_4`; `wco2-wh2o·_5`; `wco2-wh2o·_6`; `wco2-wh2o·_7`; `wco2-wh2o·_8`; `wco2-wh2o·_9`; `wco2-wh2o·_10`; `wco2-wh2o·_11`; `wco2-wh2o·_12`; `wco2-wh2o·_13`; `wco2-wh2o·_14`; `wco2-wh2o·_15`; `wco2-wh2o·_16`; `wco2-wh2o·_17`; `wco2-wh2o·_18`; `wco2-wh2o·_19`; `wco2-wh2o·`; `wco2+wh2o·_1`; `wco2+wh2o·_2`; `wco2+wh2o·_3`; `wco2+wh2o·_4`; `wco2+wh2o·_5`; `wco2+wh2o·_6`; `wco2+wh2o·_7`; `wco2+wh2o·_8`; `wco2+wh2o·_9`; `wco2+wh2o·_10`; `wco2+wh2o·_11`; `wco2+wh2o·_12`; `wco2+wh2o·_13`; `wco2+wh2o·_14`; `wco2+wh2o·_15`; `wco2+wh2o·_16`; `wco2+wh2o·_17`; `wco2+wh2o·_18`; `wco2+wh2o·_19`; `wco2+wh2o·`; `wco2·wh2o-_1`; `wco2·wh2o-_2`; `wco2·wh2o-_3`; `wco2·wh2o-_4`; `wco2·wh2o-_5`; `wco2·wh2o-_6`; `wco2·wh2o-_7`; `wco2·wh2o-_8`; `wco2·wh2o-_9`; `wco2·wh2o-_10`; `wco2·wh2o-_11`; `wco2·wh2o-_12`; `wco2·wh2o-_13`; `wco2·wh2o-_14`; `wco2·wh2o-_15`; `wco2·wh2o-_16`; `wco2·wh2o-_17`; `wco2·wh2o-_18`; `wco2·wh2o-_19`; `wco2·wh2o-`; `wco2·_1`; `wco2·_2`; `wco2·_3`; `wco2·_4`; `wco2·_5`; `wco2·_6`; `wco2·_7`; `wco2·_8`; `wco2·_9`; `wco2·_10`; `wco2·_11`; `wco2·_12`; `wco2·_13`; `wco2·_14`; `wco2·_15`; `wco2·_16`; `wco2·_17`; `wco2·_18`; `wco2·_19`; `wco2·`; `wco2_qc`; `w/co2_cov_qc`; `wT/co2_cov_qc`; `wT/co2T_cov_qc`; `w/co2T_cov_qc`; `wD/co2D_cov_qc`; `w/co2D_cov_qc`; `wD/co2_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wco2·wh2o+_qc`; `wco2-wh2o-_qc`; `wco2·wh2o·_qc`; `wco2-wh2o+_qc`; `wco2+wh2o+_qc`; `wco2+wh2o-_qc`; `wco2-wh2o·_qc`; `wco2+wh2o·_qc`; `wco2·wh2o-_qc`; `wco2·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:34:57,698 wvlt DEBUG 		[(20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000)].
+2024-04-25 21:35:02,963 wvlt DEBUG 		Matrix to time table took 46 s (run_wt).
+2024-04-25 21:35:03,38 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:35:13,218 wvlt DEBUG 		Saving header of DataFrame took 10 (26) s (run_wt).
+2024-04-25 21:35:14,452 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:16,654 wvlt DEBUG 		Saving header of DataFrame took 14 (29) s (run_wt).
+2024-04-25 21:35:17,778 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:20,16 wvlt DEBUG 		Saving header of DataFrame took 17 (32) s (run_wt).
+2024-04-25 21:35:21,88 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:23,238 wvlt DEBUG 		Saving header of DataFrame took 20 (36) s (run_wt).
+2024-04-25 21:35:24,295 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:26,626 wvlt DEBUG 		Saving header of DataFrame took 24 (39) s (run_wt).
+2024-04-25 21:35:27,709 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:29,925 wvlt DEBUG 		Saving header of DataFrame took 27 (42) s (run_wt).
+2024-04-25 21:35:30,992 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:33,163 wvlt DEBUG 		Saving header of DataFrame took 30 (46) s (run_wt).
+2024-04-25 21:35:34,260 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:36,455 wvlt DEBUG 		Saving header of DataFrame took 33 (49) s (run_wt).
+2024-04-25 21:35:37,535 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:39,758 wvlt DEBUG 		Saving header of DataFrame took 37 (52) s (run_wt).
+2024-04-25 21:35:40,867 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:43,131 wvlt DEBUG 		Saving header of DataFrame took 40 (56) s (run_wt).
+2024-04-25 21:35:44,218 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:46,392 wvlt DEBUG 		Saving header of DataFrame took 43 (59) s (run_wt).
+2024-04-25 21:35:47,478 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:49,789 wvlt DEBUG 		Saving header of DataFrame took 47 (62) s (run_wt).
+2024-04-25 21:35:50,863 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:53,88 wvlt DEBUG 		Saving header of DataFrame took 50 (66) s (run_wt).
+2024-04-25 21:35:54,219 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:56,419 wvlt DEBUG 		Saving header of DataFrame took 53 (69) s (run_wt).
+2024-04-25 21:35:57,501 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:35:59,722 wvlt DEBUG 		Saving header of DataFrame took 57 (72) s (run_wt).
+2024-04-25 21:36:00,838 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:03,53 wvlt DEBUG 		Saving header of DataFrame took 60 (76) s (run_wt).
+2024-04-25 21:36:04,128 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:06,333 wvlt DEBUG 		Saving header of DataFrame took 63 (79) s (run_wt).
+2024-04-25 21:36:07,547 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:09,818 wvlt DEBUG 		Saving header of DataFrame took 67 (82) s (run_wt).
+2024-04-25 21:36:10,863 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:13,90 wvlt DEBUG 		Saving header of DataFrame took 70 (86) s (run_wt).
+2024-04-25 21:36:14,178 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:16,418 wvlt DEBUG 		Saving header of DataFrame took 73 (89) s (run_wt).
+2024-04-25 21:36:17,532 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:19,734 wvlt DEBUG 		Saving header of DataFrame took 77 (92) s (run_wt).
+2024-04-25 21:36:20,820 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:23,46 wvlt DEBUG 		Saving header of DataFrame took 80 (96) s (run_wt).
+2024-04-25 21:36:24,160 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:26,468 wvlt DEBUG 		Saving header of DataFrame took 84 (99) s (run_wt).
+2024-04-25 21:36:27,603 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:29,826 wvlt DEBUG 		Saving header of DataFrame took 87 (102) s (run_wt).
+2024-04-25 21:36:30,943 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:33,179 wvlt DEBUG 		Saving header of DataFrame took 90 (106) s (run_wt).
+2024-04-25 21:36:34,214 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:36,435 wvlt DEBUG 		Saving header of DataFrame took 93 (109) s (run_wt).
+2024-04-25 21:36:37,543 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:39,920 wvlt DEBUG 		Saving header of DataFrame took 97 (112) s (run_wt).
+2024-04-25 21:36:40,989 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:43,211 wvlt DEBUG 		Saving header of DataFrame took 100 (116) s (run_wt).
+2024-04-25 21:36:44,299 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:46,498 wvlt DEBUG 		Saving header of DataFrame took 104 (119) s (run_wt).
+2024-04-25 21:36:47,630 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:49,841 wvlt DEBUG 		Saving header of DataFrame took 107 (122) s (run_wt).
+2024-04-25 21:36:50,923 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:53,148 wvlt DEBUG 		Saving header of DataFrame took 110 (126) s (run_wt).
+2024-04-25 21:36:54,260 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:56,492 wvlt DEBUG 		Saving header of DataFrame took 114 (129) s (run_wt).
+2024-04-25 21:36:57,568 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:36:59,823 wvlt DEBUG 		Saving header of DataFrame took 117 (132) s (run_wt).
+2024-04-25 21:37:01,11 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:03,257 wvlt DEBUG 		Saving header of DataFrame took 120 (136) s (run_wt).
+2024-04-25 21:37:04,325 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:06,518 wvlt DEBUG 		Saving header of DataFrame took 124 (139) s (run_wt).
+2024-04-25 21:37:07,583 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:09,828 wvlt DEBUG 		Saving header of DataFrame took 127 (142) s (run_wt).
+2024-04-25 21:37:10,958 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:13,172 wvlt DEBUG 		Saving header of DataFrame took 130 (146) s (run_wt).
+2024-04-25 21:37:14,238 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:16,443 wvlt DEBUG 		Saving header of DataFrame took 133 (149) s (run_wt).
+2024-04-25 21:37:17,523 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:19,712 wvlt DEBUG 		Saving header of DataFrame took 137 (152) s (run_wt).
+2024-04-25 21:37:20,781 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:23,58 wvlt DEBUG 		Saving header of DataFrame took 140 (156) s (run_wt).
+2024-04-25 21:37:24,178 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:26,440 wvlt DEBUG 		Saving header of DataFrame took 143 (159) s (run_wt).
+2024-04-25 21:37:27,590 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:29,769 wvlt DEBUG 		Saving header of DataFrame took 147 (162) s (run_wt).
+2024-04-25 21:37:30,833 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:32,978 wvlt DEBUG 		Saving header of DataFrame took 150 (165) s (run_wt).
+2024-04-25 21:37:34,118 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:36,416 wvlt DEBUG 		Saving header of DataFrame took 153 (169) s (run_wt).
+2024-04-25 21:37:37,485 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:39,718 wvlt DEBUG 		Saving header of DataFrame took 157 (172) s (run_wt).
+2024-04-25 21:37:40,761 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:42,991 wvlt DEBUG 		Saving header of DataFrame took 160 (175) s (run_wt).
+2024-04-25 21:37:44,76 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:46,255 wvlt DEBUG 		Saving header of DataFrame took 163 (179) s (run_wt).
+2024-04-25 21:37:47,330 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:49,552 wvlt DEBUG 		Saving header of DataFrame took 167 (182) s (run_wt).
+2024-04-25 21:37:50,680 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:37:53,509 wvlt DEBUG 		Saving DataFrame for all averaging period took 171 (186) s (run_wt).
+2024-04-25 21:37:54,248 wvlt DEBUG 		Moving from array to DataFrame took 187 s (run_wt).
+2024-04-25 21:37:54,250 wvlt DEBUG 		Call w*h2o.
+2024-04-25 21:37:54,250 wvlt DEBUG 		Decompose all variables took 0 s (run_wt).
+2024-04-25 21:37:54,250 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:582: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+  data = data[_isinfinalrange]
+
+2024-04-25 21:37:55,458 wvlt DEBUG 		Decomposed covariance shape: (19, 1728000) (1.0 days) (run_wt).
+2024-04-25 21:37:56,328 wvlt DEBUG 		Calculate covariances took 2 s (run_wt).
+2024-04-25 21:37:57,245 wvlt DEBUG 		Difference between original and denoised 0.0 for array w/ shape (19, 1728000) and (19, 1728000) (run_wt).
+2024-04-25 21:37:57,881 wvlt DEBUG 		Done normal conditional sampling took 2 s (run_wt).
+2024-04-25 21:37:58,30 wvlt DEBUG 		Conditional sampling took 2 s (run_wt).
+2024-04-25 21:37:58,33 wvlt DEBUG 		Adding nan flag took 2 s (run_wt).
+2024-04-25 21:37:59,523 wvlt DEBUG 		Integration took 3 s (run_wt).
+2024-04-25 21:37:59,523 wvlt DEBUG 		Guarantee took 3 s (run_wt).
+2024-04-25 21:37:59,523 wvlt DEBUG 		Transform 2D arrays to DataFrame with columns `wh2o_1`; `wh2o_2`; `wh2o_3`; `wh2o_4`; `wh2o_5`; `wh2o_6`; `wh2o_7`; `wh2o_8`; `wh2o_9`; `wh2o_10`; `wh2o_11`; `wh2o_12`; `wh2o_13`; `wh2o_14`; `wh2o_15`; `wh2o_16`; `wh2o_17`; `wh2o_18`; `wh2o_19`; `wh2o`; `w/h2o_cov`; `wT/h2o_cov`; `wT/h2oT_cov`; `w/h2oT_cov`; `wD/h2oD_cov`; `w/h2oD_cov`; `wD/h2o_cov`; `w_var`; `wD_var`; `wT_var`; `co2_var`; `co2D_var`; `co2T_var`; `h2o_var`; `h2oD_var`; `h2oT_var`; `wh2o·_1`; `wh2o·_2`; `wh2o·_3`; `wh2o·_4`; `wh2o·_5`; `wh2o·_6`; `wh2o·_7`; `wh2o·_8`; `wh2o·_9`; `wh2o·_10`; `wh2o·_11`; `wh2o·_12`; `wh2o·_13`; `wh2o·_14`; `wh2o·_15`; `wh2o·_16`; `wh2o·_17`; `wh2o·_18`; `wh2o·_19`; `wh2o·`; `wh2o_qc`; `w/h2o_cov_qc`; `wT/h2o_cov_qc`; `wT/h2oT_cov_qc`; `w/h2oT_cov_qc`; `wD/h2oD_cov_qc`; `w/h2oD_cov_qc`; `wD/h2o_cov_qc`; `w_var_qc`; `wD_var_qc`; `wT_var_qc`; `co2_var_qc`; `co2D_var_qc`; `co2T_var_qc`; `h2o_var_qc`; `h2oD_var_qc`; `h2oT_var_qc`; `wh2o·_qc`; `w_nfb`; `co2_nfb`; `h2o_nfb`.
+2024-04-25 21:38:00,30 wvlt DEBUG 		[(20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (20, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000), (1, 1728000)].
+2024-04-25 21:38:02,263 wvlt DEBUG 		Matrix to time table took 6 s (run_wt).
+2024-04-25 21:38:02,338 py.warnings WARNING c:\Users\phherigcoimb\Anaconda3\envs\wavec\Lib\site-packages\numpy\core\fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
+  return bound(*args, **kwds)
+
+2024-04-25 21:38:05,203 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:06,64 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:06,928 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:07,786 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:08,663 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:09,628 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:10,600 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:11,528 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:12,418 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:13,388 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:14,380 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:15,330 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:16,254 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:17,163 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:18,70 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:18,960 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:19,918 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:20,808 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:21,723 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:22,643 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:23,605 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:24,528 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:25,392 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:26,333 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:27,305 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:28,201 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:29,118 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:30,68 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:30,968 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:31,882 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:32,814 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:33,768 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:34,711 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:35,612 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:36,481 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:37,423 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:38,356 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:39,228 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:40,153 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:41,195 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:42,147 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:43,68 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:43,973 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:44,889 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:45,858 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:46,773 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:47,685 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:48,610 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:762: FutureWarning: The provided callable <function nanmean at 0x000001A0CE6F8040> is currently using DataFrameGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  __tempa__ = __tempa__.groupby(['variable'], dropna=False).agg(np.nanmean).reset_index(drop=False)
+
+2024-04-25 21:38:49,448 wvlt DEBUG 		Saving DataFrame for all averaging period took 47 (51) s (run_wt).
+2024-04-25 21:38:49,649 wvlt DEBUG 		Moving from array to DataFrame took 52 s (run_wt).
+2024-04-25 21:38:49,649 wvlt INFO 	Decomposing all 3 variables took 100 s (33 s/var) (run_wt).
+2024-04-25 21:38:49,654 wvlt INFO 	Array to DataFrame took 238 s (119 s/loop) (run_wt).
+2024-04-25 21:38:49,654 wvlt INFO 	Starting averaging at 1511 s (run_wt).
+2024-04-25 21:38:49,849 wvlt INFO 	Finish 20220515 took 504 s, yielded 49 files (run_wt). Progress: 49 50 %
+2024-04-25 21:38:49,852 wvlt WARNING UserWarning: Skipping, file already exists (20220516).
+2024-04-25 21:38:49,852 wvlt INFO Finish wavelets at 1511 s (run_wt).
+2024-04-25 21:38:53,463 py.warnings WARNING c:\Users\phherigcoimb\OneDrive\gitRepo\wavelete-ec\scripts\wavelet_functions.py:289: FutureWarning: The provided callable <function nansum at 0x000001A0CE6E3B00> is currently using SeriesGroupBy.sum. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "sum" instead.
+  data0 = data[(np.isnan(data['natural_frequency'])==False) * (data['natural_frequency'] >= f0)].groupby(['variable', 'TIMESTAMP'])['value'].agg(np.nansum).reset_index(drop=False)
+
