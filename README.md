@@ -8,12 +8,13 @@ Pedro H H Coimbra, Benjamin Loubet, Olivier Laurent, Matthias Mauder, Bernard He
 # (Recommended) step-by-step
 
 1. Setup python.\
-(suggestion) install anaconda, and run `conda create -n wavec --file requirements.txt`
+(option 1) install anaconda, and run `conda create -n wavec --file requirements.txt`\
+(option 2) install anaconda, and run `conda create -f environment.yml`\
 
 2. Run EddyPro, saving level 6 raw data. \
 To do this go in Advanced Settings (top menu) > Output Files (left menu) > Processed raw data (bottom);\
 Then select Time series on "level 6 (after time lag compensation)";\
-Select all variables;
+Select all variables;\
 Proceed as usual running on "Advanced Mode".
 
 3. Follow launcher.ipynb
