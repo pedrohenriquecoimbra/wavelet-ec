@@ -23,7 +23,8 @@ logging.captureWarnings(True)
 logging.info("STARTING THE RUN")
 
 def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, integratioperiod=None,
-         covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], **kwargs):
+         covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
+         method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
 
     # Create setup
@@ -73,14 +74,14 @@ def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=2
     configure.integrating = integratioperiod if integratioperiod is not None else fileduration * 60
 
     # Select wavelet method
-    configure.method = 'dwt'
+    configure.method = method
     configure.denoise = bool(denoise)
 
     # Dead band
     if deadband: configure.deadband = {v: abs(float(d)) for v, d in zip(variables_available, deadband) if abs(float(d))>0}
 
     # Select dt
-    configure.wt_kwargs = {'fs': acquisition_frequency}
+    configure.wt_kwargs = {'fs': acquisition_frequency, 'wavelet': wave_mother}
     configure.raw_kwargs.update({'fkwargs': {'dt': 1/acquisition_frequency},
                                  'fmt': {'co': '4th'}})
 
@@ -206,6 +207,8 @@ if __name__ == '__main__':
     parser.add_argument('-dn', '--denoise', type=int)#, nargs=1)
     parser.add_argument('-db', '--deadband', type=str, nargs='+')
     parser.add_argument('-cov', '--covariance', type=str, nargs='+')
+    parser.add_argument('--method', type=str, default='dwt')
+    parser.add_argument('--wave_mother', type=str, default='db6')
     parser.add_argument('--run', type=int, default=1)
     parser.add_argument('--concat', type=int, default=1)
     parser.add_argument('--partition', type=int, default=1)

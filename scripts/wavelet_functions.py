@@ -63,6 +63,7 @@ j2sj = hc24.j2sj
 
 logger = logging.getLogger('wvlt')
 
+
 def __cwt__(input, fs, f0, f1, fn, nthreads=1, scaling="log", fast=False, norm=True, Morlet=6.0):
     """
     function: performs Continuous Wavelet Transform
@@ -118,6 +119,7 @@ def __icwt__(W, sj, dt, dj, Cd=None, psi=None, wavelet=None):
         x: array
     """
     if wavelet is None: wavelet = pycwt.wavelet.Morlet(6)
+    if isinstance(wavelet, str): wavelet = hc24.__wavemother_str_pycwt__(wavelet)
     if Cd is None: Cd = wavelet.cdelta
     if psi is None: psi = wavelet.psi(0)
         
@@ -132,25 +134,25 @@ def __icwt__(W, sj, dt, dj, Cd=None, psi=None, wavelet=None):
     return x
 
    
-def __dwt__(*args, level=None, wave="db6"):
+def __dwt__(*args, level=None, wavelet="db6"):
     """
     function: performs Discrete Wavelet Transform
     call: __dwt__()
     Input:
         *args: arrays (1D) to be transformed
         level: maximum scale (power of 2)
-        wave: mother wavelet (comprehensible to pywt)
+        wavelet: mother wavelet (comprehensible to pywt)
     Return:
         Ws: list of 2D arrays
     """
     Ws = []
     for X in args:
-        Ws += [pywt.wavedec(X, wave, level=level)]
+        Ws += [pywt.wavedec(X, wavelet, level=level)]
     level = len(Ws[-1])-1
     return Ws
 
 
-def __idwt__(*args, N, level=None, wave="db6"):
+def __idwt__(*args, N, level=None, wavelet="db6"):
     """
     function: performs Inverse Discrete Wavelet Transform
     call: __idwt__()
@@ -158,7 +160,7 @@ def __idwt__(*args, N, level=None, wave="db6"):
         *args: 2D arrays contianing wavelet coefficient
         N: data lenght
         level: maximum scale (power of 2)
-        wave: mother wavelet (comprehensible to pywt)
+        wavelet: mother wavelet (comprehensible to pywt)
     Return:
         Ws: list of 2D arrays
         level: maximum scale (power of 2)
@@ -176,8 +178,8 @@ def __idwt__(*args, N, level=None, wave="db6"):
     
     Ys = []
     for W in args:
-        A1 = wrcoef(N, 'a', W, wave, level)
-        D1 = [wrcoef(N, 'd', W, wave, i) for i in range(1, level+1)]
+        A1 = wrcoef(N, 'a', W, wavelet, level)
+        D1 = [wrcoef(N, 'd', W, wavelet, i) for i in range(1, level+1)]
         Ys += [np.array(D1 + [A1])]
     return Ys, level
 
@@ -205,25 +207,27 @@ def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=100,
         'dwt', 'cwt', 'fcwt'], "Method not found. Available methods are: dwt, cwt, fcwt"
        
     if method == 'fcwt':
-        if callable(fcwt):
+        if fcwt is not None:
             """Run Continuous Wavelet Transform, using fast algorithm"""
             _l, wave = __cwt__(signal, fs, f0, f1, fn, **kwargs)
             sj = np.log2(fs/_l)
             if inv:
                 wave = __icwt__(wave, sj=sj, dt=fs, dj=dj, **kwargs, 
                             wavelet=pycwt.wavelet.Morlet(6))
+            sj = list(sj)
         else:
             logger.warning('UserWarning: Fast continuous wavelet transform (fcwt) not found. Running slow version.')
             method = 'cwt'
     
     elif method == 'cwt':
-        if callable(pycwt):
+        if pycwt is not None:
             """Run Continuous Wavelet Transform"""
             wave, sj, _, _, _, _ = pycwt.cwt(
-                signal, dt=1/fs, s0=2/fs, dj=dj, J=fn-1)
+                signal, dt=1/fs, s0=2/fs, dj=dj, J=fn-1, **kwargs)
             sj = np.log2(sj*fs)
             if inv:
                 wave = __icwt__(wave, sj=sj, dt=fs**-1, dj=dj, **kwargs)
+            sj = list(sj)
         else:
             logger.warning('UserWarning: Continuous wavelet transform (cwt) not found. Running discrete version.')
             method = 'dwt'
@@ -307,7 +311,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     averaging & integrating at the same unit
 
     fs = 20, f0 = 1/(3*60*60), f1 = 10, fn = 100, agg_avg = 1, 
-    suffix = "", mother = pycwt.wavelet.MexicanHat(),
+    suffix = "", wavelet = pycwt.wavelet.MexicanHat(),
     **kwargs):
     """
     if isinstance(averaging, (list, tuple)): averaging = averaging[-1]
@@ -319,7 +323,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         'dwt', 'cwt', 'fcwt'], "Method not found. Available methods are: dwt, cwt, fcwt"
     if verbosity: print(f'\nRUNNING WAVELET TRASNFORM ({method})')
     if method in ["cwt", "fcwt"]:
-        if method == "fcwt" or "mother" not in wt_kwargs.keys() or wt_kwargs.get("mother") in ['morlet', 'Morlet', pycwt.wavelet.Morlet(6)]:
+        if method == "fcwt" or "wavelet" not in wt_kwargs.keys() or wt_kwargs.get("wavelet") in ['morlet', 'Morlet', pycwt.wavelet.Morlet(6)]:
             Cφ = 5.271
         else:
             Cφ = 16.568
@@ -687,12 +691,12 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 logger.debug(f'\t\tGuarantee took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
                 
                 φs_names = []
-                for n in φs.keys():
+                for n in φs.keys():  
                     if φs[n].shape[0] > 1:
                         for l in sj + ['']: # use if __integrate_decomposedarrays_in_dictionary__
                             if l: φs_names += [f'{n}_{l}'] 
                             else: φs_names += [n] 
-                    else: φs_names += [n]                 
+                    else: φs_names += [n]            
                 # [f'{n}_{l}' if l else n for n in φs.keys() for l in sj + [''] if φs[n].shape[0] > 1] +
                 # [n for n in φs.keys() if φs[n].shape[0] <= 1] + 
                 logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names + [f"{n}_qc" for n in μs.keys()] + [f"{n}_nfb" for n in ζb.keys()])}`.')
