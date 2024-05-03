@@ -22,13 +22,15 @@ logging.basicConfig(filename=logname,
 logging.captureWarnings(True)
 logging.info("STARTING THE RUN")
 
-def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, integratioperiod=None,
+def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D', integratioperiod=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
          method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
 
     # Create setup
     configure = hc24.structuredData()
+
+    configure.processing_time_duration = processduration
 
     # Select output file path
     configure.output_path = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(sitename)+'_CDWT{}_{}.csv'))
@@ -212,6 +214,7 @@ if __name__ == '__main__':
     parser.add_argument('--run', type=int, default=1)
     parser.add_argument('--concat', type=int, default=1)
     parser.add_argument('--partition', type=int, default=1)
+    parser.add_argument('--processduration', type=str, default='1D')    
     args = parser.parse_args()
     args = handle_eddypro_setup(**vars(args))
 
