@@ -304,10 +304,9 @@ def integrate_cospectra(root, pattern, f0, dst_path):
 def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={}, 
            method="dwt", Cφ=1, nan_tolerance=.3,
            averaging=30, condsamp_flat=[], integrating=30*60, 
-           overwrite=False, saveraw=False, file_duration="1D",
+           overwrite=False, saveraw=False, processing_time_duration="1D",
            despike=False, denoise=False, noisecolor=1, deadband={}, verbosity=1):
     """
-    file_duration -> processing_time_duration
     averaging & integrating at the same unit
 
     fs = 20, f0 = 1/(3*60*60), f1 = 10, fn = 100, agg_avg = 1, 
@@ -332,11 +331,11 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     suffix = raw_kwargs['suffix'] if 'suffix' in raw_kwargs.keys() else ''
 
     _, _, _f = ymd
-    ymd = hc24.list_time_in_period(*ymd, file_duration, include='both')
+    ymd = hc24.list_time_in_period(*ymd, processing_time_duration, include='both')
     
     if method in ['dwt']:
         buffer = hc24.bufferforfrequency_dwt(
-            N=pd.to_timedelta(file_duration)/pd.to_timedelta("1s") * dt**-1,
+            N=pd.to_timedelta(processing_time_duration)/pd.to_timedelta("1s") * dt**-1,
             n_=_f, **wt_kwargs)/2
     else:
         buffer = hc24.bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
@@ -378,8 +377,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         info_t_startdateloop = time.time()
 
         date = re.sub('[-: ]', '', str(yl[0]))
-        if file_duration.endswith("D"): date = date[:8]
-        if file_duration.endswith("H") or file_duration.endswith("Min"): date = date[:12]
+        if processing_time_duration.endswith("D"): date = date[:8]
+        if processing_time_duration.endswith("H") or processing_time_duration.endswith("Min"): date = date[:12]
         
         print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
         prev_print = '\x1B[1A\r'
