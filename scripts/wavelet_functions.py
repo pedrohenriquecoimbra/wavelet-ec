@@ -242,7 +242,7 @@ def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=100,
             N = np.array(signal).shape[-1]
             waves = __idwt__(*waves, N=N, level=lvl, **kwargs)
         wave = waves[0][0]
-    return wave, sj
+    return wave.real, sj
 
 
 def conditional_sampling(Y12, *args, names=['xy', 'a'], label = {1: "+", -1: "-", 0: "·"}, false=0):
