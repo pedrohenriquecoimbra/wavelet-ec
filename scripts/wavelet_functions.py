@@ -184,7 +184,7 @@ def __idwt__(*args, N, level=None, wavelet="db6"):
     return Ys, level
 
 
-def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=100, 
+def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=180, 
                  dj=1/12, inv=True, **kwargs):
     """
     function: performs Continuous Wavelet Transform
@@ -323,7 +323,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     if verbosity: print(f'\nRUNNING WAVELET TRASNFORM ({method})')
     if method in ["cwt", "fcwt"]:
         if method == "fcwt" or "wavelet" not in wt_kwargs.keys() or wt_kwargs.get("wavelet") in ['morlet', 'Morlet', pycwt.wavelet.Morlet(6)]:
-            Cφ = 5.271
+            Cφ = 2.5
         else:
             Cφ = 16.568
     
