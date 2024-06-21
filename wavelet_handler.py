@@ -9,23 +9,24 @@ import yaml
 import scripts.coimbra2024_scripts as hc24
 import scripts.wavelet_functions as wavelet_functions
 
-logname = f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"
-hc24.mkdirs(logname)
-#with open(logname, "w+"): pass
-logging.basicConfig(filename=logname,
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.DEBUG, 
-                    force=True)
-
-logging.captureWarnings(True)
-logging.info("STARTING THE RUN")
 
 def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D', integratioperiod=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
          method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
+
+    logname = str(os.path.join(outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
+    hc24.mkdirs(logname)
+    #with open(logname, "w+"): pass
+    logging.basicConfig(filename=logname,
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.DEBUG, 
+                        force=True)
+
+    logging.captureWarnings(True)
+    logging.info("STARTING THE RUN")
 
     # Create setup
     configure = hc24.structuredData()
