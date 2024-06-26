@@ -518,7 +518,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         frequencies = [dt*2**l for l in sj]
                         # read allan deviation file
                         # interpolate and find frequencies
-                        
+
                         allan_dev = {'co2': np.array([0.014, 0.014, 0.014, 0.014, 0.013, 0.01,  0.007, 0.005, 0.004, 0.004, 0.003, 0.002, 0.002, 0.001, 0.002, 0.003, 0.003, np.inf]),
                                      'co': np.array([3.095, 3.095, 3.095, 3.095, 2.853, 2.206, 1.393, 0.998, 0.674, 0.544, 0.418, 0.265, 0.168, 0.124, 0.103, 0.067, 0.086, np.inf]),
                                      'ch4': np.array([0.089, 0.089, 0.089, 0.089, 0.083, 0.065, 0.043, 0.034, 0.027, 0.023, 0.018, 0.013, 0.01,  0.011, 0.018, 0.027, 0.041, np.inf])}
@@ -887,7 +887,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         
         #[os.remove(d) for a in avg_ for d in dat_fullspectra[a] if os.path.exists(d)]
         if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
-        prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} %' + '\n'
+        prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} % ({time.strftime("%d.%m.%y %H:%M:%S")})' + '\n'
             
         logger.info(f'\tFinish {date} took {round(time.time() - info_t_startdateloop)} s, yielded {len(yl)} files (run_wt). Progress: {len(yl)} {int(100*ymd_i/len(ymd))} %')
     
