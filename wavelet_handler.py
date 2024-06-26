@@ -10,7 +10,7 @@ import scripts.coimbra2024_scripts as hc24
 import scripts.wavelet_functions as wavelet_functions
 
 
-def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D', integratioperiod=None,
+def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D', integratioperiod=None, preaverage=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
          method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
@@ -32,6 +32,7 @@ def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=2
     configure = hc24.structuredData()
 
     configure.processing_time_duration = processduration
+    configure.preaverage = preaverage
 
     # Select output file path
     configure.output_path = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(sitename)+'_CDWT{}_{}.csv'))
@@ -215,7 +216,8 @@ if __name__ == '__main__':
     parser.add_argument('--run', type=int, default=1)
     parser.add_argument('--concat', type=int, default=1)
     parser.add_argument('--partition', type=int, default=1)
-    parser.add_argument('--processduration', type=str, default='1D')    
+    parser.add_argument('--processduration', type=str, default='1D')
+    parser.add_argument('--preaverage', type=str, default=None)   
     args = parser.parse_args()
     args = handle_eddypro_setup(**vars(args))
 

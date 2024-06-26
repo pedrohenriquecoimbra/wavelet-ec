@@ -305,6 +305,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
            method="dwt", Cφ=1, nan_tolerance=.3,
            averaging=30, condsamp_flat=[], integrating=30*60, 
            overwrite=False, saveraw=False, processing_time_duration="1D",
+           preaverage=None,
            despike=False, denoise=False, noisecolor=1, deadband={}, verbosity=1):
     """
     averaging & integrating at the same unit
@@ -435,6 +436,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         info_t_startdatacontinuity = time.time()
         data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt}s")}),
                             data, on="TIMESTAMP", how='outer').reset_index(drop=True)
+        timestamp0 = data['TIMESTAMP'].copy()
+        timestamp = timestamp0.copy()
         logger.debug(f'\tForce data to be continuous took {round(time.time() - info_t_startdatacontinuity)} s (run_wt).')
 
         # main run
@@ -494,30 +497,41 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         levels_notto_integrate = [l==False for l in levels_to_integrate]
 
                         # Strip buffer data
-                        _isinfinalrange = (data.TIMESTAMP >= min(yl)) & (data.TIMESTAMP < max(yl))
+                        _isinfinalrange = (timestamp0 >= min(yl)) & (timestamp0 < max(yl))
                         signal = signal[_isinfinalrange.to_list()]
                         signan = signan[_isinfinalrange.to_list()]
-                        N = len(signal)
                         φ[v] = φ[v][:, _isinfinalrange.to_list()]
-                        φ0[v] = copy.deepcopy(φ[v])
+                        N = len(signal)
                         S[v] = signal
 
                         # apply despiking (Mauder et al.)
                         if despike:
-                            φ0[v] = np.apply_along_axis(__despike__, 1, φ0[v])
+                            φ[v] = np.apply_along_axis(__despike__, 1, φ[v])
+                        
+                        φ0[v] = copy.deepcopy(φ[v])
                         μ[v] = signan *1
                         μ[v+'D'] = signan *1
                         μ[v+'T'] = signan *1
                         
                         """
                         # apply Allan deviation (ad-hoc)
+                        frequencies = [dt*2**l for l in sj]
+                        # read allan deviation file
+                        # interpolate and find frequencies
+                        
                         allan_dev = {'co2': np.array([0.014, 0.014, 0.014, 0.014, 0.013, 0.01,  0.007, 0.005, 0.004, 0.004, 0.003, 0.002, 0.002, 0.001, 0.002, 0.003, 0.003, np.inf]),
                                      'co': np.array([3.095, 3.095, 3.095, 3.095, 2.853, 2.206, 1.393, 0.998, 0.674, 0.544, 0.418, 0.265, 0.168, 0.124, 0.103, 0.067, 0.086, np.inf]),
                                      'ch4': np.array([0.089, 0.089, 0.089, 0.089, 0.083, 0.065, 0.043, 0.034, 0.027, 0.023, 0.018, 0.013, 0.01,  0.011, 0.018, 0.027, 0.041, np.inf])}
                         allan_dev = {k: np.expand_dims(v, 1) for k, v in allan_dev.items()}
+
+                        #filter values
                         if (N > 0) and (v.lower() in allan_dev.keys()):
                             # φ[v] needs to be (n, 17)
-                            φ0[v] = np.where((abs(φ[v]) < np.sqrt(allan_dev[v])), 0, φ0[v])                        
+                            φ0[v] = np.where((abs(φ[v]) < np.sqrt(allan_dev[v])), 0, φ0[v])
+                        
+                        #if still some values
+                        ##fit theorical (co)spectrum
+                        ##fill spectra using theorical curve
                         """
 
                         # for file length, update later
@@ -527,12 +541,14 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                         #ζ[v]  = []
                         ζb[v] = []
 
-                        arr_slice = np.unique(data[_isinfinalrange].TIMESTAMP.dt.floor(_f), return_index=True)
-                        for this_group, this_data in list(zip(arr_slice[0], np.split(data, arr_slice[1][1:]))):
+                        #arr_slice = np.unique(data[_isinfinalrange].TIMESTAMP.dt.floor(_f), return_index=True)
+                        arr_slice = np.unique(timestamp0[_isinfinalrange].dt.floor(_f), return_index=True)
+                        for this_group, this_data in list(zip(arr_slice[0], np.split(timestamp0[_isinfinalrange], arr_slice[1][1:]))):
                             #for this_group, this_data in data.groupby(data[_isinfinalrange].TIMESTAMP.dt.floor(_f)):
                             # Everytime creating working with the whole array, maybe faster to work on a split of the array (redability)
                             # List of T/F to select values that are in the current AVERAGING period
-                            this_hh = np.isin(data[_isinfinalrange].index, this_data.index)#np.where(data.TIMESTAMP > this_yl) & (data.TIMESTAMP <= (this_yl + pd.Timedelta(_f))), True, False)
+                            #this_hh = np.isin(data[_isinfinalrange].index, this_data.index)#np.where(data.TIMESTAMP > this_yl) & (data.TIMESTAMP <= (this_yl + pd.Timedelta(_f))), True, False)
+                            this_hh = np.isin(timestamp0[_isinfinalrange].index, this_data.index)
                             this_Sv = np.array(S[v])
                             this_trend = np.nansum(np.array(φ[v])[levels_notto_integrate], axis=0)
                             this_N = len(this_Sv[this_hh])
@@ -582,7 +598,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
 
                 info_t_startcovariance = time.time()
                 # Strip definitively buffer data
-                data = data[_isinfinalrange]
+                # data = data[_isinfinalrange]
 
                 # calculate covariance
                 for ci, c in enumerate(xy): Y12 = Y12 * φ[c].conjugate() if ci else φ[c] * Cφ
@@ -616,6 +632,33 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 μs.update({f'{k}_var': np.where(np.array(μ[k]), 0, 1).reshape(1,-1) for k in σ.keys()})
                 
                 logger.debug(f'\t\tCalculate covariances took {round(time.time() - info_t_startcovariance)} s (run_wt).')
+                
+                #Pre average to avoid (e.g.: 1 min)
+                #It has to be divisor of 30 min to preserve 30 min average
+                info_t_startpreaveraging = time.time()
+                if preaverage:
+                    arr_slice = np.unique(timestamp0[_isinfinalrange].dt.floor(preaverage), return_index=True)
+                    #print(arr_slice[1][1:])
+                    #print(len([np.nanmean(s) for s in np.split(signal, arr_slice[1][1:])]))
+                    #print([len(s) for s in [s for s in np.split(signal, arr_slice[1][1:])]])
+                    #signal = np.array([np.nanmean(s) for s in np.split(signal, arr_slice[1][1:])])
+                    #signan = np.array([np.nanmean(s) for s in np.split(signan, arr_slice[1][1:])])
+                    #φ[v] = np.array([np.nanmean(s, axis=0) for s in np.split(φ[v].T, arr_slice[1][1:])]).T
+                    
+                    φ0 = {k: np.array([np.nanmean(s, axis=0) for s in np.split(v.T, arr_slice[1][1:])]).T for k, v in φ0.items()}
+                    φs = {k: np.array([np.nanmean(s, axis=0) for s in np.split(v.T, arr_slice[1][1:])]).T for k, v in φs.items()}
+                    logger.debug(f'\tPreaveraging φs took {round(time.time() - info_t_startpreaveraging)} s (run_wt).')
+                    μs = {k: np.array([np.nanmean(s, axis=0) for s in np.split(v.T, arr_slice[1][1:])]).T for k, v in μs.items()}
+                    logger.debug(f'\tPreaveraging μs took {round(time.time() - info_t_startpreaveraging)} s (run_wt).')
+                    ζb = {k: np.array([np.nanmean(s, axis=0) for s in np.split(v.T, arr_slice[1][1:])]).T for k, v in ζb.items()}
+                    logger.debug(f'\tPreaveraging ζb took {round(time.time() - info_t_startpreaveraging)} s (run_wt).')
+                    Y12 = np.array([np.nanmean(s, axis=0) for s in np.split(Y12.T, arr_slice[1][1:])]).T
+                    Y120 = np.array([np.nanmean(s, axis=0) for s in np.split(Y120.T, arr_slice[1][1:])]).T
+                    logger.debug(f'\tPreaveraging Y12 took {round(time.time() - info_t_startpreaveraging)} s (run_wt).')
+                    timestamp = pd.Series(arr_slice[0])
+                else:
+                    timestamp = timestamp0[_isinfinalrange].copy()
+                logger.debug(f'\tPreaveraging took {round(time.time() - info_t_startpreaveraging)} s (run_wt).')
                 
                 info_t_startconditionalsampling = time.time()
                 # conditional sampling
@@ -700,7 +743,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 # [n for n in φs.keys() if φs[n].shape[0] <= 1] + 
                 logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names + [f"{n}_qc" for n in μs.keys()] + [f"{n}_nfb" for n in ζb.keys()])}`.')
                 logger.debug(f'\t\t{[np.array(v).shape for v in list(φs.values()) + list(μs.values()) + list(ζb.values())]}.')
-                __temp__ = hc24.matrixtotimetable(np.array(data.TIMESTAMP),
+                logger.debug(f'\t\t{timestamp.shape}.')
+                __temp__ = hc24.matrixtotimetable(np.array(timestamp), #data.TIMESTAMP),
                                             np.concatenate(list(φs.values()) + list(μs.values()) + list(ζb.values()), axis=0),
                                             columns=φs_names + [f"{n}_qc" for n in μs.keys()] + [f"{n}_nfb" for n in ζb.keys()])
                 logger.debug(f'\t\tMatrix to time table took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
@@ -814,7 +858,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
             logger.info(f'\tArray to DataFrame took {round(info_t_dataframe)} s ({round(info_t_dataframe/(thisvar_i+1))} s/loop) (run_wt).')
             logger.info(f'\tStarting averaging at {round(time.time() - info_t_start)} s (run_wt).')
             
-            arr_slice = np.unique(data.TIMESTAMP.dt.floor(str(averaging)+'Min'), return_index=True)
+            #data.TIMESTAMP
+            arr_slice = np.unique(timestamp.dt.floor(str(averaging)+'Min'), return_index=True)
             for __datea__ in arr_slice[0]:
                 #for __datea__, _ in data.groupby(data.TIMESTAMP.dt.floor(str(averaging)+'Min')):
                 dst_path = output_path.format(suffix + "_full_cospectra", pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
