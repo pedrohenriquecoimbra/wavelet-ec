@@ -223,7 +223,8 @@ if __name__ == '__main__':
 
     # default
     args['integratioperiod'] = args['integratioperiod'] if args['integratioperiod'] is not None else args['fileduration'] * 60
-    
+    args['sitename'] = args['sitename'].replace('/', '_').replace('\\', '_')
+
     args.pop('eddypro')
     args.pop('metadata')
     run = args.pop('run')
@@ -237,6 +238,10 @@ if __name__ == '__main__':
     # Assert variables have been assigned
     missing_args = [f'`{k}`' for k in ['sitename', 'inputpath', 'outputpath', 'datetimerange', 'acquisition_frequency', 'fileduration'] if args[k] is None]
     assert len(missing_args) == 0, f'Missing argument in: {", ".join(missing_args)}.'
+
+    with open(args['outputpath']+f'/wavelet_processing_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.py', 'w+') as p:
+        p.write('python wavelet_handler.py ' + 
+                ''.join([f'--{k} {' '.join(v)}' if isinstance(v, list) else f'--{k} {v}' for k, v in args.items()]))
 
     if run: main(**args)
     if concat: __concat__(**args)
