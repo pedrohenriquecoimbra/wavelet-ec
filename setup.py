@@ -17,8 +17,8 @@ setup(
     packages=find_packages(exclude=['sample*', 'deprecated*']),
     include_package_data=True,
     install_requires=[
-        'pandas>=2.2.2',
-        'matplotlib>=3.8.4',
+        'pandas',
+        'matplotlib',
         'numpy>=1.26.4',
         'PyWavelets>=1.6.0',
         'scipy>=1.13.0'
@@ -34,6 +34,7 @@ setup(
         'Framework :: Jupyter',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',        
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.12',
         'Topic :: Other/Nonlisted Topic'],
