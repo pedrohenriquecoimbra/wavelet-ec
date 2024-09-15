@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 import VERSION
 
 setup(
-    name='wavelet-ec',
+    name='waveletec',
     version=VERSION.__version__,
     url='https://github.com/pedrohenriquecoimbra/wavelete-ec',
     description=(
