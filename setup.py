@@ -17,9 +17,9 @@ setup(
     packages=find_packages(exclude=['sample*', 'deprecated*']),
     include_package_data=True,
     install_requires=[
-        'pandas',
+        'pandas>=2',
         'matplotlib',
-        'numpy>=1.26.4',
+        'numpy>=1.24',
         'PyWavelets>=1.6.0',
         'scipy>=1.13.0'
         'PyYAML',
