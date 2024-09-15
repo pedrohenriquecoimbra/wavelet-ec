@@ -58,7 +58,7 @@ except ImportError as e:
     pass
 
 # Project modules
-from . import coimbra2024_scripts as hc24
+from . import commons as hc24
 j2sj = hc24.j2sj
 
 logger = logging.getLogger('wvlt')
@@ -184,7 +184,7 @@ def __idwt__(*args, N, level=None, wavelet="db6"):
     return Ys, level
 
 
-def universal_wt(signal, method, fs=20, f0=1/(3*60*60), f1=10, fn=180, 
+def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180, 
                  dj=1/12, inv=True, **kwargs):
     """
     function: performs Continuous Wavelet Transform
@@ -270,9 +270,6 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label = {1: "+", -1: "-"
     return Ys
 
 
-def split_sampling(Y12, *args, names=['xy', 'a'], false=0):
-    return
-
 def integrate_cospectra(root, pattern, f0, dst_path):
     saved_files = {}
     for name in os.listdir(root):
@@ -322,7 +319,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     assert method in [
         'dwt', 'cwt', 'fcwt'], "Method not found. Available methods are: dwt, cwt, fcwt"
     if verbosity: print(f'\nRUNNING WAVELET TRASNFORM ({method})')
-    if method in ["cwt", "fcwt"]:
+    if False and (method in ["cwt", "fcwt"]):
         if method == "fcwt" or "wavelet" not in wt_kwargs.keys() or wt_kwargs.get("wavelet") in ['morlet', 'Morlet', pycwt.wavelet.Morlet(6)]:
             Cφ = 2.5
         else:
@@ -434,7 +431,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
         
         # ensure continuity
         info_t_startdatacontinuity = time.time()
-        data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt}s")}),
+        data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt*1000}ms")}),
                             data, on="TIMESTAMP", how='outer').reset_index(drop=True)
         timestamp0 = data['TIMESTAMP'].copy()
         timestamp = timestamp0.copy()
@@ -604,7 +601,7 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 for ci, c in enumerate(xy): Y12 = Y12 * φ[c].conjugate() if ci else φ[c] * Cφ
                 for ci, c in enumerate(xy): Y120 = Y120 * φ0[c].conjugate() if ci else φ0[c] * Cφ
                 for ci, c in enumerate(xy): Cov = Cov * σ[c] if ci else copy.deepcopy(σ[c])
-                
+                                
                 CovT = {}
                 for t in ['T', 'D']:
                     for co in set(itertools.combinations(['', t]*len(xy), len(xy))):
@@ -664,7 +661,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                 # conditional sampling
                 names = [''.join(xy)] + [''.join(cs) for cs in condsamp_pair]
                 φcs = []
-                if condsamp_pair: φcs += [Y120]#[Y12ζ]
+                if condsamp_pair: 
+                    φcs += [Y120]#[Y12ζ]
                 for cs in condsamp_pair:
                     for ci, c in enumerate(cs): φc0 = φc0 * φ0[c].conjugate() if ci else φ0[c]
                     # if variables to condition are uncertain do not consider them
@@ -673,6 +671,12 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                     #for ci, c in enumerate(cs): Y12ζ = np.where(abs(φ[c]) > abs(ζ[c]), Y12ζ, 0)
                     φcs += [φc0]
                 
+                if ''.join(xy) in ['wco2', 'co2w', 'wh2o', 'h2ow']:
+                    σcec = conditional_sampling(Cov, *[σ['w'], σ['co2'], σ['h2o']], 
+                                                names=[''.join(xy), 'w', 'co2', 'h2o'],
+                                                label={1: "+", -1: "-"})
+                    φs.update(σcec)
+
                 """
                 names = [''.join(xy)] + [xy[0]+c for c in condsamp_flat]
                 φc = [np.array(φ[xy[0]]) * np.array(φ[c]).conjugate() if xy[0] != c else np.array(φ[c]) for c in condsamp_flat]

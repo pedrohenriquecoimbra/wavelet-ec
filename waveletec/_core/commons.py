@@ -957,7 +957,7 @@ def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verb
         else:
             minmax = [np.nanmin(df_site[kw.tname]),
                       np.nanmax(df_site[kw.tname])]
-        df_site = df_site.set_index(kw.tname).join(pd.DataFrame({kw.tname: pd.date_range(*minmax, freq=str(kw.dt) + ' S')}).set_index(kw.tname),
+        df_site = df_site.set_index(kw.tname).join(pd.DataFrame({kw.tname: pd.date_range(*minmax, freq=str(kw.dt*1000) + 'ms')}).set_index(kw.tname),
                 how='outer').ffill().reset_index()
         #if 'co2' in df_site.columns and (abs(np.max(df_site.co2)) < 1000) and (abs(np.min(df_site.co2)) < 1000):
         #    df_site.loc[:, "co2"] = df_site.loc[:, "co2"] * 1000  # mmol/m3 -> μmol/m3
@@ -974,7 +974,7 @@ def loaddatawithbuffer(d0, d1=None, freq=None, buffer=None,
         d0, d1 = [np.nanmin(d0), np.nanmax(d0)]
     
     if buffer == None:
-        datarange = [pd.date_range(start=d0, end=d1, freq=freq)[:-1] + pd.Timedelta(freq)]
+        datarange = [pd.date_range(start=d0, end=d1, freq=f"{f_freq}min")[:-1] + pd.Timedelta(freq)]
     else:
         # buffer align with file frequency (e.g. 30 min)
         freqno = int(re.match(r"\d*", f"{f_freq}min")[0])
