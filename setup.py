@@ -21,7 +21,7 @@ setup(
         'matplotlib',
         'numpy>=1.24',
         'PyWavelets>=1.6.0',
-        'scipy>=1.13.0'
+        'scipy>=1.13.0',
         'PyYAML',
     ],
     #extras_require={
