@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 from setuptools import find_packages, setup
 
-import VERSION
+from scripts import VERSION
 
 setup(
     name='waveletec',
-    version=VERSION.__version__,
+    version=VERSION,
     url='https://github.com/pedrohenriquecoimbra/wavelete-ec',
     description=(
         "Wavelet-based Eddy Covariance "
         "Written by pedrohenriquecoimbra"),
     long_description=open('README.md').read(),
+    author='Pedro Henrique Coimbra',
+    author_email='pedro-henrique.herig-coimbra@inrae.fr',
     keywords="EC, partitionning, wavelet",
-    license='BSD',
+    license='MIT',
     platforms=['linux'],
     packages=find_packages(exclude=['sample*', 'deprecated*']),
     include_package_data=True,

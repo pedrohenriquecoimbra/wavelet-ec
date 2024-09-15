@@ -1,0 +1,11 @@
+LICENSE
+README.md
+setup.py
+scripts/__init__.py
+scripts/coimbra2024_scripts.py
+scripts/wavelet_functions.py
+waveletec.egg-info/PKG-INFO
+waveletec.egg-info/SOURCES.txt
+waveletec.egg-info/dependency_links.txt
+waveletec.egg-info/requires.txt
+waveletec.egg-info/top_level.txt
