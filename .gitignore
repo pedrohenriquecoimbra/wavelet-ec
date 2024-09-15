@@ -1,4 +1,7 @@
 .git
+*.part
+*.pyc
 scripts/__pycache__/*
-sample/FR-Gri_20220514/input/20Hz/*.csv
+sample/**/input/20Hz/*.csv
 deprecated/*
+sample/*/output/wavelet_flux_*
