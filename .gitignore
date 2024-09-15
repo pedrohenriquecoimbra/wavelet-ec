@@ -1,6 +1,9 @@
 .git
 *.part
 *.pyc
+dist/*
+build/*
+waveletec.egg-info/*
 scripts/__pycache__/*
 sample/**/input/20Hz/*.csv
 deprecated/*

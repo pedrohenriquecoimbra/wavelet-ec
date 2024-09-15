@@ -1,29 +1,31 @@
 #!/usr/bin/env python
 from setuptools import find_packages, setup
 
-from scripts import VERSION
+from waveletec import version
 
 setup(
     name='waveletec',
-    version=VERSION,
+    version=version.__version__,
     url='https://github.com/pedrohenriquecoimbra/wavelete-ec',
     description=(
         "Wavelet-based Eddy Covariance "
         "Written by pedrohenriquecoimbra"),
     long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     author='Pedro Henrique Coimbra',
     author_email='pedro-henrique.herig-coimbra@inrae.fr',
     keywords="EC, partitionning, wavelet",
     license='MIT',
-    platforms=['linux'],
+    platforms=['any'],
     packages=find_packages(exclude=['sample*', 'deprecated*']),
     include_package_data=True,
     install_requires=[
-        'pandas>=2',
-        'matplotlib',
+        'pandas>=2.0.0',
+        'matplotlib>=3.1.0',
         'numpy>=1.24',
         'PyWavelets>=1.4.0',
         'scipy>=1.10.0',
+        'scikit-learn',
         'PyYAML',
     ],
     #extras_require={
@@ -45,4 +47,5 @@ setup(
         'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3.14',
         'Topic :: Other/Nonlisted Topic'],
+    python_requires='>=3.8',
 )
