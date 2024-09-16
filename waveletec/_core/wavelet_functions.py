@@ -31,7 +31,7 @@ The main function is:
         b: 
 """
 
-# standard modules
+# built-in modules
 import os
 import re
 import warnings
@@ -57,12 +57,22 @@ except ImportError as e:
     fcwt = None
     pass
 
-# Project modules
+# project modules
 from . import commons as hc24
-j2sj = hc24.j2sj
+from .commons import j2sj
+from . import wavelet_misc as wlmisc
 
 logger = logging.getLogger('wvlt')
 
+def formula_to_vars(formula):
+    res = hc24.structuredData()
+    res.formula = formula
+    res.allvars = formula.replace('|', '*').split('*')
+    res.uniquevars = list(set(res.allvars))
+    res.xy = formula.split('|')[0].split('*')
+    res.condsamp_pair = [v.split('*') for v in formula.split('|')[1:]]
+    res.condsamp_flat = [c for cs in res.condsamp_pair for c in cs]
+    return res
 
 def __cwt__(input, fs, f0, f1, fn, nthreads=1, scaling="log", fast=False, norm=True, Morlet=6.0):
     """
@@ -245,7 +255,8 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
     return wave.real, sj
 
 
-def conditional_sampling(Y12, *args, names=['xy', 'a'], label = {1: "+", -1: "-", 0: "·"}, false=0):
+def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
+    # label can also be {1: "+", -1: "-", 0: "·"}
     # guarantee names are enough to name all arguments
     nargs = len(args)
     if nargs < len(names): names = names[:nargs]
@@ -298,6 +309,293 @@ def integrate_cospectra(root, pattern, f0, dst_path):
     return
 
     
+def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', wt_kwargs={}, nan_tolerance=.3, verbosity=1):
+    """    Calculate data decomposed with wavelet transform
+    """
+    assert method in [
+        'dwt', 'cwt', 'fcwt'], "Method not found. Available methods are: dwt, cwt, fcwt"
+    
+    φ = {}
+    # run by couple of variables (e.g.: co2*w -> mean(co2'w'))
+    info_t_startvarloop = time.time()
+    
+    # run wavelet transform
+    for v in variables:
+        if v not in φ.keys():
+            signal = np.array(data[v])
+            signan = np.isnan(signal)
+            N = len(signal)
+            Nnan = np.sum(signan)
+            if Nnan:
+                if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
+                    logger.warning(
+                        f"UserWarning: Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%) in {np.nanmean(data.TIMESTAMP)}.")
+            if Nnan and Nnan < N:
+                signal = np.interp(np.linspace(0, 1, N), 
+                        np.linspace(0, 1, N)[signan == False],
+                        signal[signan==False])
+            φ[v], sj = universal_wt(signal, method, **wt_kwargs, inv=True)
+            N = len(signal)
+        
+
+    logger.debug(f'\t\tDecompose all variables took {round(time.time() - info_t_startvarloop)} s (run_wt).')
+        
+    φs_names = []
+    for n in φ.keys():
+        if φ[n].shape[0] > 1:
+            for l in sj: # use '+ ['']' if __integrate_decomposedarrays_in_dictionary__
+                if l: φs_names += [f'{n}_{l}'] 
+                else: φs_names += [n] 
+        else: φs_names += [n]
+    logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names)}`.')
+    logger.debug(f'\t\t{[np.array(v).shape for v in list(φ.values())]}.')
+    __temp__ = hc24.matrixtotimetable(np.array(data.TIMESTAMP),
+                                      np.concatenate(list(φ.values()), axis=0), columns=φs_names)
+    
+    __temp__.set_index('TIMESTAMP', inplace=True)
+    __temp__.columns = pd.MultiIndex.from_tuples([tuple(c.split('_')) for c in __temp__.columns])
+    __temp__ = __temp__.stack(1).reset_index(1).rename(columns={"level_1": "natural_frequency"}).reset_index(drop=False)
+
+    #pattern = re.compile(r"^(?P<variable>.+?)_?(?P<natural_frequency>(?<=_)\d+)?$")
+    #__temp__ = __temp__.melt(['TIMESTAMP'] + φ.keys())
+    #__temp__ = pd.concat([__temp__.pop('variable').str.extract(pattern, expand=True), __temp__], axis=1)
+    __temp__['natural_frequency'] = __temp__['natural_frequency'].apply(lambda j: 1/j2sj(j, 1/dt) if j else np.nan)
+    return __temp__
+
+
+def calculate_product(data, formula='w*co2|w*h2o', verbosity=1):
+    """    Calculate (conditioned) product
+    """
+    var_ = formula_to_vars(formula)
+
+    for ci, c in enumerate(var_.xy): Y12 = Y12 * np.array(data[c]).conjugate() if ci else np.array(data[c])
+    φs = {''.join(var_.xy): Y12}
+
+    # conditional sampling
+    names = [''.join(var_.xy)] + [''.join(cs) for cs in var_.condsamp_pair]
+    φcs = []
+    if var_.condsamp_pair: 
+        φcs += [Y12]
+    for cs in var_.condsamp_pair:
+        for ci, c in enumerate(cs): φc0 = φc0 * np.array(data[c]).conjugate() if ci else np.array(data[c])
+        φcs += [φc0]
+    φc = conditional_sampling(Y12, *φcs, names=names, label={1:"+", -1: "-"}) if φcs else {}
+    φs.update(φc)
+
+    data = pd.concat([data, pd.DataFrame(φs)], axis=1)
+    return data
+
+
+def loop_variables(data, varstorun, dt=0.05, wt_kwargs={}, 
+                   method="dwt", nan_tolerance=.3, averaging=30, verbosity=1):
+    """
+    averaging & integrating at the same unit
+
+    fs = 20, f0 = 1/(3*60*60), f1 = 10, fn = 100, agg_avg = 1, 
+    suffix = "", wavelet = pycwt.wavelet.MexicanHat(),
+    **kwargs):
+    """
+    wt = {'dt': dt, 'method': method, 'wt_kwargs': wt_kwargs, 'nan_tolerance': nan_tolerance}
+    ## START HERE FUNCTION RUN_COV
+
+    # ensure time is time
+    data.TIMESTAMP = pd.to_datetime(data.TIMESTAMP)
+    
+    # ensure continuity
+    info_t_startdatacontinuity = time.time()
+    data = pd.merge(pd.DataFrame({"TIMESTAMP": pd.date_range(np.nanmin(data.TIMESTAMP), np.nanmax(data.TIMESTAMP), freq=f"{dt*1000}ms")}),
+                        data, on="TIMESTAMP", how='outer').reset_index(drop=True)
+    timestamp0 = data['TIMESTAMP'].copy()
+    timestamp = timestamp0.copy()
+    logger.debug(f'\tForce data to be continuous took {round(time.time() - info_t_startdatacontinuity)} s (run_wt).')
+    
+    assert len(varstorun), 'Empty list of covariances to run. Check available variables and covariances to be performed.'
+    allvars = []
+    for v in varstorun:
+        allvars += formula_to_vars(v).uniquevars
+
+    allvars = list(set(allvars))
+    this_data = data[['TIMESTAMP'] + allvars].copy()
+
+    if method == 'cov':
+        for c in allvars:
+            this_data[c] = this_data[c] - this_data[c].groupby(this_data.TIMESTAMP.dt.floor(f'{averaging}min')).transform(np.nanmean)
+        
+        this_data = pd.concat(
+            [(calculate_product(this_data, formula=f)
+                .drop(columns=formula_to_vars(f).uniquevars if i == 0 else ['TIMESTAMP'] + formula_to_vars(f).uniquevars))
+                for i, f in enumerate(varstorun)], axis=1)
+        #this_data = calculate_product(this_data, formula=var_.formula)
+        return this_data
+
+    else:
+        info_t_startdecomposedata = time.time()
+        data_decomp = decompose_data(this_data, variables=allvars, **wt)
+        logger.debug(f'\tDecompose data took {round(time.time() - info_t_startdecomposedata)} s (run_wt).')
+
+        info_t_startconcatenatedata = time.time()
+
+        data_decomp = pd.concat(
+            [(calculate_product(data_decomp, formula=f)
+                .drop(columns=formula_to_vars(f).uniquevars if i == 0 else ['TIMESTAMP', 'natural_frequency'] + formula_to_vars(f).uniquevars))
+                for i, f in enumerate(varstorun)], axis=1)
+        return data_decomp
+
+    #[os.remove(d) for a in avg_ for d in dat_fullspectra[a] if os.path.exists(d)]
+    #if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
+    #prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} % ({time.strftime("%d.%m.%y %H:%M:%S")})' + '\n'
+        
+    #logger.info(f'\tFinish {date} took {round(time.time() - info_t_startdateloop)} s, yielded {len(yl)} files (run_wt). Progress: {len(yl)} {int(100*ymd_i/len(ymd))} %')
+    data = pd.concat([data_decomp, this_data], axis=0)
+    logger.debug(f'\tConcatenate data took {round(time.time() - info_t_startconcatenatedata)} s (run_wt).')
+    return data
+
+def load_data_and_loop(ymd, raw_kwargs, output_path=None, verbosity=1,
+                  overwrite=False, processing_time_duration="1D", 
+                  internal_averaging=None, dt=0.05, wt_kwargs={}, 
+                  method="dwt", averaging=30, **kwargs):
+    if isinstance(averaging, (list, tuple)): averaging = averaging[-1]
+    if internal_averaging is None: internal_averaging = averaging
+    fulldata = pd.DataFrame()
+
+    info_t_start = time.time()
+    logger.info('Entered wavelet code (run_wt).')
+
+    if verbosity: print(f'\nRUNNING WAVELET TRASNFORM ({method})')
+
+    suffix = '_cov' if method == 'cov' else '_full_cospectra'
+
+    _, _, _f = ymd
+    ymd = hc24.list_time_in_period(*ymd, processing_time_duration, include='both')
+    
+    if method == 'cov':
+        buffer = 0
+    elif method in ['dwt']:
+        buffer = wlmisc.bufferforfrequency_dwt(n_=_f, **wt_kwargs)/2
+    else:
+        buffer = wlmisc.bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
+    logger.debug(f"Buffer (s): {buffer}.")
+        
+    logger.info(f'Start date loop at {round(time.time() - info_t_start)} s (run_wt).')
+    
+    # Skip two line
+    prev_print = '\n'
+    for ymd_i, yl in enumerate(ymd):
+        legitimate_to_write = 0
+        info_t_startdateloop = time.time()
+
+        date = re.sub('[-: ]', '', str(yl[0]))
+        if processing_time_duration.endswith("D"): date = date[:8]
+        if processing_time_duration.endswith("H") or processing_time_duration.endswith("Min"): date = date[:12]
+        
+        print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
+        prev_print = '\x1B[1A\r'
+
+        # recheck if files exist and overwrite option
+        # doesn't save time (maybe only save 5min)
+        if not overwrite and os.path.exists(output_path.format(suffix, date)):
+            logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
+            continue
+        
+        if all([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]): 
+            logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
+            continue
+        elif any([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]):
+            logger.warning("UserWarning: Continuing but some files already exist ({}), others don't ({}).".format(
+                ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
+                ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if not os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
+                ))
+            pass
+        
+        curoutpath_inprog = output_path.format(suffix, str(date), "").rsplit(".", 1)[
+            0] + ".inprogress"
+        if hc24.checkifinprogress(curoutpath_inprog): continue
+        
+        # load files
+        info_t_startloaddata = time.time()
+        data = hc24.loaddatawithbuffer(
+            yl, d1=None, freq=_f, buffer=buffer, f_freq=_f, **raw_kwargs)
+        if data.empty:
+            if verbosity>1: logger.warning("UserWarning: No file was found ({}, path: {}).".format(date, raw_kwargs.get('path', 'default')))
+            if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
+            continue
+        logger.info(f'\tLoading data took {round(time.time() - info_t_startloaddata)} s (run_wt).')
+        
+        # LOOP FOR VARIABLES
+        #__save_cospectra__(data, averaging=internal_averaging,
+        #                          dt=dt, wt_kwargs=wt_kwargs, method=method, 
+        #                          verbosity=verbosity, **kwargs)
+        try:
+            data = loop_variables(data, averaging=internal_averaging,
+                                  dt=dt, wt_kwargs=wt_kwargs, method=method, 
+                                  verbosity=verbosity, **kwargs)
+            data['TIMESTAMP'] = data['TIMESTAMP'].dt.floor(f'{averaging}min')
+            __ID_COLS__ = ['TIMESTAMP'] if method == "cov" else ['TIMESTAMP', 'natural_frequency']
+            data = data.groupby(__ID_COLS__).agg(np.nanmean).reset_index(drop=False)
+        except Exception as e:
+            logger.critical(str(e))
+            print(str(e))
+
+        #[os.remove(d) for a in avg_ for d in dat_fullspectra[a] if os.path.exists(d)]
+        if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
+        prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} % ({time.strftime("%d.%m.%y %H:%M:%S")})' + '\n'
+            
+        logger.info(f'\tFinish {date} took {round(time.time() - info_t_startdateloop)} s, yielded {len(yl)} files (run_wt). Progress: {len(yl)} {int(100*ymd_i/len(ymd))} %')
+
+        logger.debug(f'\tSaving data starting at {round(time.time() - info_t_start)} s (run_wt).')
+        
+        if method == 'cov':
+            fulldata = pd.concat([fulldata, data], axis=0)
+        else:
+            # FILTER OUT THE BUFFER DATA, KEEP ONLY GOOD DATA 
+            #data = data[data.TIMESTAMP>= ]
+            data = (data.sort_values(by=['TIMESTAMP', 'natural_frequency'])
+                    .melt(['TIMESTAMP', 'natural_frequency']))
+            __save_cospectra__(data, suffix, output_path, **{'method': method, 'averaging': averaging, 'buffer': buffer, 'dt': dt})
+    
+    if not fulldata.empty:
+        fulldata.to_csv(output_path.format(suffix, pd.datetime.now().strftime('%Y%m%dT%H%M%S_%f')), index=False)
+    return
+
+
+def __save_cospectra__(data, suffix, output_path, **meta):
+    info_t_startsaveloop = time.time()
+    for __datea__, __tempa__ in data.groupby(data.TIMESTAMP):
+        dst_path = output_path.format(suffix, pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
+        if os.path.exists(dst_path): continue
+        use_header = False
+        if not os.path.exists(dst_path):
+            use_header = True
+            header  = "wavelet_based_(co)spectra\n"
+            header += f"--------------------------------------------------------------\n"
+            header += f"TIMESTAMP_START = {min(__tempa__.TIMESTAMP)}\n"
+            header += f"TIMESTAMP_END = {max(__tempa__.TIMESTAMP)}\n"
+            header += f"N: {len(__tempa__.TIMESTAMP)}\n"
+            header += f"TIME_BUFFER [min] = {meta.get('buffer', '')/60}\n"
+            header += f"frequency [Hz]\n"
+            header += f"y-axis_->_wavelet_coefficient_*_\n"
+            header += f"mother_wavelet -> {meta.get('method', '')}\n"
+            header += f"acquisition_frequency [Hz] = {1/meta.get('dt', '')}\n"
+            header += f"averaging_interval [Min] = {meta.get('averaging', '')}\n"
+            hc24.mkdirs(dst_path)
+            with open(dst_path, 'w+') as part: part.write(header)
+            legitimate_to_write = 1
+            logger.debug(f'\t\tSaving header of DataFrame took {round(time.time() - info_t_startsaveloop)} s (run_wt).')
+        
+        if not legitimate_to_write: continue
+        
+        __tempa__.drop('TIMESTAMP', axis=1, inplace=True)
+        with open(dst_path, 'a+', newline='') as part: __tempa__.to_file(part, header=use_header, chunksize=500, index=False)
+        
+        del __tempa__
+        
+    #arr_slice = np.unique(data.TIMESTAMP, return_index=True)
+    #for __datea__ in arr_slice[0]:
+    #    dst_path = output_path.format(suffix, pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
+    #    if os.path.exists(dst_path+'.part'): os.rename(dst_path+'.part', dst_path)
+    return
+
+
 def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={}, 
            method="dwt", Cφ=1, nan_tolerance=.3,
            averaging=30, condsamp_flat=[], integrating=30*60, 
@@ -332,11 +630,11 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
     ymd = hc24.list_time_in_period(*ymd, processing_time_duration, include='both')
     
     if method in ['dwt']:
-        buffer = hc24.bufferforfrequency_dwt(
+        buffer = wlmisc.bufferforfrequency_dwt(
             N=pd.to_timedelta(processing_time_duration)/pd.to_timedelta("1s") * dt**-1,
             n_=_f, **wt_kwargs)/2
     else:
-        buffer = hc24.bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
+        buffer = wlmisc.bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
     logger.debug(f"Buffer (s): {buffer}.")
         
     logger.info(f'Start date loop at {round(time.time() - info_t_start)} s (run_wt).')
@@ -426,6 +724,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
             continue
         logger.info(f'\tLoading data took {round(time.time() - info_t_startloaddata)} s (run_wt).')
         
+        ## START HERE FUNCTION RUN_COV
+
         # ensure time is time
         data.TIMESTAMP = pd.to_datetime(data.TIMESTAMP)
         
@@ -753,6 +1053,8 @@ def run_wt(ymd, varstorun, raw_kwargs, output_path, wt_kwargs={},
                                             columns=φs_names + [f"{n}_qc" for n in μs.keys()] + [f"{n}_nfb" for n in ζb.keys()])
                 logger.debug(f'\t\tMatrix to time table took {round(time.time() - info_t_startconditionalsampling)} s (run_wt).')
                 
+                ## END HERE FUNCTION RUN_COV 
+
                 #__temp__ = __temp__[__temp__.TIMESTAMP >= min(yl)]
                 #__temp__ = __temp__[__temp__.TIMESTAMP < max(yl)]
                 

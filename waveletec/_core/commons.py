@@ -18,84 +18,19 @@ import warnings
 import logging
 import time
 import datetime
-import sys
-from contextlib import contextmanager
 from functools import reduce
 
 # 3rd party modules
 import yaml
 import numpy as np
 from itertools import chain
+from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor, QuantileRegressor
 import zipfile
 from io import StringIO
 
-# Add-ons
-def _warning(
-    message,
-    category = UserWarning,
-    filename = '',
-    lineno = -1,
-    file = None, 
-    line = None):
-    print("%s: %s" % (category.__name__, message))
-warnings.showwarning = _warning
-
-import matplotlib.pyplot as plt
-# Reads styles in /styles
-stylesheets = plt.style.core.read_style_directory(os.path.join(os.getcwd(), 'style'))
-# Update dictionary of styles
-plt.style.core.update_nested_dict(plt.style.library, stylesheets)
-plt.style.core.available[:] = sorted(plt.style.library.keys())
-
-import pandas as pd
-from pandas.api.types import is_numeric_dtype, is_object_dtype
-pd.DataFrame.columnstartswith = lambda self, x: [c for c in self.columns if c.startswith(x)]
-pd.DataFrame.columnsmatch = lambda self, x: [c for c in self.columns if re.findall(x, c)]
-def columnsconditioned(self, start, *args):
-    columns = self.columnsmatch(f'^{start}[^_]+$')
-    if args:
-        for a in args:
-            for c in [c for c in columns]:
-                if not re.findall(a, c):
-                    columns.pop(columns.index(c))
-    
-    return columns
-pd.DataFrame.columnsconditioned = columnsconditioned
-def df_to_file(self, file_name, *a, **k): 
-    to_functions = {'csv': pd.DataFrame.to_csv,
-                    'xlsx': pd.DataFrame.to_excel,
-                    'txt': pd.DataFrame.to_csv,
-                    'parquet': pd.DataFrame.to_parquet,
-                    'temporary': pd.DataFrame.to_parquet,
-                    'json': pd.DataFrame.to_json}
-    for file_ext, to in to_functions.items():
-        if (isinstance(file_name, str) and file_name.replace('.part', '').endswith(file_ext)) | (not isinstance(file_name, str) and file_name.name.replace('.part', '').endswith(file_ext)):
-            to(self, file_name, *a, **k)   
-    return None
-pd.DataFrame.to_file = df_to_file
-def pd_read_file(file_name, *a, **k):
-    read_functions = {'csv': pd.read_csv,
-                    'xlsx': pd.read_excel,
-                    'txt': pd.read_csv,
-                    'parquet': pd.read_parquet,
-                    'temporary': pd.read_parquet,
-                    'json': pd.read_json}
-    for file_ext, read in read_functions.items():
-        if file_name.endswith(file_ext):
-            return read(file_name, *a, **k)         
-    return None
-pd.read_file = pd_read_file
-
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:  
-            yield
-        finally:
-            sys.stdout = old_stdout
+# project modules
+from .addons import *
 
 ##########################################
 ###     PROJECT CHOICES                           
@@ -103,61 +38,122 @@ def suppress_stdout():
 
 SITES_TO_STUDY = ['SAC']
 
+month2season = lambda month: {1:1, 2:1, 3:2, 4:2, 5:2, 6:3, 7:3, 8:3, 9:4, 10:4, 11:4, 12:1}[month]
+
+
 ##########################################
-###     FUNCTIONS                           
+###     GENERIC FUNCTIONS                           
 ##########################################
+
 
 class structuredData:
     def __init__(self, **kwargs):
         for k, v in kwargs.items(): self.__dict__[k]=v
         pass
 
-def read_eddypro_metadata_file(filename):
-    metadata = {}
-    with open(filename, 'r') as file:
-        section = None
-        for line in file:
-            line = line.strip()
-            if line.startswith(';') or not line:
-                continue  # Skip comments and empty lines
-            if line.startswith('[') and line.endswith(']'):
-                section = line[1:-1]  # Extract section name
-                metadata[section] = {}
-            else:
-                key, value = line.split('=', 1)
-                metadata[section][key.strip()] = value.strip()
-    return metadata
 
-def calculate_mean_wind_direction(wind_speeds, wind_directions):
-    """
-    Calculates the mean wind direction given wind speeds and wind directions.
+def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
+    assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
+    mat = np.array(mat)
 
-    Args:
-        wind_speeds (np.ndarray): Array of wind speeds.
-        wind_directions (np.ndarray): Array of wind directions in degrees (0° to 360°).
+    if len(time) != mat.shape[0] and len(time) == mat.shape[1]:
+        mat = mat.T
 
-    Returns:
-        float: Mean wind direction in degrees (0° to 360°).
-    """
-    # Convert wind directions to radians
-    wind_dir_rad = np.radians(wind_directions)
+    __temp__ = pd.DataFrame(mat, **kwargs)
+    __temp__.insert(0, c0name, time)
 
-    # Compute eastward and northward components
-    V_east = np.nanmean(wind_speeds * np.sin(wind_dir_rad))
-    V_north = np.nanmean(wind_speeds * np.cos(wind_dir_rad))
+    return __temp__
 
-    # Calculate the mean wind direction
-    mean_WD = np.arctan2(V_east, V_north) * (180 / np.pi)
 
-    # Ensure the result is in the range [0°, 360°]
-    mean_WD = (360 + mean_WD) % 360
+def yaml_to_dict(path):
+    with open(path, 'r+') as file:
+        file = yaml.safe_load(file)
+    return file
 
-    return mean_WD
 
-month2season = lambda month: {1:1, 2:1, 3:2, 4:2, 5:2, 6:3, 7:3, 8:3, 9:4, 10:4, 11:4, 12:1}[month]
+def list_time_in_period(tmin, tmax, fastfreq, slowfreq, include='both'):
+    if include=="left":
+        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
+          freq=fastfreq)[:-1]) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
+    elif include == "right":
+        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
+          freq=fastfreq)[1:]) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
+    elif include == "both":
+        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
+          freq=fastfreq)) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
+    return
+
+
+def checkifinprogress(path, LIMIT_TIME_OUT=30*60):
+    if os.path.exists(path) and (time.time()-os.path.getmtime(path)) < LIMIT_TIME_OUT:
+        logging.debug(f'Fresh file found ({time.time()-os.path.getmtime(path)} s old, {os.path.getmtime(path)}), skipping.')
+        return 1
+    else:
+        if os.path.exists(path): logging.debug(f'Old file found ({time.time()-os.path.getmtime(path)} s old, {time.time()*10**-3}, {os.path.getmtime(path)*10**-3}), new in progress file created.')
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "a+"):
+            pass
+        return 0
+
+
+def mkdirs(filename):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+
+def nearest(items, pivot, direction=0):
+    if direction == 0:
+        nearest = min(items, key=lambda x: abs(x - pivot))
+        difference = abs(nearest - pivot)
+        
+    elif direction == -1:
+        nearest = min(items, key=lambda x: abs(x - pivot) if x<pivot else pd.Timedelta(999, "d"))
+        difference = (nearest - pivot)
+        
+    elif direction == 1:
+        nearest = min(items, key=lambda x: abs(x - pivot) if x>pivot else pd.Timedelta(999, "d"))
+        difference = (nearest - pivot)
+    return nearest, difference
+
+
+def update_nested_dict(d, u):
+    for k, v in u.items():
+        if isinstance(v, dict):
+            d[k] = update_nested_dict(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
+
+def update_nested_dicts(*ds, fstr=None):
+    r = {}
+    for d in ds:
+        if isinstance(d, str) and fstr:
+            try:
+                d = fstr(d)
+            except Exception as e:
+                continue
+        r = update_nested_dict(r, d)
+    return r
+
+
+def concat_into_single_file(path, pattern, output_path=None, **kwargs):
+    print('\nCONSOLIDATING DATASET\n')
+    if output_path is None: output_path = os.path.join(path, 'concat_into_single_file') 
     
-def custom_round(x, base=5):
-    return base * np.round(x/base)
+    files_to_concat = []
+    for name in os.listdir(path):
+        if re.findall(pattern, name):
+            files_to_concat += [os.path.join(path, name)]
+    
+    files_to_concat = [pd.read_csv(f, **kwargs) for f in files_to_concat]
+    data = reduce(lambda left, right: pd.concat([left, right]), files_to_concat)
+    
+    mkdirs(output_path)
+    data.to_csv(output_path, index=False)
+    print(os.path.basename(output_path), ': Saved.', ' '*15, end='\n', sep='')
+    
+    return
+
 
 def __input_to_series__(data, request):
     if data is None: return request
@@ -170,101 +166,101 @@ def __input_to_series__(data, request):
         request = np.sum(data[request], axis=1)
     return request
 
-def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2', 
-                  positive='wco2-wh2o+', negative='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
-    #lightresponse = lambda p: np.where(np.isnan(p), 1, (p-np.nanmin(p))/(np.nanmax(p)-np.nanmin(p)))
-    #data["DW_GPP_withPARratio"] = np.where((np.isnan(data.PPFD)==False) * (data.PPFD<10), 0, 1) * (
-    #    data["dwt_wco2-+h2o_uStar_f"] + lightresponse(data["PPFD"]) * (data["dwt_wco2--h2o_uStar_f"]))
-    #data["DW_Reco_withPARratio"] = (data["DWT_NEE_uStar_f"] - data["DW_GPP_withPARratio"])
-    
-    if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
-    else:
-        islight = np.array([1] * len(data))
-    data[labelpositive] = islight * (data[positive] + 0.5*data[negative])
-    data[labelnegative] = (data[all] - data[labelpositive])
-    return data
 
-def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
-                  CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
-    
-    CO2 = __input_to_series__(data, CO2)
-    CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
-    CO2neg_H2Oneg = __input_to_series__(data, CO2neg_H2Oneg)
-    if data is None: data = pd.DataFrame()
+def force_array_dimension(shape, out):
+    """
+    Return array with same shape as base one.
+    """
+    out_ = np.zeros(shape) * np.nan
 
-    if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
-    else:
-        islight = np.array([1] * len(data))
-    
-    data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)
-    data[Reco] = (CO2 - data[GPP])
+    shape_dif = (np.array(shape) - np.array(out.shape)) / 2
+    signal = shape_dif / abs(shape_dif)
 
-    data[NEE] = CO2
-    #data_pt = data_pt[[NEE, GPP, Reco]]
-    return data
+    bas_cut = [None] * 4
+    out_cut = [None] * 4
 
-def partition_DWCS_CH4(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
-                  CO2pos_CH4pos='wco2+wch4+', CO2pos_CH4neg='wco2+wch4-', 
-                  CO2neg_CH4pos='wco2-wch4+', CO2neg_CH4neg='wco2-wch4-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
-    
-    CO2 = __input_to_series__(data, CO2)
-    CO2pos_CH4pos = __input_to_series__(data, CO2pos_CH4pos)
-    CO2pos_CH4neg = __input_to_series__(data, CO2pos_CH4neg)
-    CO2neg_CH4pos = __input_to_series__(data, CO2neg_CH4pos)
-    CO2neg_CH4neg = __input_to_series__(data, CO2neg_CH4neg)
-    if data is None: data = pd.DataFrame()
+    for i, s_ in enumerate(signal):
 
-    if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
-    else:
-        islight = np.array([1] * len(data))
-    
-    data[Reco] = CO2pos_CH4pos + 0.5 * CO2pos_CH4neg
-    data[GPP] = (CO2 - data[Reco])
+        dif = [int(np.ceil(abs(shape_dif[i]))), -
+               int(np.floor(abs(shape_dif[i])))]
+        dif = [el if el != 0 else None for el in dif]
 
-    data[NEE] = CO2
-    #data_pt = data_pt[[NEE, GPP, Reco]]
-    return data
+        if i == 0:
+            if s_ == 1:
+                bas_cut[:2] = dif
 
-def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                     CO2='wco2', 
-                     CO2neg_H2Opos='wco2-wh2o+', 
-                     CO2neg_H2Oneg='wco2-wh2o-', 
-                     CO2pos_COpos='wco2+wco+',
-                     CO2pos_COneg='wco2+wco-',
-                     NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
-    #prefix = 'DWnf_' #NEE.split('_', 1)[0] +'_'
-    #suffix = ''
-    CO2 = __input_to_series__(data, CO2)
-    CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
-    CO2neg_H2Oneg = __input_to_series__(data, CO2neg_H2Oneg)
-    CO2pos_COpos =  __input_to_series__(data, CO2pos_COpos)
-    CO2pos_COneg =  __input_to_series__(data, CO2pos_COneg)
-    if data is None: data = pd.DataFrame()
+            elif s_ == -1:
+                out_cut[:2] = dif
 
-    if NIGHT: NIGHT = data[NIGHT]
-    else: NIGHT = 0
+        elif i == 1:
+            if s_ == 1:
+                bas_cut[2:] = dif
 
-    data[NEE] = CO2
-    islight = np.where((np.isnan(NIGHT == False) * NIGHT), 0, 1)
-    
-    data[GPP] = islight * (CO2neg_H2Opos + CO2neg_H2Oneg / 3)
+            elif s_ == -1:
+                out_cut[2:] = dif
 
-    data[ffCO2] = CO2pos_COpos
-    data[Reco]  = CO2pos_COneg
+    out_[bas_cut[0]:bas_cut[1],
+         bas_cut[2]:bas_cut[3]] = \
+        sum_nan_arrays(out_[bas_cut[0]:bas_cut[1],
+                               bas_cut[2]:bas_cut[3]],
+                          out[out_cut[0]:out_cut[1],
+                              out_cut[2]:out_cut[3]])
 
-    remaining   = CO2 - data[GPP] - data[Reco] - data[ffCO2]
-    data[Reco]  = data[Reco]  + remaining / 2
-    data[ffCO2] = data[ffCO2] + remaining / 2
-    
-    #data = data[[NEE, GPP, Reco, ffCO2]]
-    return data
+    return out_
+
+
+##########################################
+###     STATISTICS (PRINT)
+##########################################
+
+
+def custom_round(x, base=5):
+    return base * np.round(x/base)
+
+
+def nanminmax(x):
+    return [np.nanmin(x), np.nanmax(x)]
+
+
+def get_r2(X, y):
+    if len(X)==0:
+        return 0
+    X = np.array(X).ravel()
+    y = np.array(y).ravel()
+    finite = np.isfinite(X*y)
+    X = X[finite].reshape(-1, 1)
+    y = y[finite].reshape(-1, 1)
+    regression = LinearRegression(fit_intercept=True)
+    regression.fit(X, y)
+    r2 = regression.score(X, y)
+    return r2
+
+
+def __fit_noise__(y_axis, x_axis, x_max=5, a=1):
+    logger = logging.getLogger('fitnoise')
+    """
+    freqs = [1/j2sj(j, 1/dt) for j in np.arange(1,len(spec)+1)]
+    a: noise color (white = 1)
+    """
+    r = structuredData()
+    r.curve_0 = lambda f, b: np.log((f**a)*b)
+    specna = np.where(np.isnan(y_axis[:x_max]) | (y_axis[:x_max] <= 0), False, True)
+    try:
+        x_axis = np.array(x_axis)
+        y_axis  = np.array(y_axis)
+        r.params_0, _ = curve_fit(r.curve_0, x_axis[:x_max][specna], np.log(y_axis[:x_max][specna]), bounds=(0, np.inf))
+    except Exception as e:
+        logger.error(f"UserWarning: {str(e)}")
+        r.params_0 = [0]
+    r.fit = np.array([(f**a)*r.params_0[0] for f in x_axis])
+    return r
+
+
+def sum_nan_arrays(a, b):
+    ma = np.isnan(a)
+    mb = np.isnan(b)
+    return np.where(ma & mb, np.nan, np.where(ma, 0, a) + np.where(mb, 0, b))
+
 
 def summarisestats(X, y, method='Linear', fit_intercept=True, **kw):
     statisticsToReturn = structuredData()
@@ -308,18 +304,11 @@ def summarisestatstext(meta, xn='x', yn='y'):
     stat_label = stat_label + f", {yn}={np.round(meta.m, 2)}"+r"$\times$"+"{xn} linear fit" #×
     return stat_label
 
-def get_r2(X, y):
-    if len(X)==0:
-        return 0
-    X = np.array(X).ravel()
-    y = np.array(y).ravel()
-    finite = np.isfinite(X*y)
-    X = X[finite].reshape(-1, 1)
-    y = y[finite].reshape(-1, 1)
-    regression = LinearRegression(fit_intercept=True)
-    regression.fit(X, y)
-    r2 = regression.score(X, y)
-    return r2
+
+##########################################
+###     PLOT                           
+##########################################
+
 
 def abline(intercept=0, slope=1, origin=(0, 0), **kwargs):
     kwargs.pop('data', None)
@@ -327,6 +316,7 @@ def abline(intercept=0, slope=1, origin=(0, 0), **kwargs):
     x_vals = np.array(axes.get_xlim())
     y_vals = intercept + slope * x_vals
     plt.plot(x_vals, y_vals, **kwargs)
+
 
 def abline2(origin=(0, 0), slope=1, length=1, scale='', **kwargs):
     kwargs.pop('data', None)
@@ -337,6 +327,7 @@ def abline2(origin=(0, 0), slope=1, length=1, scale='', **kwargs):
         x_vals = 10**x_vals
         y_vals = 10**y_vals
     plt.plot(x_vals, y_vals, **kwargs)
+
 
 def add_subplot_axes(ax,rect):
     fig = plt.gcf()
@@ -359,52 +350,6 @@ def add_subplot_axes(ax,rect):
     subax.xaxis.set_tick_params(labelsize=x_labelsize)
     subax.yaxis.set_tick_params(labelsize=y_labelsize)
     return subax
-
-def sum_nan_arrays(a, b):
-    ma = np.isnan(a)
-    mb = np.isnan(b)
-    return np.where(ma & mb, np.nan, np.where(ma, 0, a) + np.where(mb, 0, b))
-
-def force_array_dimension(shape, out):
-    """
-    Return array with same shape as base one.
-    """
-    out_ = np.zeros(shape) * np.nan
-
-    shape_dif = (np.array(shape) - np.array(out.shape)) / 2
-    signal = shape_dif / abs(shape_dif)
-
-    bas_cut = [None] * 4
-    out_cut = [None] * 4
-
-    for i, s_ in enumerate(signal):
-
-        dif = [int(np.ceil(abs(shape_dif[i]))), -
-               int(np.floor(abs(shape_dif[i])))]
-        dif = [el if el != 0 else None for el in dif]
-
-        if i == 0:
-            if s_ == 1:
-                bas_cut[:2] = dif
-
-            elif s_ == -1:
-                out_cut[:2] = dif
-
-        elif i == 1:
-            if s_ == 1:
-                bas_cut[2:] = dif
-
-            elif s_ == -1:
-                out_cut[2:] = dif
-
-    out_[bas_cut[0]:bas_cut[1],
-         bas_cut[2]:bas_cut[3]] = \
-        sum_nan_arrays(out_[bas_cut[0]:bas_cut[1],
-                               bas_cut[2]:bas_cut[3]],
-                          out[out_cut[0]:out_cut[1],
-                              out_cut[2]:out_cut[3]])
-
-    return out_
 
 ##########################################
 ###     GET DATASETS                           
@@ -470,210 +415,12 @@ def get_metadata(sitename=None, folder='data'):
     return None
 
 
-def get_eddypro_cospectra(sitename=None, x='natural_frequency', y='f_nat*cospec(w_co2)/cov(w_co2)', folder='data', subfolder='', help=False):
-    assert (x is not None and y is not None) or (help)
-    if sitename is None:
-        return get_all_sites(get_eddypro_cospectra, x=x, y=y, folder=folder, subfolder=subfolder, help=help)
-    
-    ep_path = os.path.join(folder, sitename, 'output/eddypro_output', subfolder, 'eddypro_binned_cospectra')
-    
-    if not os.path.exists(ep_path): return None
-    files = []
-    for name in os.listdir(ep_path):
-        if name.endswith('.csv'):
-            if re.findall('_binned_cospectra_', name):
-                binned_cosp = pd.read_csv(os.path.join(ep_path, name), skiprows=11, na_values=[-9999, 'NAN'])
-                if help: 
-                    print(binned_cosp.columns)
-                    return
-                if x not in binned_cosp.columns or y not in binned_cosp.columns: continue
-                binned_cosp.dropna(subset=[x], inplace=True)
-                binned_cosp = binned_cosp[[x, y]]
-                binned_cosp['TIMESTAMP'] = name.split('_')[0]
-                binned_cosp = binned_cosp.pivot(index='TIMESTAMP', columns=x, values=y).reset_index(drop=False)
-                binned_cosp.columns = [c for c in binned_cosp.columns]
-                files += [binned_cosp]
-    
-    if len(files) == 1:
-        data = files[0]
-    else:
-        data = pd.concat(files)
-    
-    data['TIMESTAMP'] = pd.to_datetime(data['TIMESTAMP'], format='%Y%m%d-%H%M')
-    return data
-
-def get_eddypro_output(sitename=None, **kwargs):
-    if sitename is None:
-        return get_all_sites(get_eddypro_output, **kwargs)
-    mergeorconcat = kwargs.get('mergeorconcat', 'merge')
-    folder        = kwargs.get('folder', 'data')
-    
-    ep_read_params = {'skiprows': [0,2], 'na_values': [-9999, 'NAN']}
-    
-    ep_path = os.path.join(folder, sitename, 'eddypro_output')
-
-    files = {'FLUX': [], 'FLXNT': [], 'QCQA': [], 'META': []}
-    for name in os.listdir(ep_path):
-        if name.endswith('.csv'):
-            if re.findall('_full_output_', name):
-                if name.endswith('_adv.csv'):
-                    files['FLUX'] += [pd.read_csv(os.path.join(ep_path, name), **ep_read_params)]
-                else:
-                    files['FLUX'] += [pd.read_csv(os.path.join(ep_path, name), na_values=[-9999, 'NAN'])]
-            elif re.findall('_fluxnet_', name):
-                flxnt_last = pd.read_csv(os.path.join(ep_path, name), na_values=[-9999, 'NAN'])
-                flxnt_last["date"] = pd.to_datetime(flxnt_last["TIMESTAMP_START"], format='%Y%m%d%H%M').dt.strftime('%Y-%m-%d')
-                flxnt_last["time"] = pd.to_datetime(flxnt_last["TIMESTAMP_START"], format='%Y%m%d%H%M').dt.strftime('%H:%M')
-                files['FLXNT'] += [flxnt_last]
-                del flxnt_last
-            elif re.findall('_qc_details_', name):
-                if name.endswith('_adv.csv'):
-                    files['QCQA'] += [pd.read_csv(os.path.join(ep_path, name), **ep_read_params)]
-                else:
-                    files['QCQA'] += [pd.read_csv(os.path.join(ep_path, name), na_values=[-9999, 'NAN'])]
-            elif re.findall('_metadata_', name):
-                files['META'] += [pd.read_csv(os.path.join(ep_path, name), na_values=[-9999, 'NAN'])]
-    
-    for k in [k for k in list(files.keys()) if not files[k]]:
-        del([files[k]])
-
-    for k in files.keys():
-        if len(files[k]) == 1:
-            files[k] = files[k][0]
-        elif mergeorconcat == 'concat':
-            files[k] = pd.concat(files[k])
-        else:
-            files[k] = reduce(lambda left, right: pd.merge(
-                left, right, on=["date", 'time'], how="outer", suffixes=('', '_DUP')), files[k])
-    
-    data = pd.DataFrame(files.pop('FLUX', {}))
-    for name, dat in files.items():
-        data = pd.merge(data, dat, on=["date", 'time'], how="outer", suffixes=('', f'_{name}'))
-    
-    data['TIMESTAMP'] = pd.to_datetime(data.date + ' ' + data.time)#.dt.tz_localize('UTC')
-    
-    # Despike because open path analysers can be noisy
-    data['air_molar_volume_despiked'] = mauder2013(data.air_molar_volume, 5)
-    data['Vd'] = (data.air_molar_volume_despiked * data.air_pressure /
-                           (data.air_pressure - data.e))
-    # make wet from dry
-    data['Va'] = (data.air_molar_volume_despiked * data.air_pressure /
-                           (data.air_pressure - data.e))
-    return data
-
 def j2sj(e, samp_rate=10): return 1/(samp_rate*(2**-float(e)))
 def sj2j(s, samp_rate=10): return np.log(samp_rate*s) / np.log(2)
 
 def get_dic_flux_data(data): return {k: copy.deepcopy(data.query(
     f"CO_SITE == '{k}'").reset_index(drop=True)) for k in data.CO_SITE.unique()}
 
-##########################################
-###     GENERIC FUNCTIONS                           
-##########################################
-
-def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
-    assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
-    mat = np.array(mat)
-
-    if len(time) != mat.shape[0] and len(time) == mat.shape[1]:
-        mat = mat.T
-
-    __temp__ = pd.DataFrame(mat, **kwargs)
-    __temp__.insert(0, c0name, time)
-
-    return __temp__
-
-
-def yaml_to_dict(path):
-    with open(path, 'r+') as file:
-        file = yaml.safe_load(file)
-    return file
-
-
-def list_time_in_period(tmin, tmax, fastfreq, slowfreq, include='both'):
-    if include=="left":
-        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
-          freq=fastfreq)[:-1]) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
-    elif include == "right":
-        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
-          freq=fastfreq)[1:]) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
-    elif include == "both":
-        return [(pd.date_range(max(p, pd.to_datetime(tmin)), min(p + pd.Timedelta(slowfreq), pd.to_datetime(tmax)),
-          freq=fastfreq)) for p in pd.date_range(tmin, tmax, freq=slowfreq).floor(slowfreq)]
-    return
-
-
-def checkifinprogress(path, LIMIT_TIME_OUT=30*60):
-    if os.path.exists(path) and (time.time()-os.path.getmtime(path)) < LIMIT_TIME_OUT:
-        logging.debug(f'Fresh file found ({time.time()-os.path.getmtime(path)} s old, {os.path.getmtime(path)}), skipping.')
-        return 1
-    else:
-        if os.path.exists(path): logging.debug(f'Old file found ({time.time()-os.path.getmtime(path)} s old, {time.time()*10**-3}, {os.path.getmtime(path)*10**-3}), new in progress file created.')
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "a+"):
-            pass
-        return 0
-
-
-def nanminmax(x):
-    return [np.nanmin(x), np.nanmax(x)]
-
-
-def mkdirs(filename):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-    
-def nearest(items, pivot, direction=0):
-    if direction == 0:
-        nearest = min(items, key=lambda x: abs(x - pivot))
-        difference = abs(nearest - pivot)
-        
-    elif direction == -1:
-        nearest = min(items, key=lambda x: abs(x - pivot) if x<pivot else pd.Timedelta(999, "d"))
-        difference = (nearest - pivot)
-        
-    elif direction == 1:
-        nearest = min(items, key=lambda x: abs(x - pivot) if x>pivot else pd.Timedelta(999, "d"))
-        difference = (nearest - pivot)
-    return nearest, difference
-
-
-def update_nested_dict(d, u):
-    for k, v in u.items():
-        if isinstance(v, dict):
-            d[k] = update_nested_dict(d.get(k, {}), v)
-        else:
-            d[k] = v
-    return d
-
-def update_nested_dicts(*ds, fstr=None):
-    r = {}
-    for d in ds:
-        if isinstance(d, str) and fstr:
-            try:
-                d = fstr(d)
-            except Exception as e:
-                continue
-        r = update_nested_dict(r, d)
-    return r
-
-def concat_into_single_file(path, pattern, output_path=None, **kwargs):
-    print('\nCONSOLIDATING DATASET\n')
-    if output_path is None: output_path = os.path.join(path, 'concat_into_single_file') 
-    
-    files_to_concat = []
-    for name in os.listdir(path):
-        if re.findall(pattern, name):
-            files_to_concat += [os.path.join(path, name)]
-    
-    files_to_concat = [pd.read_csv(f, **kwargs) for f in files_to_concat]
-    data = reduce(lambda left, right: pd.concat([left, right]), files_to_concat)
-    
-    mkdirs(output_path)
-    data.to_csv(output_path, index=False)
-    print(os.path.basename(output_path), ': Saved.', ' '*15, end='\n', sep='')
-    
-    return
 
 ##########################################
 ###     UNIVERSAL READER                            
@@ -702,6 +449,7 @@ DEFAULT_READ_GHG = {
 }
 
 DEFAULT_FMT_DATA = {
+    'co': '4th',
 }
 
 
@@ -806,6 +554,12 @@ def __universal_reader__(path, **kw_csv):
     return df_td
 
 def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verbosity=1, fkwargs={}, tipfile="readme.txt", **kwargs):
+    """
+    path: str or dict 
+    e.g. (str): path = str(os.path.join(inputpath, 'eddypro_raw_datasets/level_6'))
+    e.g. (dict): path = {k: str(os.path.join(v, 'eddypro_raw_datasets/level_6')) for k, v in inputpath.items()}
+        where k will become the suffix in case of duplicates
+    """
     if isinstance(path, dict):
         dataframes = {}
         for k, v in path.items():
@@ -1007,91 +761,3 @@ def loaddatawithbuffer(d0, d1=None, freq=None, buffer=None,
     else:
         pd.DataFrame()
 
-##########################################
-###     METEO                            
-##########################################
-
-def vapour_deficit_pressure(T, RH):
-    if np.nanquantile(T, 0.1) < 100 and np.nanquantile(T, 0.9) < 100:
-        T = T + 274.15
-
-    # Saturation Vapor Pressure (es)
-    #es = 0.6108 * np.exp(17.27 * T / (T + 237.3))
-    es = (T **(-8.2)) * (2.7182)**(77.345 + 0.0057*T-7235*(T**(-1)))
-
-    # Actual Vapor Pressure (ea)
-    ea = es * RH / 100
-
-    # Vapor Pressure Deficit (Pa)
-    return (es - ea)# * 10**(-3)
-
-##########################################
-###     DESPIKING                            
-##########################################
-
-def mauder2013(x, q=7):
-    # it does not do the check for n consecutive spikes 
-    x = np.array(x)
-    x_med = np.nanmedian(x)
-    mad = np.nanmedian(np.abs(x - x_med))
-    bounds = (x_med - (q * mad) / 0.6745, x_med + (q * mad) / 0.6745)
-    #print("median", x_med, "mad", mad, "bounds", bounds)
-    x[x < min(bounds)] = np.nan
-    x[x > max(bounds)] = np.nan
-
-    #if fill is not None:
-    #    x = fill(pd.Series(x) if fill in (pd.Series.ffill, pd.Series.interpolate) else x)
-    return x
-
-
-##########################################
-###     WAVELET-RELATED                            
-##########################################
-
-def __wavemother_str_pycwt__(name):
-    wavelets = {w.lower(): vars(pycwt.mothers)[w] for w in ['Morlet', 'Paul', 'DOG', 'MexicanHat']}
-    mother = wavelets[re.subn('[0-9]', '',  name.lower())[0]]
-    if re.findall('[0-9]+', name.lower()): 
-        mother = mother(int(re.findall('[0-9]+', name.lower())[0]))
-    else:
-        mother = mother()
-    return mother
-
-try:
-    import pywt
-    def bufferforfrequency_dwt(N=0, n_=None, fs=20, level=None, f0=None, max_iteration=10**4, wavelet='db6'):
-        if level is None and f0 is None: f0 = 1/(2*60*60)  # 18
-        lvl = level if level is not None else int(np.ceil(np.log2(fs/f0)))
-        if n_ is None: n_ = fs * 60 * 30
-        n0 = N
-        cur_iteration = 0
-        while True:
-            n0 += pd.to_timedelta(n_)/pd.to_timedelta("1s") * fs if isinstance(n_, str) else n_
-            if lvl <= pywt.dwt_max_level(n0, wavelet):
-                break
-            cur_iteration += 1
-            if cur_iteration > max_iteration:
-                warnings.warn('Limit of iterations attained before buffer found. Current buffer allows up to {} levels.'.format(
-                    pywt.dwt_max_level(n0, wavelet)))
-                break
-        return (n0-N) * fs**-1
-except Exception as e:
-    print(e)
-
-try:
-    import pycwt
-    def bufferforfrequency(f0, dt=0.05, param=6, mother="MORLET", wavelet=pycwt.Morlet(6)):
-        #check if f0 in right units
-        # f0 ↴
-        #    /\
-        #   /  \
-        #  /____\
-        # 2 x buffer
-        
-        if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
-        c = wavelet.flambda() * wavelet.coi()
-        n0 = 1 + (2 * (1/f0) * (c * dt)**-1)
-        N = int(np.ceil(n0 * dt))
-        return N
-except Exception as e:
-    print(e)

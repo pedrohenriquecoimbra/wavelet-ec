@@ -1,6 +1,6 @@
 # Project modules
 from waveletec._core import wavelet_functions as wavelet_functions
-from waveletec.handler import main, __concat__, __partition__, handle_eddypro_setup
+from waveletec.handler import eddypro_wavelet_run, integrate_full_spectra_into_file, condition_sampling_partition, handle_eddypro_setup
 
 
 if __name__ == '__main__':
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     run = args.pop('run')
     concat = args.pop('concat')
     partition = args.pop('partition')
-
+    
     print('Start run w/')
     # replace os.get_cwd() for '' if str
     print('\n'.join([f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
@@ -52,6 +52,8 @@ if __name__ == '__main__':
     #    p.write('python wavelet_handler.py ' + 
     #            ''.join([f'--{k} {" ".join(v)}' if isinstance(v, list) else f'--{k} {v}' for k, v in args.items()]))
 
-    if run: main(**args)
-    if concat: __concat__(**args)
-    if partition: __partition__(**args)
+    if args['method'] == 'cov': concat = partition = False
+
+    if run: eddypro_wavelet_run(**args)
+    if concat: integrate_full_spectra_into_file(**args)
+    if partition: condition_sampling_partition(**args)
