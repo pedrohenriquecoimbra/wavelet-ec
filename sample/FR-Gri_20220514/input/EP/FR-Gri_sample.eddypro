@@ -2,7 +2,7 @@
 [Project]
 creation_date=2015-06-23T14:07:38
 last_change_date=2024-04-24T12:36:01
-file_name=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/input/EP/FR-Gri_sample.eddypro
+file_name=input/EP/FR-Gri_sample.eddypro
 run_mode=0
 run_fcc=0
 project_title=FR-Gri_sample
@@ -12,9 +12,9 @@ project_id=FR-Gri_sample
 file_type=1
 file_prototype=FR-Gri_EC_yyyymmddHHMM_L05_F01.csv
 use_pfile=1
-proj_file=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/input/EP/FR-Gri_sample.metadata
+proj_file=input/EP/FR-Gri_sample.metadata
 use_dyn_md_file=1
-dyn_metadata_file=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/input/EP/FR-Gri_2022_dynamic_metadata.csv
+dyn_metadata_file=input/EP/FR-Gri_2022_dynamic_metadata.csv
 binary_hnlines=-1
 binary_eol=-1
 binary_nbytes=-1
@@ -50,7 +50,7 @@ lf_meth=1
 wpl_meth=0
 foot_meth=2
 tob1_format=0
-out_path=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/output
+out_path=output
 fix_out_format=1
 err_label=-9999.0
 qc_meth=1
@@ -101,7 +101,7 @@ sa_min_st_le=3.0000
 sa_min_st_h=5.0000
 add_sonic_lptf=1
 horst_lens=1
-ex_file=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/output/eddypro_FR-Gri_sample_fluxnet_2024-04-24T111754_adv.csv
+ex_file=output/eddypro_FR-Gri_sample_fluxnet_2024-04-24T111754_adv.csv
 sa_bin_spectra=D:/ICOS/Data/Traitement_data_flux/2019/Outputs_20200114/eddypro_binned_cospectra
 sa_full_spectra=D:/ICOS/Data/Traitement_data_flux/2019/Outputs_20200114/eddypro_full_cospectra
 ex_dir=
@@ -130,7 +130,7 @@ sa_gas4_g1_start=1
 sa_gas4_g1_stop=12
 
 [RawProcess_General]
-data_path=C:/Users/phherigcoimb/OneDrive/gitRepo/wavelete-ec/sample/FR-Gri_20220514/input/20Hz
+data_path=input/20Hz
 recurse=1
 use_geo_north=0
 mag_dec=0
