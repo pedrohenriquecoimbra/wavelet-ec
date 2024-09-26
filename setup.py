@@ -28,9 +28,10 @@ setup(
         'scikit-learn',
         'PyYAML',
     ],
-    #extras_require={
-    #    'oscar': ['matplotlib>=2.0,<4.0']
-    #},
+    extras_require={
+        'cwt': ['pycwt'],
+        'fcwt': ['pycwt', 'fcwt'],
+    },
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 4 - Beta',
