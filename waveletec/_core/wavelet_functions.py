@@ -495,25 +495,26 @@ def load_data_and_loop(ymd, raw_kwargs, output_path=None, verbosity=1,
         print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
         prev_print = '\x1B[1A\r'
 
-        # recheck if files exist and overwrite option
-        # doesn't save time (maybe only save 5min)
-        if not overwrite and os.path.exists(output_path.format(suffix, date)):
-            logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
-            continue
-        
-        if all([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]): 
-            logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
-            continue
-        elif any([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]):
-            logger.warning("UserWarning: Continuing but some files already exist ({}), others don't ({}).".format(
-                ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
-                ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if not os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
-                ))
-            pass
-        
-        curoutpath_inprog = output_path.format(suffix, str(date), "").rsplit(".", 1)[
-            0] + ".inprogress"
-        if hc24.checkifinprogress(curoutpath_inprog): continue
+        if output_path:
+            # recheck if files exist and overwrite option
+            # doesn't save time (maybe only save 5min)
+            if not overwrite and os.path.exists(output_path.format(suffix, date)):
+                logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
+                continue
+            
+            if all([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]): 
+                logger.warning("UserWarning: Skipping, file already exists ({}).".format(date))
+                continue
+            elif any([os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M'))) for _yl in yl[:-1]]):
+                logger.warning("UserWarning: Continuing but some files already exist ({}), others don't ({}).".format(
+                    ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
+                    ', '.join([_yl.strftime('%Y%m%d%H%M') for _yl in yl[:-1] if not os.path.exists(output_path.format(suffix, _yl.strftime('%Y%m%d%H%M')))]), 
+                    ))
+                pass
+            
+            curoutpath_inprog = output_path.format(suffix, str(date), "").rsplit(".", 1)[
+                0] + ".inprogress"
+            if hc24.checkifinprogress(curoutpath_inprog): continue
         
         # load files
         info_t_startloaddata = time.time()
@@ -521,7 +522,7 @@ def load_data_and_loop(ymd, raw_kwargs, output_path=None, verbosity=1,
             yl, d1=None, freq=_f, buffer=buffer, f_freq=_f, **raw_kwargs)
         if data.empty:
             if verbosity>1: logger.warning("UserWarning: No file was found ({}, path: {}).".format(date, raw_kwargs.get('path', 'default')))
-            if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
+            if output_path and os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
             continue
         logger.info(f'\tLoading data took {round(time.time() - info_t_startloaddata)} s (run_wt).')
         
@@ -541,7 +542,7 @@ def load_data_and_loop(ymd, raw_kwargs, output_path=None, verbosity=1,
             print(str(e))
 
         #[os.remove(d) for a in avg_ for d in dat_fullspectra[a] if os.path.exists(d)]
-        if os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
+        if output_path and os.path.exists(curoutpath_inprog): os.remove(curoutpath_inprog)
         prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} % ({time.strftime("%d.%m.%y %H:%M:%S")})' + '\n'
             
         logger.info(f'\tFinish {date} took {round(time.time() - info_t_startdateloop)} s, yielded {len(yl)} files (run_wt). Progress: {len(yl)} {int(100*ymd_i/len(ymd))} %')
@@ -555,11 +556,14 @@ def load_data_and_loop(ymd, raw_kwargs, output_path=None, verbosity=1,
             #data = data[data.TIMESTAMP>= ]
             data = (data.sort_values(by=['TIMESTAMP', 'natural_frequency'])
                     .melt(['TIMESTAMP', 'natural_frequency']))
-            __save_cospectra__(data, suffix, output_path, **{'method': method, 'averaging': averaging, 'buffer': buffer, 'dt': dt})
+            if output_path:
+                __save_cospectra__(data, suffix, output_path, **{'method': method, 'averaging': averaging, 'buffer': buffer, 'dt': dt})
+            else:
+                fulldata = pd.concat([fulldata, data], axis=0)
     
-    if not fulldata.empty:
-        fulldata.to_csv(output_path.format(suffix, pd.datetime.now().strftime('%Y%m%dT%H%M%S_%f')), index=False)
-    return
+    if output_path and not fulldata.empty:
+            fulldata.to_csv(output_path.format(suffix, pd.datetime.now().strftime('%Y%m%dT%H%M%S_%f')), index=False)
+    return fulldata
 
 
 def __save_cospectra__(data, suffix, output_path, **meta):
