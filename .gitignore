@@ -9,4 +9,4 @@ scripts/__pycache__/*
 sample/**/input/20Hz/*.csv
 deprecated/*
 sample/*/output/wavelet_flux_*
-sample/*/test/*
+sample/*/test*
