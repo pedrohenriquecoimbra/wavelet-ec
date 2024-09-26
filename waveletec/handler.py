@@ -25,29 +25,30 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
          method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
 
-    logname = str(os.path.join(outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
-    hc24.mkdirs(logname)
-    #with open(logname, "w+"): pass
-    logging.basicConfig(filename=logname,
-                        filemode='a',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.DEBUG, 
-                        force=True)
+    if outputpath is not None:
+        logname = str(os.path.join(outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
+        hc24.mkdirs(logname)
+        #with open(logname, "w+"): pass
+        logging.basicConfig(filename=logname,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S',
+                            level=logging.DEBUG, 
+                            force=True)
 
-    logging.captureWarnings(True)
-    logging.info("STARTING THE RUN")
+        logging.captureWarnings(True)
+        logging.info("STARTING THE RUN")
 
-    # Select output file path
-    if method == 'cov':
-        output_path = str(os.path.join(outputpath, str(sitename)+'{}_{}.csv'))
-    else:
-        output_path = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(sitename)+'_CDWT{}_{}.csv'))
+        # Select output file path
+        if method == 'cov':
+            outputpath = str(os.path.join(outputpath, str(sitename)+'{}_{}.csv'))
+        else:
+            outputpath = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(sitename)+'_CDWT{}_{}.csv'))
 
-    # Save args for run
-    hc24.mkdirs(output_path)
-    with open(os.path.join(os.path.dirname(os.path.dirname(output_path)), f'log/setup_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.yml'), 'w+') as stp:
-        yaml.safe_dump(local_args, stp)
+        # Save args for run
+        hc24.mkdirs(outputpath)
+        with open(os.path.join(os.path.dirname(os.path.dirname(outputpath)), f'log/setup_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.yml'), 'w+') as stp:
+            yaml.safe_dump(local_args, stp)
 
     # Select covariances
     # x*y → Cov(x, y)
@@ -67,8 +68,8 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
 
     # RUN WAVELET FLUX PROCESSING
     # ymd = [START_DATE, END_DATE, FILE_FREQUENCY]
-    wavelet_functions.load_data_and_loop(ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min'],
-                                         output_path = output_path,
+    data = wavelet_functions.load_data_and_loop(ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min'],
+                                         output_path = outputpath,
                                          varstorun = covariance,
                                          averaging = [fileduration],
                                          processing_time_duration = processduration,
@@ -77,6 +78,7 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
                                          raw_kwargs = {'path': inputpath,
                                                        'fkwargs': {'dt': 1/acquisition_frequency}},
                                          verbosity=5)
+    return data
 
 
 def integrate_full_spectra_into_file(sitename, outputpath, integratioperiod=60*30, **kwargs):
@@ -84,8 +86,7 @@ def integrate_full_spectra_into_file(sitename, outputpath, integratioperiod=60*3
     dst_path = os.path.join(outputpath, str(sitename)+f'_CDWT_full_cospectra.csv')
     
     wavelet_functions.integrate_cospectra(os.path.join(outputpath, 'wavelet_full_cospectra'),
-                                          '_CDWT_full_cospectra_([0-9]{12}).csv$',
-                                          1/integratioperiod, dst_path)
+                                          1/integratioperiod, '_CDWT_full_cospectra_([0-9]{12}).csv$', dst_path)
     #hc24.concat_into_single_file(
     #    os.path.join(outputpath, 'wavelet_full_cospectra'), str(sitename)+f'_CDWT_full_cospectra.+.{fileduration}mn.csv', 
     #    output_path=dst_path, skiprows=10)
