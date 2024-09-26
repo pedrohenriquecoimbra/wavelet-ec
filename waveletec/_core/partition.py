@@ -27,6 +27,7 @@ def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2',
 def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
                   CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None):
     if isinstance(data, str): data = pd.read_file(data)
+    else: data = data.copy()
     
     CO2 = __input_to_series__(data, CO2)
     CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
