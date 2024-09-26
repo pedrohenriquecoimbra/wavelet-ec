@@ -333,7 +333,7 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', wt_kwarg
             if Nnan:
                 if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
                     logger.warning(
-                        f"UserWarning: Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%) in {np.nanmean(data.TIMESTAMP)}.")
+                        f"UserWarning: Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%) in {data.TIMESTAMP.head(-1)[0]}.")
             if Nnan and Nnan < N:
                 signal = np.interp(np.linspace(0, 1, N), 
                         np.linspace(0, 1, N)[signan == False],
