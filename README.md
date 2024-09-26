@@ -1,9 +1,12 @@
+[![DOI](https://zenodo.org/badge/DOI/10.2139/ssrn.4642939.svg)](http://dx.doi.org/10.2139/ssrn.4642939)
+
+[![DOI](https://zenodo.org/badge/786866970.svg)](https://zenodo.org/doi/10.5281/zenodo.11071327)
+
 # Citation
 
 Pedro H H Coimbra, Benjamin Loubet, Olivier Laurent, Matthias Mauder, Bernard Heinesch, Jonathan Bitton, Jeremie Depuydt, Pauline Buysse. Improvement of CO2 Flux Quality Through Wavelet-Based Eddy Covariance: A New Method for Partitioning Respiration and Photosynthesis. http://dx.doi.org/10.2139/ssrn.4642939
 
 \* corresponding author: pedro-henrique.herig-coimbra@inrae.fr
-
 
 # Getting started
 
