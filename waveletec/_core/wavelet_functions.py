@@ -281,7 +281,6 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
     return Ys
 
 
-def integrate_cospectra(root, pattern, f0, dst_path):
     saved_files = {}
     for name in os.listdir(root):
         dateparts = re.findall(pattern, name, flags=re.IGNORECASE)
