@@ -281,22 +281,27 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
     return Ys
 
 
-    saved_files = {}
-    for name in os.listdir(root):
-        dateparts = re.findall(pattern, name, flags=re.IGNORECASE)
-        if len(dateparts) == 1:
-            saved_files[dateparts[0]] = os.path.join(root, name)
+def integrate_cospectra(root, f0, pattern='', dst_path=None):
+    if isinstance(root, str):
+        saved_files = {}
+        for name in os.listdir(root):
+            dateparts = re.findall(pattern, name, flags=re.IGNORECASE)
+            if len(dateparts) == 1:
+                saved_files[dateparts[0]] = os.path.join(root, name)
 
-    def __read__(date, path):
-        r = pd.read_csv(path, skiprows=11, sep=',')
-        if 'natural_frequency' not in r.columns: 
-            logger.warn(f'Skipping spectral file. Natural frequency column not found ({path}).')
-            return pd.DataFrame()
-        if r.natural_frequency.dtype != float: print(date, r.natural_frequency.dtype)
-        r['TIMESTAMP'] = pd.to_datetime(date, format='%Y%m%d%H%M')
-        return r
+        def __read__(date, path):
+            r = pd.read_csv(path, skiprows=11, sep=',')
+            if 'natural_frequency' not in r.columns: 
+                logger.warn(f'Skipping spectral file. Natural frequency column not found ({path}).')
+                return pd.DataFrame()
+            if r.natural_frequency.dtype != float: print(date, r.natural_frequency.dtype)
+            r['TIMESTAMP'] = pd.to_datetime(date, format='%Y%m%d%H%M')
+            return r
 
-    data = pd.concat([__read__(k, v) for k, v in saved_files.items()])
+        data = pd.concat([__read__(k, v) for k, v in saved_files.items()])
+    else:
+        data = root
+    
     data0 = data[(np.isnan(data['natural_frequency'])==False) * (data['natural_frequency'] >= f0)].groupby(['variable', 'TIMESTAMP'])['value'].agg(np.nansum).reset_index(drop=False)
     data1 = data[np.isnan(data['natural_frequency'])].drop('natural_frequency', axis=1)
 
