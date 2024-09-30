@@ -129,7 +129,7 @@ def __icwt__(W, sj, dt, dj, Cd=None, psi=None, wavelet=None):
         x: array
     """
     if wavelet is None: wavelet = pycwt.wavelet.Morlet(6)
-    if isinstance(wavelet, str): wavelet = hc24.__wavemother_str_pycwt__(wavelet)
+    if isinstance(wavelet, str): wavelet = wlmisc.__wavemother_str_pycwt__(wavelet)
     if Cd is None: Cd = wavelet.cdelta
     if psi is None: psi = wavelet.psi(0)
         
