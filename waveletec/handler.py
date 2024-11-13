@@ -20,6 +20,17 @@ def __possible_combinations__(interesting_combinations, variables_available):
 
 
 def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D'):
+    ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min']
+    _, _, _f = ymd
+    ymd = hc24.list_time_in_period(*ymd, processduration, include='both')
+
+    for ymd_i, yl in enumerate(ymd):
+        data = hc24.loaddatawithbuffer(
+            yl, d1=None, freq=acquisition_frequency, buffer=0, f_freq=_f, **{'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}})
+        break
+    return data
+
+
 def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
          processduration='1D', integratioperiod=None, preaverage=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
