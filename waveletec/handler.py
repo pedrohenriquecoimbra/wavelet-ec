@@ -19,6 +19,7 @@ def __possible_combinations__(interesting_combinations, variables_available):
         return varstorun
 
 
+def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D'):
 def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
          processduration='1D', integratioperiod=None, preaverage=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
