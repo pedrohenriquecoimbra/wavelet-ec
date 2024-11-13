@@ -163,7 +163,7 @@ def condition_sampling_partition(sitename, outputpath, variables_available=['u',
 def handle_eddypro_setup(**args):
     if args['eddypro']:
         eddypro_setup = hc24.eddypro_tools.read_eddypro_metadata_file(args['eddypro'])
-        if not 'sitename' in args.keys() or args['sitename'] is None: args['sitename'] = eddypro_setup['Project']['project_title']
+        if not 'sitename' in args.keys() or args['sitename'] is None: args['sitename'] = eddypro_setup['Project']['project_id']
         if not 'inputpath' in args.keys() or args['inputpath'] is None: args['inputpath'] = eddypro_setup['Project']['out_path'] + '/eddypro_raw_datasets/level_6'
         if not 'outputpath' in args.keys() or args['outputpath'] is None: args['outputpath'] = eddypro_setup['Project']['out_path'] + '/wavelet_flux'
         if not 'datetimerange' in args.keys() or args['datetimerange'] is None: args['datetimerange'] = eddypro_setup['Project']['pr_start_date'].replace('-', '') + eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' + \
