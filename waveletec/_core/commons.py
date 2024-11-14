@@ -546,7 +546,7 @@ def __universal_reader__(path, **kw_csv):
         
     try:
         if handle_eddypro_raw_dataset:
-            with open(path, 'r') as file: header = [c.replace('\n', '') for c in file.readlines()[9].split('  ') if c]
+            with open(path, 'r') as file: header = [c.replace('\n', '').strip() for c in file.readlines()[9].split('  ') if c]
             kw_csv.update({'skiprows': 10, 'sep': '\s+', 'na_values': ['NaN', 'nan', -9999], 'names': header})
         df_td = pd.read_csv(path, **kw_csv)
     except Exception as e:
@@ -609,8 +609,8 @@ def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verb
                                   fstr=lambda d: yaml_to_dict(d))
         
         kw = structuredData(**kw_['FILE_RAW'])
-        kw_csv = kw_['READ_CSV'] 
-        if kw_['READ_CSV'] != DEFAULT_READ_CSV: kw_['READ_CSV']['handle_eddypro_raw_dataset'] = False
+        kw_csv = kw_['READ_CSV']
+        if kw_csv != DEFAULT_READ_CSV: kw_csv['handle_eddypro_raw_dataset'] = False
         
         try:
             if ('header_file' in kw_csv.keys()) and (os.path.exists(kw_csv['header_file'])):
@@ -626,7 +626,7 @@ def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verb
                 dateparts = re.findall(kw.file_pattern, name, flags=re.IGNORECASE)
                 if len(dateparts) == 1:
                     files_list[dateparts[0]] = os.path.join(root, name)
-
+        
         for td in set(lookup_) & files_list.keys() if lookup_ != [] else files_list.keys():
             path_to_tdfile = files_list[td]
             if os.path.exists(path_to_tdfile):
