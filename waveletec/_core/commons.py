@@ -437,6 +437,7 @@ DEFAULT_FILE_RAW = {
 }
 
 DEFAULT_READ_CSV = {
+    'handle_eddypro_raw_dataset': True,
     'skiprows': 8,
     'sep': r"\s+",
     'na_values': ['NaN', 'nan', -9999],
@@ -449,7 +450,7 @@ DEFAULT_READ_GHG = {
 }
 
 DEFAULT_FMT_DATA = {
-    'co': '4th',
+    '4thgas': '4th gas',
 }
 
 
@@ -532,6 +533,7 @@ class structuredDataFrame:
 
 
 def __universal_reader__(path, **kw_csv):
+    handle_eddypro_raw_dataset = kw_csv.pop('handle_eddypro_raw_dataset', False)
     if path.endswith('.gz'): kw_csv.update(**{'compression': 'gzip'})
     elif path.endswith('.csv'): kw_csv.pop('compression', None)
     if path.endswith('.ghg'):
@@ -541,7 +543,11 @@ def __universal_reader__(path, **kw_csv):
         path = StringIO(datafile)
         # DEFAULT_READ_GHG
         kw_csv.update(DEFAULT_READ_GHG)
+        
     try:
+        if handle_eddypro_raw_dataset:
+            with open(path, 'r') as file: header = [c.replace('\n', '') for c in file.readlines()[9].split('  ') if c]
+            kw_csv.update({'skiprows': 10, 'sep': '\s+', 'na_values': ['NaN', 'nan', -9999], 'names': header})
         df_td = pd.read_csv(path, **kw_csv)
     except Exception as e:
         # (EOFError, pd.errors.ParserError, pd.errors.EmptyDataError):
@@ -603,7 +609,8 @@ def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verb
                                   fstr=lambda d: yaml_to_dict(d))
         
         kw = structuredData(**kw_['FILE_RAW'])
-        kw_csv = kw_['READ_CSV']
+        kw_csv = kw_['READ_CSV'] 
+        if kw_['READ_CSV'] != DEFAULT_READ_CSV: kw_['READ_CSV']['handle_eddypro_raw_dataset'] = False
         
         try:
             if ('header_file' in kw_csv.keys()) and (os.path.exists(kw_csv['header_file'])):

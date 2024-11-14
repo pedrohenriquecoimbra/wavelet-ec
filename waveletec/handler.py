@@ -19,10 +19,15 @@ def __possible_combinations__(interesting_combinations, variables_available):
         return varstorun
 
 
-def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D'):
+def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, **kwargs):
+    raw_kwargs = {'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}}
+    kwargs['fmt'] = kwargs.get('fmt', {})
+    if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+    raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
+
     ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min']
     _, _, _f = ymd
-    ymd = hc24.list_time_in_period(*ymd, processduration, include='both')
+    ymd = hc24.list_time_in_period(*ymd, '1D', include='both')
 
     for ymd_i, yl in enumerate(ymd):
         data = hc24.loaddatawithbuffer(
@@ -80,6 +85,10 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
 
     # RUN WAVELET FLUX PROCESSING
     # ymd = [START_DATE, END_DATE, FILE_FREQUENCY]
+    raw_kwargs = {'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}}
+    kwargs['fmt'] = kwargs.get('fmt', {})
+    if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+    raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
     data = wavelet_functions.load_data_and_loop(ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min'],
                                          output_path = outputpath,
                                          varstorun = covariance,
@@ -87,8 +96,7 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
                                          processing_time_duration = processduration,
                                          method = method,
                                          wt_kwargs = {'fs': acquisition_frequency, 'wavelet': wave_mother},
-                                         raw_kwargs = {'path': inputpath,
-                                                       'fkwargs': {'dt': 1/acquisition_frequency}},
+                                         raw_kwargs = raw_kwargs,
                                          verbosity=5)
     return data
 
@@ -181,10 +189,17 @@ def handle_eddypro_setup(**args):
         if not 'datetimerange' in args.keys() or args['datetimerange'] is None: args['datetimerange'] = eddypro_setup['Project']['pr_start_date'].replace('-', '') + eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' + \
             eddypro_setup['Project']['pr_end_date'].replace('-', '') + eddypro_setup['Project']['pr_end_time'].replace(':', '')
         if not 'fileduration' in args.keys() or args['fileduration'] is None: args['fileduration'] = int(eddypro_setup['RawProcess_Settings']['avrg_len'])
-    
         if not 'metadata' in args.keys() or args['metadata'] is None: 
             if eddypro_setup['Project']['proj_file']: args['metadata'] = eddypro_setup['Project']['proj_file']
             else: args['metadata'] = args['eddypro'].rsplit('.', 1)[0] + '.metadata'
+        
+        try:
+            if not 'gas4_name' in args.keys() or args['gas4_name'] is None: 
+                gas4_col = eddypro_setup['Project']['col_n2o']
+                eddypro_metad = hc24.eddypro_tools.read_eddypro_metadata_file(args['metadata'])
+                args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
+        except Exception as e:
+            print(e)
     
     if args['metadata']:
         eddypro_metad = hc24.eddypro_tools.read_eddypro_metadata_file(args['metadata'])
