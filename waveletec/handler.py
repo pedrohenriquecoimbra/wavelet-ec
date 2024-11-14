@@ -31,7 +31,7 @@ def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, filedura
 
     for ymd_i, yl in enumerate(ymd):
         data = hc24.loaddatawithbuffer(
-            yl, d1=None, freq=acquisition_frequency, buffer=0, f_freq=_f, **{'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}})
+            yl, d1=None, freq=_f, buffer=0, f_freq=_f, **raw_kwargs)
         break
     return data
 
@@ -189,6 +189,7 @@ def handle_eddypro_setup(**args):
         if not 'datetimerange' in args.keys() or args['datetimerange'] is None: args['datetimerange'] = eddypro_setup['Project']['pr_start_date'].replace('-', '') + eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' + \
             eddypro_setup['Project']['pr_end_date'].replace('-', '') + eddypro_setup['Project']['pr_end_time'].replace(':', '')
         if not 'fileduration' in args.keys() or args['fileduration'] is None: args['fileduration'] = int(eddypro_setup['RawProcess_Settings']['avrg_len'])
+
         if not 'metadata' in args.keys() or args['metadata'] is None: 
             if eddypro_setup['Project']['proj_file']: args['metadata'] = eddypro_setup['Project']['proj_file']
             else: args['metadata'] = args['eddypro'].rsplit('.', 1)[0] + '.metadata'
