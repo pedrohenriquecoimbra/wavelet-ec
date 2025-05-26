@@ -7,4 +7,5 @@ from . import partition
 from . import wavelet_functions
 from . import wavelet_misc
 from .commons import *
+from .read_data import *
 from .meteo import *
