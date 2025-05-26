@@ -1,11 +1,52 @@
 # built-in modules
+import logging
 
 # 3rd party modules
 import numpy as np
 import pandas as pd
+import itertools
 
 # project modules
 from .commons import __input_to_series__
+
+
+def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
+    logger = logging.getLogger('wvlt.partition.conditional_sampling')
+    logger.debug(f"star conditional_sampling")
+
+    # label can also be {1: "+", -1: "-", 0: "·"}
+    # guarantee names are enough to name all arguments
+    nargs = len(args)
+    if nargs < len(names):
+        names = names[:nargs]
+    if nargs > len(names):
+        names = names + ['b'] * (nargs-len(names))
+    # [Y12] + list(args)
+    YS = list(args)
+    Ys = {}
+
+    logger.debug(f"YS: {YS}")
+
+    # run for all unique combinations of + and - for groups of size n
+    # (e.g., n=2: ++, +-, -+, --, n=3 : +++, ++-, ...)
+    for co in set(itertools.combinations(list(label.keys())*nargs, nargs)):
+        sign = ''.join([label[c] for c in co])
+        name = ''.join([c for cs in zip(names, sign) for c in cs])
+        Ys[name] = Y12
+        logger.debug(f"name: {name}")
+        # condition by sign
+        for i, c in enumerate(co):
+            if c:
+                mask = 1 * (c*YS[i] > 0)
+            else:
+                mask = 1 * (YS[i] == 0)
+            # xy[xy==0] = false
+            mask = np.where(mask == 0, false, mask)
+            Ys[name] = Ys[name] * mask
+    return Ys
+    # Ys['info_vars'] = list(Ys.keys())
+    # Ys['info_names'] = names
+    # return type('var_', (object,), Ys)
 
 
 def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2', 

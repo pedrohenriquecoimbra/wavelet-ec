@@ -353,32 +353,6 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
     return waves, sj
 
 
-def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
-    # label can also be {1: "+", -1: "-", 0: "·"}
-    # guarantee names are enough to name all arguments
-    nargs = len(args)
-    if nargs < len(names): names = names[:nargs]
-    if nargs > len(names): names = names + ['b']* (nargs-len(names))
-    # [Y12] + list(args) 
-    YS = list(args)
-    Ys = {}
-
-    # run for all unique combinations of + and - for groups of size n
-    # (e.g., n=2: ++, +-, -+, --, n=3 : +++, ++-, ...)
-    for co in set(itertools.combinations(list(label.keys())*nargs, nargs)):
-        sign = ''.join([label[c] for c in co])
-        name = ''.join([c for cs in zip(names, sign) for c in cs])
-        Ys[name] = Y12
-        # condition by sign
-        for i, c in enumerate(co):
-            if c: xy = 1 * (c*YS[i] > 0)
-            else: xy = 1 * (YS[i] == 0)
-            #xy[xy==0] = false
-            xy = np.where(xy == 0, false, xy)
-            Ys[name] = Ys[name] * xy
-    return Ys
-
-
 def integrate_cospectra(root, f0, pattern='', dst_path=None):
     if isinstance(root, str):
         saved_files = {}
