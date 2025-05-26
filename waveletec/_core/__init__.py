@@ -4,7 +4,7 @@ from . import corrections
 from . import meteo
 from . import partition
 from . import wavelet_functions
-from . import wavelet_misc
+from . import pipeline
 from .commons import *
 from .read_data import *
 from .meteo import *

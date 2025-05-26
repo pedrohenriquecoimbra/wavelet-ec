@@ -6,15 +6,17 @@ import logging
 import datetime
 # Project modules
 import yaml
-from . import _core as hc24
-from ._core import partition as ptt
-from ._core import wavelet_functions as wavelet_functions
+import _core as hc24
+from _core import partition as ptt
+from _core import wavelet_functions as wavelet_functions
+from _extra import eddypro_tools as eddypro
+from _core import pipeline
 
 
+logger = logging.getLogger('wvlt.handler')
 
-
-def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, **kwargs):
-    raw_kwargs = {'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}}
+def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, fileduration=30, **kwargs):
+    raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
     kwargs['fmt'] = kwargs.get('fmt', {})
     if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
     raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
@@ -30,7 +32,41 @@ def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, filedura
     return data
 
 
-def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
+def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D'):
+    ymd = [datetimerange.split(
+        '-')[0], datetimerange.split('-')[1], f'{fileduration}min']
+    _, _, _f = ymd
+    ymd = waveletec._core.list_time_in_period(
+        *ymd, processduration, include='both')
+
+    for ymd_i, yl in enumerate(ymd):
+        data = waveletec._core.loaddatawithbuffer(
+            yl, d1=None, freq=_f, buffer=0, f_freq=_f, **{'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}})
+        break
+    return data
+
+def run_from_eddypro(path="input/EP/FR-Gri_sample.eddypro",
+                    #  covariance=["w*co2|w|co2|h2o", "w*co2|w*h2o", "w*h2o",],
+                    #  processduration='6H', 
+                     **kwargs):
+    c = eddypro.extract_variables_from_eddypro_setup(eddypro=path)
+    c.update(**kwargs)
+
+    return pipeline.process(**c)
+
+# raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
+# kwargs['fmt'] = kwargs.get('fmt', {})
+# if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+# raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
+
+# ymd, raw_kwargs, output_folderpath = None, verbosity = 1,
+# overwrite = False, processing_time_duration = "1D",
+# internal_averaging = None, dt = 0.05, wt_kwargs = {},
+# method = "dwt", averaging = 30, **kwargs)
+
+    
+
+def eddypro_wavelet_run(site_name, input_path, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
          processduration='1D', integratioperiod=None, preaverage=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
          method = 'dwt', wave_mother='db6', **kwargs):
@@ -41,9 +77,9 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
 
         # Select output file path
         if method == 'cov':
-            outputpath = str(os.path.join(outputpath, str(sitename)+'{}_{}.csv'))
+            outputpath = str(os.path.join(outputpath, str(site_name)+'{}_{}.csv'))
         else:
-            outputpath = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(sitename)+'_CDWT{}_{}.csv'))
+            outputpath = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(site_name)+'_CDWT{}_{}.csv'))
 
         # Save args for run
         hc24.mkdirs(outputpath)
@@ -54,21 +90,12 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
     # x*y → Cov(x, y)
     # x*y|x*z|x*... → Cov(x, y)|Cov(x, z),Cov(x, ...)
     if covariance is None:
-        interesting_combinations = ['co2*co2', 'h2o*h2o', 'ts*ts', 'co*co',  'ch4*ch4', 'n2o*n2o',
-                                    'w*co2', 'w*h2o', 'w*ts', 'w*co', 'w*ch4',  'w*n2o',
-                                    'w*co2|w*h2o', 'w*co2|w*co', 'w*co2|w*ch4', 'w*co2|w*ts', 'w*co2|w*h2o|w*co', 
-                                    'w*h2o|w*co2', 'w*h2o|w*co', 'w*h2o|w*ch4', 'w*h2o|w*ts', 
-                                    'w*co|w*co2',  'w*co|w*ts', 'w*co|w*ch4', 'w*co|w*h2o', 
-                                    'w*ch4|w*co2',  'w*ch4|w*co', 'w*ch4|w*ts', 'w*ch4|w*h2o', 
-                                    'w*ts|w*co2',  'w*ts|w*co', 'w*ts|w*ch4', 'w*ts|w*h2o',
-                                    ]        
-        # Reduce interesting to possible
-        # Limit run to the realm of possible 
-        covariance = __possible_combinations__(interesting_combinations, variables_available)
+        covariance = hc24.available_combinations(
+            hc24.DEFAULT_COVARIANCE, variables_available)
 
     # RUN WAVELET FLUX PROCESSING
     # ymd = [START_DATE, END_DATE, FILE_FREQUENCY]
-    raw_kwargs = {'path': inputpath, 'fkwargs': {'dt': 1/acquisition_frequency}}
+    raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
     kwargs['fmt'] = kwargs.get('fmt', {})
     if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
     raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
@@ -84,19 +111,19 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
     return data
 
 
-def integrate_full_spectra_into_file(sitename, outputpath, integratioperiod=60*30, **kwargs):
+def integrate_full_spectra_into_file(site_name, outputpath, integratioperiod=60*30, **kwargs):
     # CONCAT INTO SINGLE FILE
-    dst_path = os.path.join(outputpath, str(sitename)+f'_CDWT_full_cospectra.csv')
+    dst_path = os.path.join(outputpath, str(site_name)+f'_CDWT_full_cospectra.csv')
     
-    wavelet_functions.integrate_cospectra(os.path.join(outputpath, 'wavelet_full_cospectra'),
+    pipeline.integrate_cospectra_from_file(os.path.join(outputpath, 'wavelet_full_cospectra'),
                                           1/integratioperiod, '_CDWT_full_cospectra_([0-9]{12}).csv$', dst_path)
     #hc24.concat_into_single_file(
-    #    os.path.join(outputpath, 'wavelet_full_cospectra'), str(sitename)+f'_CDWT_full_cospectra.+.{fileduration}mn.csv', 
+    #    os.path.join(outputpath, 'wavelet_full_cospectra'), str(site_name)+f'_CDWT_full_cospectra.+.{fileduration}mn.csv', 
     #    output_path=dst_path, skiprows=10)
     
-def condition_sampling_partition(sitename, outputpath, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
+def condition_sampling_partition(site_name, outputpath, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
     # RUN PARTITIONING
-    dst_path = os.path.join(outputpath, str(sitename)+f'_CDWT_full_cospectra.csv')
+    dst_path = os.path.join(outputpath, str(site_name)+f'_CDWT_full_cospectra.csv')
 
     h2o_dw_required_variables = ['w','co2','h2o']
     is_lacking_variable = sum([v not in variables_available for v in h2o_dw_required_variables])
@@ -107,7 +134,7 @@ def condition_sampling_partition(sitename, outputpath, variables_available=['u',
                                         CO2neg_H2Opos='wco2-wh2o+', 
                                         CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
                                     .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco'])\
-                                    .to_file(os.path.join(outputpath, str(sitename)+f'_CDWT_partitioning_H2O.csv'), index=False)
+                                    .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_H2O.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
     
@@ -124,7 +151,7 @@ def condition_sampling_partition(sitename, outputpath, variables_available=['u',
                                         CO2pos_COneg='wco2+wco-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(sitename)+f'_CDWT_partitioning_H2O_CO.csv'), index=False)
+                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_H2O_CO.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
     
@@ -141,7 +168,7 @@ def condition_sampling_partition(sitename, outputpath, variables_available=['u',
                                         CO2pos_COneg='wco2+wco-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(sitename)+f'_CDWT_partitioning_CO.csv'), index=False)
+                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_CO.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
         
@@ -158,43 +185,83 @@ def condition_sampling_partition(sitename, outputpath, variables_available=['u',
                                         CO2pos_COneg='wco2+wch4-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(sitename)+f'_CDWT_partitioning_CH4.csv'), index=False)
+                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_CH4.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
 
 
-def handle_eddypro_setup(**args):
-    if args['eddypro']:
-        eddypro_setup = hc24.eddypro_tools.read_eddypro_metadata_file(args['eddypro'])
-        if not 'sitename' in args.keys() or args['sitename'] is None: args['sitename'] = eddypro_setup['Project']['project_id']
-        if not 'inputpath' in args.keys() or args['inputpath'] is None: args['inputpath'] = eddypro_setup['Project']['out_path'] + '/eddypro_raw_datasets/level_6'
-        if not 'outputpath' in args.keys() or args['outputpath'] is None: args['outputpath'] = eddypro_setup['Project']['out_path'] + '/wavelet_flux'
-        if not 'datetimerange' in args.keys() or args['datetimerange'] is None: args['datetimerange'] = eddypro_setup['Project']['pr_start_date'].replace('-', '') + eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' + \
-            eddypro_setup['Project']['pr_end_date'].replace('-', '') + eddypro_setup['Project']['pr_end_time'].replace(':', '')
-        if not 'fileduration' in args.keys() or args['fileduration'] is None: args['fileduration'] = int(eddypro_setup['RawProcess_Settings']['avrg_len'])
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ep', '--eddypro',   type=str)
+    parser.add_argument('-m', '--metadata',   type=str)
+    parser.add_argument('-s', '--site_name',   type=str)
+    parser.add_argument('-i', '--input_path',  type=str)
+    parser.add_argument('-o', '--output_folderpath', type=str)
+    parser.add_argument('-d', '--datetimerange', type=str)
+    parser.add_argument('-af', '--acquisition_frequency', type=int)
+    parser.add_argument('-fd', '--fileduration', type=int)
+    parser.add_argument('-ip', '--integratioperiod', type=int)
+    parser.add_argument('-v', '--variables_available', type=str, nargs='+')
+    parser.add_argument('-dk', '--despike', type=int)  # , nargs=1)
+    parser.add_argument('-dn', '--denoise', type=int)  # , nargs=1)
+    parser.add_argument('-db', '--deadband', type=str, nargs='+')
+    parser.add_argument('-cov', '--covariance', type=str, nargs='+')
+    parser.add_argument('--method', type=str, default='dwt')
+    parser.add_argument('--wave_mother', type=str, default='db6')
+    parser.add_argument('--run', type=int, default=1)
+    parser.add_argument('--concat', type=int, default=1)
+    parser.add_argument('--partition', type=int, default=1)
+    parser.add_argument('--processing_time_duration', type=str, default='1D')
+    parser.add_argument('--preaverage', type=str, default=None)
+    parser.add_argument('--log_level', type=str, default='INFO', choices=[
+                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set the logging level')
 
-        if not 'metadata' in args.keys() or args['metadata'] is None: 
-            if eddypro_setup['Project']['proj_file']: args['metadata'] = eddypro_setup['Project']['proj_file']
-            else: args['metadata'] = args['eddypro'].rsplit('.', 1)[0] + '.metadata'
-        
-        try:
-            if not 'gas4_name' in args.keys() or args['gas4_name'] is None: 
-                gas4_col = eddypro_setup['Project']['col_n2o']
-                eddypro_metad = hc24.eddypro_tools.read_eddypro_metadata_file(args['metadata'])
-                args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
-        except Exception as e:
-            print(e)
+    args = parser.parse_args()
+    args = vars(args)
+
+    # Set logging level from argument
+    log_level = getattr(logging, args.pop('log_level', 'INFO').upper(), logging.INFO)
+    args['logging_kwargs'] = {'level': log_level}
+
+    # Convert string to boolean
+    run = args.pop('run')
+    concat = args.pop('concat')
+    partition = args.pop('partition')
+    ep_setup = args.pop('eddypro')
+    ep_meta = args.pop('metadata')
     
-    if args['metadata']:
-        eddypro_metad = hc24.eddypro_tools.read_eddypro_metadata_file(args['metadata'])
-        if not 'acquisition_frequency' in args.keys() or args['acquisition_frequency'] is None: args['acquisition_frequency'] = int(float(eddypro_metad['Timing']['acquisition_frequency']))
-        #if args['fileduration'] is None: args['fileduration'] = int(eddypro_metad['Timing']['file_duration'])
-    
-    if not 'variables_available' in args.keys() or args['variables_available'] is None:
-        if args['eddypro']:
-            args['variables_available'] = ['u', 'v', 'w'] + [k for k in ['co2', 'h2o', 'ch4'] if float(eddypro_setup['Project'][f'col_{k}']) > 0]
-        if args['metadata']:
-            if float(eddypro_setup['Project']['col_n2o']) > 0:
-                gas4 =  eddypro_metad['FileDescription'][f"col_{eddypro_setup['Project']['col_n2o']}_variable"]
-                if gas4: args['variables_available'] = args['variables_available'] + [gas4]
-    return args
+
+    # Retrieve eddypro setup
+    args = eddypro.extract_variables_from_eddypro_setup(
+        ep_setup, ep_meta, **args)
+
+    # Default
+    args['integratioperiod'] = args['integratioperiod'] if args['integratioperiod'] is not None else args['fileduration'] * 60
+    args['site_name'] = args['site_name'].replace('/', '_').replace('\\', '_')
+
+    print('Start run w/')
+    # replace os.get_cwd() for '' if str
+    print('\n'.join(
+        [f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
+
+    # Assert variables have been assigned
+    missing_args = [f'`{k}`' for k in ['site_name', 'input_path', 'output_folderpath',
+                                       'datetimerange', 'acquisition_frequency', 'fileduration'] if args[k] is None]
+    assert len(
+        missing_args) == 0, f'Missing argument in: {", ".join(missing_args)}.'
+
+    # with open(args['output_folderpath']+f'/wavelet_processing_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.py', 'w+') as p:
+    #    p.write('python wavelet_handler.py ' +
+    #            ''.join([f'--{k} {" ".join(v)}' if isinstance(v, list) else f'--{k} {v}' for k, v in args.items()]))
+
+    if args['method'] == 'cov':
+        concat = partition = False
+
+    if run:
+        # eddypro_wavelet_run(**args)
+        run_from_eddypro(**args)
+    if concat:
+        integrate_full_spectra_into_file(**args)
+    if partition:
+        condition_sampling_partition(**args)
