@@ -43,18 +43,7 @@ def eddypro_wavelet_run(sitename, inputpath, outputpath, datetimerange, acquisit
     local_args = locals()
 
     if outputpath is not None:
-        logname = str(os.path.join(outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
-        hc24.mkdirs(logname)
-        #with open(logname, "w+"): pass
-        logging.basicConfig(filename=logname,
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%Y-%m-%d %H:%M:%S',
-                            level=logging.DEBUG, 
-                            force=True)
-
-        logging.captureWarnings(True)
-        logging.info("STARTING THE RUN")
+        hc24.start_logging(outputpath)
 
         # Select output file path
         if method == 'cov':

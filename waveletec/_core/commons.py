@@ -52,6 +52,37 @@ class structuredData:
         pass
 
 
+def start_logging(outputpath, **kwargs):
+    """
+    Start logging to a file in the specified output path.
+    """
+    logname = str(os.path.join(
+        outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
+    mkdirs(logname)
+
+    params = dict(filemode='a',
+                   format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                   datefmt='%Y-%m-%d %H:%M:%S',
+                   level=logging.DEBUG,
+                   force=True)
+    params.update(kwargs)
+
+    # with open(logname, "w+"): pass
+    logging.basicConfig(filename=logname, **params)
+
+    logging.captureWarnings(True)
+    logging.info("STARTING THE RUN")
+
+
+def save_locals(locals_, path, **kwargs):
+    locals_ = {
+        k: v for k, v in locals_.items()
+        if isinstance(v, (str, int, float, list, dict, bool, type(None)))
+    }
+    with open(path, 'w') as stp:
+        yaml.safe_dump(locals_, stp)
+
+
 def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
     assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
     mat = np.array(mat)
