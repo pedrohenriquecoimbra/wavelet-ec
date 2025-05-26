@@ -64,15 +64,76 @@ from . import wavelet_misc as wlmisc
 
 logger = logging.getLogger('wvlt')
 
+
+def __wavemother_str_pycwt__(name):
+    wavelets = {w.lower(): vars(pycwt.mothers)[w] for w in ['Morlet', 'Paul', 'DOG', 'MexicanHat']}
+    mother = wavelets[re.subn('[0-9]', '',  name.lower())[0]]
+    if re.findall('[0-9]+', name.lower()): 
+        mother = mother(int(re.findall('[0-9]+', name.lower())[0]))
+    else:
+        mother = mother()
+    return mother
+
+
+try:
+    import pywt
+    def bufferforfrequency_dwt(N=0, n_=None, fs=20, level=None, f0=None, max_iteration=10**4, wavelet='db6'):
+        if level is None and f0 is None: f0 = 1/(2*60*60)  # 18
+        lvl = level if level is not None else int(np.ceil(np.log2(fs/f0)))
+        if n_ is None: n_ = fs * 60 * 30
+        n0 = N
+        cur_iteration = 0
+        while True:
+            n0 += pd.to_timedelta(n_)/pd.to_timedelta("1s") * fs if isinstance(n_, str) else n_
+            if lvl <= pywt.dwt_max_level(n0, wavelet):
+                break
+            cur_iteration += 1
+            if cur_iteration > max_iteration:
+                warnings.warn('Limit of iterations attained before buffer found. Current buffer allows up to {} levels.'.format(
+                    pywt.dwt_max_level(n0, wavelet)))
+                break
+        return (n0-N) * fs**-1
+except Exception as e:
+    print(e)
+
+
+try:
+    import pycwt
+    def bufferforfrequency(f0, dt=0.05, param=6, mother="MORLET", wavelet=pycwt.Morlet(6)):
+        #check if f0 in right units
+        # f0 ↴
+        #    /\
+        #   /  \
+        #  /____\
+        # 2 x buffer
+        
+        if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
+        c = wavelet.flambda() * wavelet.coi()
+        n0 = 1 + (2 * (1/f0) * (c * dt)**-1)
+        N = int(np.ceil(n0 * dt))
+        return N
+except Exception as e:
+    print(e)
+
+
 def formula_to_vars(formula):
-    res = hc24.structuredData()
-    res.formula = formula
-    res.allvars = formula.replace('|', '*').split('*')
-    res.uniquevars = list(set(res.allvars))
-    res.xy = formula.split('|')[0].split('*')
-    res.condsamp_pair = [v.split('*') for v in formula.split('|')[1:]]
-    res.condsamp_flat = [c for cs in res.condsamp_pair for c in cs]
-    return res
+    """
+    function: parse formula to variables
+    call: formula_to_vars()
+    Input:
+        formula: string
+    Return:
+        var_: object with attributes xy, condsamp_pair, uniquevars
+    """
+    # parse formula
+    xy = formula.split('|')[0].split('*')
+    condsamp_pair = [v.split('*') for v in formula.split('|')[1:]]
+    condsamp_flat = [c for cs in condsamp_pair for c in cs]
+    combinations = list(set(['*'.join(xy)] + ['*'.join(cs) for cs in condsamp_pair]))
+
+    return type('var_', (object,), {'xy': xy, 'condsamp_pair': condsamp_pair, 'condsamp_flat': condsamp_flat, 
+                                    'uniquevars': list(set(xy + condsamp_flat)), 'combinations': combinations})
+
 
 def __cwt__(input, fs, f0, f1, fn, nthreads=1, scaling="log", fast=False, norm=True, Morlet=6.0):
     """
@@ -129,7 +190,7 @@ def __icwt__(W, sj, dt, dj, Cd=None, psi=None, wavelet=None):
         x: array
     """
     if wavelet is None: wavelet = pycwt.wavelet.Morlet(6)
-    if isinstance(wavelet, str): wavelet = wlmisc.__wavemother_str_pycwt__(wavelet)
+    if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
     if Cd is None: Cd = wavelet.cdelta
     if psi is None: psi = wavelet.psi(0)
         
@@ -163,6 +224,17 @@ def __dwt__(*args, level=None, wavelet="db6"):
 
 
 def waverec_2d(coeffs, N, wavelet, mode='symmetric'):
+    """
+    function: reconstructs 2D signal from wavelet coefficients
+    call: waverec_2d()
+    Input:
+        coeffs: list of wavelet coefficients
+        N: data length
+        wavelet: mother wavelet (comprehensible to pywt)
+        mode: wavelet mode (default is 'symmetric')
+    Return:
+        rec: reconstructed signal
+        """
     def reconstruct_level(coeffs, level_to_keep):
         # Make a copy of the coeffs
         coeffs_copy = [np.zeros_like(c) for c in coeffs]
@@ -183,43 +255,40 @@ def waverec_2d(coeffs, N, wavelet, mode='symmetric'):
     # reconstructed_levels[1], [2], etc. = Details (higher frequencies)
     return reconstructed_levels
 
+
 def __idwt__(*args, N, wavelet='db6', mode='symmetric'):
+    """
+    function: performs Inverse Discrete Wavelet Transform
+    call: __idwt__()
+    Input:
+        *args: 2D arrays containing wavelet coefficient
+        N: data lenght
+        wavelet: mother wavelet (comprehensible to pywt)
+    Return:
+        Ys: list of 2D arrays
+    """
     Ys = []
     for W in args:
         reconstructed_signal = waverec_2d(W, N, wavelet, mode=mode)
         Ys += [np.array(reconstructed_signal[::-1])]
     return Ys
 
-def __idwt__deprecated(*args, N, level=None, wavelet="db6"):
-    """
-    function: performs Inverse Discrete Wavelet Transform
-    call: __idwt__()
-    Input:
-        *args: 2D arrays contianing wavelet coefficient
-        N: data lenght
-        level: maximum scale (power of 2)
-        wavelet: mother wavelet (comprehensible to pywt)
-    Return:
-        Ws: list of 2D arrays
-        level: maximum scale (power of 2)
-    """
-    #assert sum([s==level for s in W.shape]), "Coefficients don't have the same size as level."
-    def wrcoef(N, coef_type, coeffs, wavename, level):
-        a, ds = coeffs[0], list(reversed(coeffs[1:]))
 
-        if coef_type == 'a':
-            return pywt.upcoef('a', a, wavename, level=level, take=N)  # [:N]
-        elif coef_type == 'd':
-            return pywt.upcoef('d', ds[level-1], wavename, level=level, take=N)  # [:N]
-        else:
-            raise ValueError("Invalid coefficient type: {}".format(coef_type))
-    
-    Ys = []
-    for W in args:
-        A1 = wrcoef(N, 'a', W, wavelet, level)
-        D1 = [wrcoef(N, 'd', W, wavelet, i) for i in range(1, level+1)]
-        Ys += [np.array(D1 + [A1])]
-    return Ys, level
+def prepare_signal(signal, nan_tolerance=0.3, identifier='0000'):
+    signal = np.array(signal)
+    signan = np.isnan(signal)
+    N = len(signal)
+    Nnan = np.sum(signan)
+    if Nnan:
+        if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
+            logger.warning(
+                f"UserWarning ({identifier}): Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%).")
+    if Nnan and Nnan < N:
+        signal = np.interp(np.linspace(0, 1, N),
+                            np.linspace(0, 1, N)[
+            signan == False],
+            signal[signan == False])
+    return type('var_', (object,), {'signal': signal, 'N': N, 'Nnan': Nnan})
 
 
 def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180, 
