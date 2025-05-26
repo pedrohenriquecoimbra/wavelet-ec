@@ -11,12 +11,6 @@ from ._core import partition as ptt
 from ._core import wavelet_functions as wavelet_functions
 
 
-def __possible_combinations__(interesting_combinations, variables_available):
-        # Reduce interesting to possible
-        possible_combinations = [sum([v not in variables_available for v in re.split('[*|]', t)])==0 for t in interesting_combinations]
-        # Limit run to the realm of possible 
-        varstorun = [t for t, p in zip(interesting_combinations, possible_combinations) if p]
-        return varstorun
 
 
 def sample_raw_data(inputpath, datetimerange, acquisition_frequency=20, fileduration=30, **kwargs):

@@ -40,6 +40,15 @@ SITES_TO_STUDY = ['SAC']
 
 month2season = lambda month: {1:1, 2:1, 3:2, 4:2, 5:2, 6:3, 7:3, 8:3, 9:4, 10:4, 11:4, 12:1}[month]
 
+DEFAULT_COVARIANCE = ['co2*co2', 'h2o*h2o', 'ts*ts', 'co*co',  'ch4*ch4', 'n2o*n2o',
+                      'w*co2', 'w*h2o', 'w*ts', 'w*co', 'w*ch4',  'w*n2o',
+                      'w*co2|w*h2o', 'w*co2|w*co', 'w*co2|w*ch4', 'w*co2|w*ts', 'w*co2|w*h2o|w*co',
+                      'w*h2o|w*co2', 'w*h2o|w*co', 'w*h2o|w*ch4', 'w*h2o|w*ts',
+                      'w*co|w*co2',  'w*co|w*ts', 'w*co|w*ch4', 'w*co|w*h2o',
+                      'w*ch4|w*co2',  'w*ch4|w*co', 'w*ch4|w*ts', 'w*ch4|w*h2o',
+                      'w*ts|w*co2',  'w*ts|w*co', 'w*ts|w*ch4', 'w*ts|w*h2o',
+                      ]
+
 
 ##########################################
 ###     GENERIC FUNCTIONS                           
@@ -81,6 +90,14 @@ def save_locals(locals_, path, **kwargs):
     }
     with open(path, 'w') as stp:
         yaml.safe_dump(locals_, stp)
+
+
+def available_combinations(interesting_combinations, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o']):
+        # Reduce interesting to possible
+        possible_combinations = [sum([v not in variables_available for v in re.split('[*|]', t)])==0 for t in interesting_combinations]
+        # Limit run to the realm of possible 
+        varstorun = [t for t, p in zip(interesting_combinations, possible_combinations) if p]
+        return varstorun
 
 
 def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
