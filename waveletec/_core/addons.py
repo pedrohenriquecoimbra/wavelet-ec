@@ -3,11 +3,13 @@ import re
 import os
 import sys
 import warnings
+import logging
 from contextlib import contextmanager
 
 # 3rd party modules
 import pandas as pd
 
+logger = logging.getLogger('wvlt.addons')
 
 # Add-ons
 def _warning(
@@ -48,9 +50,16 @@ def df_to_file(self, file_name, *a, **k):
                     'parquet': pd.DataFrame.to_parquet,
                     'temporary': pd.DataFrame.to_parquet,
                     'json': pd.DataFrame.to_json}
+    
+    file_str = file_name if isinstance(file_name, str) else file_name.name
+    if file_str.endswith('.part'):
+        file_str = file_str.replace('.part', '')
+
     for file_ext, to in to_functions.items():
-        if (isinstance(file_name, str) and file_name.replace('.part', '').endswith(file_ext)) | (not isinstance(file_name, str) and file_name.name.replace('.part', '').endswith(file_ext)):
-            to(self, file_name, *a, **k)   
+        if file_str.endswith(file_ext):
+            return to(self, file_name, *a, **k)
+        
+    logger.warning(f"File extension not recognized: {file_str}")
     return None
 pd.DataFrame.to_file = df_to_file
 def pd_read_file(file_name, *a, **k):
