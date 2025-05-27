@@ -198,6 +198,20 @@ def condition_sampling_partition(site_name, output_folderpath, variables_availab
         except Exception as e:
             logging.warning(str(e))
 
+def set_cwd(workingdir=None):
+    """
+    Set the current working directory to the specified path.
+    
+    Parameters:
+    - workingdir: Path to the directory to set as current working directory.
+    """
+    if workingdir is not None:
+        os.chdir(workingdir)
+        print(f"Current working directory set to: {os.getcwd()}")
+        logger.info(f"Current working directory set to: {os.getcwd()}")
+    else:
+        logger.debug("No working directory specified, using current directory.")
+
 
 if __name__ == '__main__':
     import argparse
@@ -236,12 +250,17 @@ if __name__ == '__main__':
     parser.add_argument('--processing_time_duration', type=str, default='1D', 
                         help='Processing time duration for the wavelet processing (default: "1D")')
     # parser.add_argument('--preaverage', type=str, default=None)
+    parser.add_argument('-cwd', '-workingdir', type=str, default=None, 
+                        help='Set the current working directory (default: None)')
     parser.add_argument('--log_level', type=str, default='INFO', choices=[
                         'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], 
                         help='Set the logging level')
 
     args = parser.parse_args()
     args = vars(args)
+
+    # Set the current working directory if specified
+    set_cwd(os.chdir(args['cwd']))
 
     # Set logging level from argument
     log_level = getattr(logging, args.pop('log_level', 'INFO').upper(), logging.INFO)
