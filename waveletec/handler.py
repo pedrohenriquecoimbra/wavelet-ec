@@ -46,7 +46,8 @@ def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, filedur
         break
     return data
 
-def run_from_eddypro(path="input/EP/FR-Gri_sample.eddypro",
+def run_from_eddypro(path,
+                     #="input/EP/FR-Gri_sample.eddypro",
                     #  covariance=["w*co2|w|co2|h2o", "w*co2|w*h2o", "w*h2o",],
                     #  processduration='6H', 
                      **kwargs):
@@ -116,19 +117,22 @@ def eddypro_wavelet_run(site_name, input_path, outputpath, datetimerange, acquis
     return data
 
 
-def integrate_full_spectra_into_file(site_name, outputpath, integratioperiod=60*30, **kwargs):
+def integrate_full_spectra_into_file(site_name, output_folderpath, integratioperiod=60*30, **kwargs):
     # CONCAT INTO SINGLE FILE
-    dst_path = os.path.join(outputpath, str(site_name)+f'_CDWT_full_cospectra.csv')
+    dst_path = os.path.join(output_folderpath, str(
+        site_name)+f'_CDWT_full_cospectra.csv')
     
-    pipeline.integrate_cospectra_from_file(os.path.join(outputpath, 'wavelet_full_cospectra'),
+    pipeline.integrate_cospectra_from_file(os.path.join(output_folderpath, 'wavelet_full_cospectra'),
                                           1/integratioperiod, '_CDWT_full_cospectra_([0-9]{12}).csv$', dst_path)
     #hc24.concat_into_single_file(
     #    os.path.join(outputpath, 'wavelet_full_cospectra'), str(site_name)+f'_CDWT_full_cospectra.+.{fileduration}mn.csv', 
     #    output_path=dst_path, skiprows=10)
     
-def condition_sampling_partition(site_name, outputpath, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
+
+def condition_sampling_partition(site_name, output_folderpath, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
     # RUN PARTITIONING
-    dst_path = os.path.join(outputpath, str(site_name)+f'_CDWT_full_cospectra.csv')
+    dst_path = os.path.join(output_folderpath, str(
+        site_name)+f'_CDWT_full_cospectra.csv')
 
     h2o_dw_required_variables = ['w','co2','h2o']
     is_lacking_variable = sum([v not in variables_available for v in h2o_dw_required_variables])
@@ -139,7 +143,7 @@ def condition_sampling_partition(site_name, outputpath, variables_available=['u'
                                         CO2neg_H2Opos='wco2-wh2o+', 
                                         CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
                                     .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco'])\
-                                    .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_H2O.csv'), index=False)
+                                    .to_file(os.path.join(output_folderpath, str(site_name)+f'_CDWT_partitioning_H2O.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
     
@@ -156,7 +160,7 @@ def condition_sampling_partition(site_name, outputpath, variables_available=['u'
                                         CO2pos_COneg='wco2+wco-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_H2O_CO.csv'), index=False)
+                                        .to_file(os.path.join(output_folderpath, str(site_name)+f'_CDWT_partitioning_H2O_CO.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
     
@@ -173,7 +177,7 @@ def condition_sampling_partition(site_name, outputpath, variables_available=['u'
                                         CO2pos_COneg='wco2+wco-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_CO.csv'), index=False)
+                                        .to_file(os.path.join(output_folderpath, str(site_name)+f'_CDWT_partitioning_CO.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
         
@@ -190,7 +194,7 @@ def condition_sampling_partition(site_name, outputpath, variables_available=['u'
                                         CO2pos_COneg='wco2+wch4-',
                                         NIGHT=None)\
                                         .filter(['TIMESTAMP', 'NEE', 'GPP', 'Reco', 'ffCO2'])\
-                                        .to_file(os.path.join(outputpath, str(site_name)+f'_CDWT_partitioning_CH4.csv'), index=False)
+                                        .to_file(os.path.join(output_folderpath, str(site_name)+f'_CDWT_partitioning_CH4.csv'), index=False)
         except Exception as e:
             logging.warning(str(e))
 
@@ -272,7 +276,7 @@ if __name__ == '__main__':
 
     if run:
         # eddypro_wavelet_run(**args)
-        run_from_eddypro(**args)
+        run_from_eddypro(args.get('eddypro'), **args)
     if concat:
         integrate_full_spectra_into_file(**args)
     if partition:
