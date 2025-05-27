@@ -202,29 +202,43 @@ def condition_sampling_partition(site_name, output_folderpath, variables_availab
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-ep', '--eddypro',   type=str)
-    parser.add_argument('-m', '--metadata',   type=str)
-    parser.add_argument('-s', '--site_name',   type=str)
-    parser.add_argument('-i', '--input_path',  type=str)
-    parser.add_argument('-o', '--output_folderpath', type=str)
-    parser.add_argument('-d', '--datetimerange', type=str)
-    parser.add_argument('-af', '--acquisition_frequency', type=int)
-    parser.add_argument('-fd', '--fileduration', type=int)
-    parser.add_argument('-ip', '--integratioperiod', type=int)
-    parser.add_argument('-v', '--variables_available', type=str, nargs='+')
-    parser.add_argument('-dk', '--despike', type=int)  # , nargs=1)
-    parser.add_argument('-dn', '--denoise', type=int)  # , nargs=1)
-    parser.add_argument('-db', '--deadband', type=str, nargs='+')
-    parser.add_argument('-cov', '--covariance', type=str, nargs='+')
-    parser.add_argument('--method', type=str, default='dwt')
-    parser.add_argument('--wave_mother', type=str, default='db6')
-    parser.add_argument('--run', type=int, default=1)
-    parser.add_argument('--concat', type=int, default=1)
-    parser.add_argument('--partition', type=int, default=1)
-    parser.add_argument('--processing_time_duration', type=str, default='1D')
-    parser.add_argument('--preaverage', type=str, default=None)
+    parser.add_argument('-ep', '--eddypro',   type=str, help='Path to EddyPro setup file')
+    parser.add_argument('-m', '--metadata',   type=str, help='Path to EddyPro metadata file')
+    parser.add_argument('-s', '--site_name',   type=str, help='Site name for the processing')
+    parser.add_argument('-i', '--input_path',  type=str, help='Path to the input data folder')
+    parser.add_argument('-o', '--output_folderpath', type=str, 
+                        help='Path to the output folder where results will be saved')
+    parser.add_argument('-d', '--datetimerange', type=str, 
+                        help='Date and time range for processing, format: YYYYMMDD-HHMM-YYYYMMDD-HHMM')
+    parser.add_argument('-af', '--acquisition_frequency', type=int, default=20, 
+                        help='Acquisition frequency in Hz (default: 20 Hz)')
+    parser.add_argument('-fd', '--fileduration', type=int, default=30, 
+                        help='File duration in minutes (default: 30 minutes)')
+    parser.add_argument('-ip', '--integratioperiod', type=int, default=None, 
+                        help='Integration period in seconds (default: None)')
+    parser.add_argument('-v', '--variables_available', type=str, nargs='+', 
+                        help='List of available variables (default: ["u", "v", "w", "ts", "co2", "h2o"])')
+    # parser.add_argument('-dk', '--despike', type=int)  # , nargs=1)
+    # parser.add_argument('-dn', '--denoise', type=int)  # , nargs=1)
+    # parser.add_argument('-db', '--deadband', type=str, nargs='+')
+    parser.add_argument('-cov', '--covariance', type=str, nargs='+', 
+                        help='List of covariances to compute (default: None)')
+    parser.add_argument('--method', type=str, default='dwt', choices=['cov', 'dwt', 'cwt'], 
+                        help='Method to use for wavelet processing (default: "dwt")')
+    parser.add_argument('--wave_mother', type=str, default='db6', 
+                        help='Mother wavelet to use for wavelet processing (default: "db6")')
+    parser.add_argument('--run', type=int, default=1, 
+                        help='Run the wavelet processing (default: 1)')
+    parser.add_argument('--concat', type=int, default=1, 
+                        help='Concatenate results into a single file (default: 1)')
+    parser.add_argument('--partition', type=int, default=1, 
+                        help='Run partitioning on the results (default: 1)')
+    parser.add_argument('--processing_time_duration', type=str, default='1D', 
+                        help='Processing time duration for the wavelet processing (default: "1D")')
+    # parser.add_argument('--preaverage', type=str, default=None)
     parser.add_argument('--log_level', type=str, default='INFO', choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Set the logging level')
+                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], 
+                        help='Set the logging level')
 
     args = parser.parse_args()
     args = vars(args)
