@@ -190,7 +190,7 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
     __temp__.set_index('TIMESTAMP', inplace=True)
     # logger.debug(f'\t\tpd.MultiIndex.from_tuples: {[tuple(c.split("_")) for c in __temp__.columns]}.')
     __temp__.columns = pd.MultiIndex.from_tuples([tuple(c.split('_')) for c in __temp__.columns])
-    __temp__ = __temp__.stack(1, future_stack=True).reset_index(1).rename(columns={"level_1": "natural_frequency"}).reset_index(drop=False)
+    __temp__ = __temp__.stack(1).reset_index(1).rename(columns={"level_1": "natural_frequency"}).reset_index(drop=False)
 
     #pattern = re.compile(r"^(?P<variable>.+?)_?(?P<natural_frequency>(?<=_)\d+)?$")
     #__temp__ = __temp__.melt(['TIMESTAMP'] + φ.keys())
