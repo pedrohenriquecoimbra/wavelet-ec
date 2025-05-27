@@ -50,7 +50,7 @@ def run_from_eddypro(path="input/EP/FR-Gri_sample.eddypro",
                     #  covariance=["w*co2|w|co2|h2o", "w*co2|w*h2o", "w*h2o",],
                     #  processduration='6H', 
                      **kwargs):
-    c = eddypro.extract_variables_from_eddypro_setup(eddypro=path)
+    c = eddypro.extract_info_from_eddypro_setup(eddypro=path)
     c.update(**kwargs)
 
     for path in ['input_path', 'output_folderpath']:
@@ -238,8 +238,10 @@ if __name__ == '__main__':
     
 
     # Retrieve eddypro setup
-    args = eddypro.extract_variables_from_eddypro_setup(
-        ep_setup, ep_meta, **args)
+    exta = eddypro.extract_info_from_eddypro_setup(
+        ep_setup, ep_meta)
+
+    args = eddypro.update_args_with_extracted_info(args, exta)
 
     # Default
     args['integratioperiod'] = args['integratioperiod'] if args['integratioperiod'] is not None else args['fileduration'] * 60

@@ -130,61 +130,76 @@ def get_eddypro_cospectra(site_name=None, x='natural_frequency', y='f_nat*cospec
     return data
 
 
-def extract_variables_from_eddypro_setup(eddypro=None, metadata=None, **args):
-    eddypro = eddypro or args.get('eddypro', None)
-    metadata = metadata or args.get('metadata', eddypro.rsplit('.', 1)[
-                    0] + '.metadata')
-    
+def extract_info_from_eddypro_setup(eddypro=None, metadata=None):
+    """
+    Extracts information from EddyPro setup and metadata files and returns a dictionary.
+
+    Parameters:
+    - eddypro: Path to the EddyPro setup file.
+    - metadata: Path to the metadata file.
+
+    Returns:
+    - A dictionary containing extracted information.
+    """    
+    args = {}
+
     if eddypro:
         eddypro_setup = read_eddypro_metadata_file(eddypro)
-        if not 'site_name' in args.keys() or args['site_name'] is None:
-            args['site_name'] = eddypro_setup['Project']['project_id']
-        if not 'input_path' in args.keys() or args['input_path'] is None:
-            args['input_path'] = eddypro_setup['Project']['out_path'] + \
-                '/eddypro_raw_datasets/level_6'
-        if not 'output_folderpath' in args.keys() or args['output_folderpath'] is None:
-            args['output_folderpath'] = eddypro_setup['Project']['out_path'] + \
-                '/wavelet_flux'
-        if not 'datetimerange' in args.keys() or args['datetimerange'] is None:
-            args['datetimerange'] = eddypro_setup['Project']['pr_start_date'].replace('-', '') + eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' + \
-                eddypro_setup['Project']['pr_end_date'].replace(
-                '-', '') + eddypro_setup['Project']['pr_end_time'].replace(':', '')
-        if not 'fileduration' in args.keys() or args['fileduration'] is None:
-            args['fileduration'] = int(
-                eddypro_setup['RawProcess_Settings']['avrg_len'])
 
-        if metadata is None:
-            # not 'metadata' in args.keys() or args['metadata'] is None:
-            if eddypro_setup['Project']['proj_file']:
-                args['metadata'] = eddypro_setup['Project']['proj_file']
-            # else:
-            #     args['metadata'] = args['eddypro'].rsplit('.', 1)[
-            #         0] + '.metadata'
+        metadata = metadata or eddypro_setup['Project']['proj_file'] or str(eddypro).rsplit('.', 1)[
+            0] + '.metadata'
+
+        args['site_name'] = eddypro_setup['Project']['project_id']
+        args['input_path'] = eddypro_setup['Project']['out_path'] + \
+            '/eddypro_raw_datasets/level_6'
+        args['output_folderpath'] = eddypro_setup['Project']['out_path'] + \
+            '/wavelet_flux'
+        args['datetimerange'] = (
+            eddypro_setup['Project']['pr_start_date'].replace('-', '') +
+            eddypro_setup['Project']['pr_start_time'].replace(':', '') + '-' +
+            eddypro_setup['Project']['pr_end_date'].replace('-', '') +
+            eddypro_setup['Project']['pr_end_time'].replace(':', '')
+        )
+        args['fileduration'] = int(
+            eddypro_setup['RawProcess_Settings']['avrg_len'])
 
         try:
-            if not 'gas4_name' in args.keys() or args['gas4_name'] is None:
-                gas4_col = eddypro_setup['Project']['col_n2o']
-                eddypro_metad = read_eddypro_metadata_file(
-                    metadata)
-                args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
+            gas4_col = eddypro_setup['Project']['col_n2o']
+            eddypro_metad = read_eddypro_metadata_file(metadata)
+            args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
         except Exception as e:
             print(e)
 
     if metadata:
         eddypro_metad = read_eddypro_metadata_file(metadata)
-        if not 'acquisition_frequency' in args.keys() or args['acquisition_frequency'] is None:
-            args['acquisition_frequency'] = int(
-                float(eddypro_metad['Timing']['acquisition_frequency']))
-        # if args['fileduration'] is None: args['fileduration'] = int(eddypro_metad['Timing']['file_duration'])
+        args['acquisition_frequency'] = int(
+            float(eddypro_metad['Timing']['acquisition_frequency']))
 
-    if not 'variables_available' in args.keys() or args['variables_available'] is None:
-        if eddypro:
-            args['variables_available'] = ['u', 'v', 'w'] + [k for k in ['co2',
-                                                                         'h2o', 'ch4'] if float(eddypro_setup['Project'][f'col_{k}']) > 0]
-        if metadata:
-            if float(eddypro_setup['Project']['col_n2o']) > 0:
-                gas4 = eddypro_metad['FileDescription'][f"col_{eddypro_setup['Project']['col_n2o']}_variable"]
-                if gas4:
-                    args['variables_available'] = args['variables_available'] + [gas4]
+    if eddypro:
+        args['variables_available'] = ['u', 'v', 'w'] + [k for k in ['co2',
+                                                                     'h2o', 'ch4'] if float(eddypro_setup['Project'][f'col_{k}']) > 0]
+
+    if metadata and float(eddypro_setup['Project']['col_n2o']) > 0:
+        gas4 = eddypro_metad['FileDescription'][f"col_{eddypro_setup['Project']['col_n2o']}_variable"]
+        if gas4:
+            args['variables_available'] = args.get(
+                'variables_available', []) + [gas4]
+
     return args
 
+
+def update_args_with_extracted_info(args, extracted_info):
+    """
+    Updates the args dictionary with the extracted information.
+
+    Parameters:
+    - args: The dictionary to be updated.
+    - extracted_info: The dictionary containing extracted information.
+
+    Returns:
+    - The updated args dictionary.
+    """
+    for key, value in extracted_info.items():
+        if key not in args or args[key] is None:
+            args[key] = value
+    return args
