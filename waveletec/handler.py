@@ -53,6 +53,10 @@ def run_from_eddypro(path="input/EP/FR-Gri_sample.eddypro",
     c = eddypro.extract_variables_from_eddypro_setup(eddypro=path)
     c.update(**kwargs)
 
+    for path in ['input_path', 'output_folderpath']:
+        if c.get(path, None) is not None:
+            c[path] = os.path.abspath(c[path])
+
     return pipeline.process(**c)
 
 # raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
@@ -255,6 +259,11 @@ if __name__ == '__main__':
     # with open(args['output_folderpath']+f'/wavelet_processing_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.py', 'w+') as p:
     #    p.write('python wavelet_handler.py ' +
     #            ''.join([f'--{k} {" ".join(v)}' if isinstance(v, list) else f'--{k} {v}' for k, v in args.items()]))
+
+    for path in ['input_path', 'output_folderpath', 'eddypro', 'metadata']:
+        # Convert paths to absolute paths
+        if args.get(path, None) is not None:
+            args[path] = os.path.abspath(args[path])
 
     if args['method'] == 'cov':
         concat = partition = False
