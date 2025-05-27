@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 # project modules
-from _core.commons import get_all_sites
-from _core import corrections
+from .._core.commons import get_all_sites
+from .._core import corrections
 
 logger = logging.getLogger('wvlt.eddypro_tools')
 
