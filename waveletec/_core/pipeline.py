@@ -250,57 +250,61 @@ def _calculate_conditional_sampling_from_formula_(data, formula='w*co2|w*h2o'):
     return pd.DataFrame(φc)
 
 
-def __save_cospectra__(data, output_path, **meta):
+def __save_cospectra__(data, dst_path, overwrite=False, **meta):
     logger = logging.getLogger('wvlt.pipeline.__save_cospectra__')
 
-    saved_files = []
+    # saved_files = []
 
     info_t_startsaveloop = time.time()
-    for __datea__, __tempa__ in data.groupby(data.TIMESTAMP):
-        dst_path = output_path.format(pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
-        logger.debug(f'\t\tSaving {dst_path} with shape {__tempa__.shape}.')
-        # if os.path.exists(dst_path): continue
-        use_header = False
 
-        if not os.path.exists(dst_path):
-            use_header = True
-            header  = "wavelet_based_(co)spectra\n"
-            header += f"--------------------------------------------------------------\n"
-            header += f"TIMESTAMP_START = {min(__tempa__.TIMESTAMP)}\n"
-            header += f"TIMESTAMP_END = {max(__tempa__.TIMESTAMP)}\n"
-            header += f"N: {len(__tempa__.TIMESTAMP)}\n"
-            header += f"TIME_BUFFER [min] = {meta.get('buffer', np.nan)/60}\n"
-            header += f"frequency [Hz]\n"
-            header += f"y-axis_->_wavelet_coefficient_*_\n"
-            header += f"mother_wavelet -> {meta.get('method', '')}\n"
-            header += f"acquisition_frequency [Hz] = {1/meta.get('dt', np.nan)}\n"
-            header += f"averaging_interval [Min] = {meta.get('averaging', '')}\n"
-            hc24.mkdirs(dst_path)
-            with open(dst_path, 'w+') as part: part.write(header)
-            # legitimate_to_write = 1
-            logger.debug(f'\t\tSaving header of DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
-            saved_files.append(dst_path)
-        
-        # if not legitimate_to_write: continue
-        
-        __tempa__.drop('TIMESTAMP', axis=1, inplace=True)
-        with open(dst_path, 'a+', newline='') as part: __tempa__.to_file(part, header=use_header, chunksize=500, index=False)
-        logger.debug(f'\t\tSaving DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
-        
-        del __tempa__
+    # for __datea__, __tempa__ in data.groupby(data.TIMESTAMP):
+    # dst_path = output_path.format(pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
+    logger.debug(f'\t\tSaving {dst_path} with shape {data.shape}.')
+    # if os.path.exists(dst_path): continue
+    use_header = False
+
+    if overwrite or (not os.path.exists(dst_path)):
+        use_header = True
+        header  = "wavelet_based_(co)spectra\n"
+        header += f"--------------------------------------------------------------\n"
+        header += f"TIMESTAMP_START = {meta.get('TIMESTAMP_START', min(data.TIMESTAMP))}\n"
+        header += f"TIMESTAMP_END = {meta.get('TIMESTAMP_END', max(data.TIMESTAMP))}\n"
+        header += f"N: {meta.get('N', len(data.TIMESTAMP))}\n"
+        header += f"TIME_BUFFER [min] = {meta.get('buffer', np.nan)/60}\n"
+        header += f"frequency [Hz]\n"
+        header += f"y-axis -> wavelet_reconstructed\n"
+        header += f"mother_wavelet -> {meta.get('method', '')}\n"
+        header += f"acquisition_frequency [Hz] = {1/meta.get('dt', np.nan)}\n"
+        header += f"averaging_interval [Min] = {meta.get('averaging', '')}\n"
+        hc24.mkdirs(dst_path)
+        with open(dst_path, 'w+') as part: part.write(header)
+        # legitimate_to_write = 1
+        logger.debug(f'\t\tSaving header of DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
+        # saved_files.append(dst_path)
+    
+    # if not legitimate_to_write: continue
+    
+    data.drop('TIMESTAMP', axis=1, inplace=True)
+    with open(dst_path, 'a+', newline='') as part:
+        data.to_file(part, header=use_header, chunksize=500, index=False)
+    logger.debug(f'\t\tSaving DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
+    
+    # del data
         
     #arr_slice = np.unique(data.TIMESTAMP, return_index=True)
     #for __datea__ in arr_slice[0]:
     #    dst_path = output_path.format(suffix, pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
     #    if os.path.exists(dst_path+'.part'): os.rename(dst_path+'.part', dst_path)
-    return saved_files
+    
+    # return saved_files
+    return
 
 def process(#ymd, raw_kwargs, 
             datetimerange, fileduration, input_path, acquisition_frequency,
             covariance=None, output_folderpath=None, verbosity=1,
                   overwrite=False, processing_time_duration="1D", 
                   internal_averaging=None, dt=0.05, wt_kwargs={}, 
-                  method="dwt", averaging=30, **kwargs):
+                  method="dwt", averaging=30, meta={}, **kwargs):
     logger = logging.getLogger('wvlt.pipeline.process')
     local_args = locals()
 
@@ -401,6 +405,7 @@ def process(#ymd, raw_kwargs,
         'verbosity': verbosity,
         'processing_time_duration': processing_time_duration,
     }
+
     
     run_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
@@ -422,7 +427,7 @@ def process(#ymd, raw_kwargs,
         else:
             output_pathmodel = str(os.path.join(output_folderpath, 'wavelet_full_cospectra', str(
                 general_config['sitename'])+'_full_cospectra_{}_'+run_time+'.csv'))
-        hc24.mkdirs(output_folderpath)
+        hc24.mkdirs(output_pathmodel)
         hc24.save_locals(local_args, os.path.join(output_folderpath, f'log/setup_{run_time}.yml'))
         # with open(, 'w+') as stp:
         #     yaml.safe_dump(local_args, stp)
@@ -453,6 +458,7 @@ def process(#ymd, raw_kwargs,
         bufferforfrequency_dwt(n_=_f, **wt_kwargs) / 2 if method == 'dwt'
         else bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
     )
+    meta.update({'buffer': buffer})
     logger.debug(f"Buffer (s): {buffer}.")
     logger.info(f'Start date loop at {round(time.time() - info_t_start)} s (load_main).')
 
@@ -476,6 +482,7 @@ def process(#ymd, raw_kwargs,
             _exit()
             continue
         
+
         try:
             # main run
             output_path = output_pathmodel.format("{}")
@@ -490,8 +497,9 @@ def process(#ymd, raw_kwargs,
             saved_files = []
             for f in allvars:
                 transform_kwargs['varstorun'] = [f]
-                output = main(data, period=[min(yl), max(yl)],
-                                output_kwargs=output_kwargs, **transform_kwargs)
+                output = main(data, period=[min(yl), max(yl)], 
+                              meta=meta,
+                              output_kwargs=output_kwargs, **transform_kwargs)
                 saved_files.append(output.saved)
                 fulldata = pd.concat([fulldata, output.data], axis=0)
                 
@@ -506,11 +514,13 @@ def process(#ymd, raw_kwargs,
     
     if output_pathmodel and not fulldata.empty:
         # timestamp = pd.Timestamp.now().strftime('%Y%m%dT%H%M%S_%f')
-        fulldata.to_csv(output_pathmodel.format(run_time), index=False)
+        fulldata.to_csv(
+            os.path.join(output_folderpath, os.path.basename(output_pathmodel.format(run_time))),
+            index=False)
     return fulldata
 
 
-def main(data, varstorun, period=None, average_period='30min', output_kwargs={}, **kwargs):
+def main(data, varstorun, period=None, average_period='30min', output_kwargs={}, meta={}, **kwargs):
     logger = logging.getLogger('wvlt.pipeline.main')
     logger.info('In main.')
     logger.debug(f'Input data shape: {data.shape}.')
@@ -524,6 +534,9 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                            nan_tolerance=.3,
                            verbosity=1, identifier='0000',
                            **kwargs)
+    meta.update({'averaging': average_period,
+                 'method': kwargs.get('method', None),
+                 'dt': kwargs.get('dt', np.nan)})
     
     # select valid dates
     if period: wvvar = wvvar[(wvvar['TIMESTAMP'] > period[0]) & (wvvar['TIMESTAMP'] < period[1])]
@@ -569,6 +582,15 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     fulldata = pd.concat([wvvar, wvout, wvcsp], axis=1)
 
     # average
+    for thisdate, thisdata in fulldata.groupby(fulldata['TIMESTAMP'].dt.floor(
+            average_period)):
+        thisdate_ = thisdate.strftime('%Y%m%d%H%M')
+        meta.update({thisdate_: meta})
+        meta[thisdate_].update({
+                    'TIMESTAMP_START': min(thisdata['TIMESTAMP']),
+                    'TIMESTAMP_END': max(thisdata['TIMESTAMP']),
+                    'N': len(thisdata['TIMESTAMP'])})
+
     fulldata['TIMESTAMP'] = fulldata['TIMESTAMP'].dt.floor(
         average_period)
     __ID_COLS__ = list(set(['TIMESTAMP', 'natural_frequency']) & set(fulldata.columns))
@@ -582,12 +604,13 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                 .melt(__ID_COLS__))
     
     logger.debug(f"\tSaving data in {output_kwargs['output_path']}.")
+    saved_files = []
     if output_kwargs.get('output_path', None):
-        saved_files = __save_cospectra__(fulldata, output_kwargs['output_path'], **
-                           {'method': kwargs.get('method', None), 'averaging': average_period, 
-                            'buffer': np.nan, 'dt': kwargs.get('dt', np.nan)})
-    else:
-        saved_files = []
+        for thisdate, thisdata in fulldata.groupby(fulldata.TIMESTAMP):
+            thisdate_ = thisdate.strftime('%Y%m%d%H%M')
+            dst_path = output_kwargs.get('output_path').format(thisdate_)
+            __save_cospectra__(thisdata, dst_path, **meta[thisdate_])
+            saved_files += [dst_path]
     
     # rename saved files when done
     # os.rename(output_kwargs['output_path'].format(suffix, pd.datetime.now().strftime('%Y%m%dT%H%M%S_%f')),
