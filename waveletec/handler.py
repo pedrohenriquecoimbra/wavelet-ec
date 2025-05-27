@@ -4,13 +4,14 @@ import sys
 import re
 import logging
 import datetime
-# Project modules
+# 3rd party modules
 import yaml
-import _core as hc24
-from _core import partition as ptt
-from _core import wavelet_functions as wavelet_functions
-from _extra import eddypro_tools as eddypro
-from _core import pipeline
+# Project modules
+from . import _core as hc24
+from ._core import partition as ptt
+from ._core import wavelet_functions as wavelet_functions
+from ._extra import eddypro_tools as eddypro
+from ._core import pipeline
 
 
 logger = logging.getLogger('wvlt.handler')
