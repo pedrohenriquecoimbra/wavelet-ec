@@ -283,7 +283,7 @@ def prepare_signal(signal, nan_tolerance=0.3, identifier='0000'):
                             np.linspace(0, 1, N)[
             signan == False],
             signal[signan == False])
-    return type('var_', (object,), {'signal': signal, 'N': N, 'Nnan': Nnan})
+    return type('var_', (object,), {'signal': signal, 'signan': signan, 'N': N, 'Nnan': Nnan})
 
 
 def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180, 
