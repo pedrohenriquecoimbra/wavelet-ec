@@ -8,7 +8,7 @@ import datetime
 import yaml
 # Project modules
 from . import _core as hc24
-from ._core import partition as ptt
+from .partitioning import coimbra_et_al_2025 as ptt
 from ._core import wavelet_functions as wavelet_functions
 from ._extra import eddypro_tools as eddypro
 from ._core import pipeline

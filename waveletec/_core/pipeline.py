@@ -63,7 +63,7 @@ except ImportError as e:
 from . import commons as hc24
 from .read_data import loaddatawithbuffer
 from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal, bufferforfrequency_dwt, bufferforfrequency
-from .partition import conditional_sampling
+from ..partitioning.coimbra_et_al_2025 import conditional_sampling
 
 logger = logging.getLogger('wvlt.pipeline')
 

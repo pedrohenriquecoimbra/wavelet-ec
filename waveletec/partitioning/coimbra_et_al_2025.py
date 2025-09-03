@@ -7,12 +7,13 @@ import pandas as pd
 import itertools
 
 # project modules
-from .commons import __input_to_series__
+from .._core.commons import __input_to_series__
 
 
 def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
     logger = logging.getLogger('wvlt.partition.conditional_sampling')
-    logger.debug(f"star conditional_sampling")
+    logger.debug(
+        f"Start conditional_sampling with Y12: {Y12},\n\n args: {args},\n names: {names},\n label: {label},\n false: {false}")
 
     # label can also be {1: "+", -1: "-", 0: "·"}
     # guarantee names are enough to name all arguments
@@ -33,7 +34,7 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
         sign = ''.join([label[c] for c in co])
         name = ''.join([c for cs in zip(names, sign) for c in cs])
         Ys[name] = Y12
-        logger.debug(f"name: {name}")
+        logger.debug(f"name: {name}, co: {co}, sign: {sign}")
         # condition by sign
         for i, c in enumerate(co):
             if c:
@@ -43,6 +44,7 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
             # xy[xy==0] = false
             mask = np.where(mask == 0, false, mask)
             Ys[name] = Ys[name] * mask
+    
     return Ys
     # Ys['info_vars'] = list(Ys.keys())
     # Ys['info_names'] = names
