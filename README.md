@@ -2,13 +2,13 @@
 
 WaveletEC is a Python module designed for processing and analyzing Eddy Covariance data using wavelet transforms. This module provides functionalities to handle EddyPro setup files, perform wavelet analysis, and integrate results.
 
-[![DOI](https://zenodo.org/badge/DOI/10.2139/ssrn.4642939.svg)](http://dx.doi.org/10.2139/ssrn.4642939)
+[![DOI](https://zenodo.org/badge/DOI/10.1016/j.agrformet.2025.110684.svg)](https://doi.org/10.1016/j.agrformet.2025.110684)
 
 [![DOI](https://zenodo.org/badge/786866970.svg)](https://zenodo.org/doi/10.5281/zenodo.11071327)
 
 ## Citation
 
-Pedro H H Coimbra, Benjamin Loubet, Olivier Laurent, Matthias Mauder, Bernard Heinesch, Jonathan Bitton, Jeremie Depuydt, Pauline Buysse. Improvement of CO2 Flux Quality Through Wavelet-Based Eddy Covariance: A New Method for Partitioning Respiration and Photosynthesis. http://dx.doi.org/10.2139/ssrn.4642939
+Pedro H H Coimbra, Benjamin Loubet, Olivier Laurent, Matthias Mauder, Bernard Heinesch, Jonathan Bitton, Nicolas Delpierre, Daniel Berveiller, Jérémie Depuydt, Pauline Buysse. Evaluation of a novel approach to partitioning respiration and photosynthesis using eddy covariance, wavelets and conditional sampling. https://doi.org/10.1016/j.agrformet.2025.110684
 
 \* corresponding author: pedro-henrique.herig-coimbra@inrae.fr
 
