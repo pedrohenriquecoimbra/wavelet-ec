@@ -39,6 +39,7 @@ import logging
 import copy
 import time
 import datetime
+import glob
 
 # 3rd party modules
 from functools import reduce
@@ -62,7 +63,7 @@ except ImportError as e:
 # project modules
 from . import commons as hc24
 from .read_data import loaddatawithbuffer
-from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal, bufferforfrequency_dwt, bufferforfrequency
+from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal, bufferforfrequency_dwt, bufferforfrequency, inside_cone_of_influence
 from ..partitioning.coimbra_et_al_2025 import conditional_sampling
 
 logger = logging.getLogger('wvlt.pipeline')
@@ -81,11 +82,10 @@ def integrate_cospectra(data, f0, dst_path=None):
 
     if dst_path:
         datai.to_file(dst_path, index=False)
-    else:
-        return datai
-    return
+    return datai
 
 def integrate_cospectra_from_file(root, f0, pattern='', dst_path=None):
+    # use glob.glob to find files matching the pattern
     if isinstance(root, str):
         saved_files = {}
         for name in os.listdir(root):
@@ -125,11 +125,19 @@ def decompose_variables(data, variables=['w', 'co2'],
             variables), 'Empty list of covariances to run. Check available variables and covariances to be performed.'
         for var in variables:
             if var not in φ.keys():
-                ready_signal = prepare_signal(data[var], nan_tolerance=nan_tolerance, identifier=identifier)
-                φ[var], sj = universal_wt(
+                ready_signal = prepare_signal(
+                    data[var], nan_tolerance=nan_tolerance, identifier=identifier)
+                wt_signal = universal_wt(
                     signal=ready_signal.signal, **kwargs, inv=True)
-                φ['info_names'] += [var]
-        φ.update({'sj': sj})
+                logger.debug(
+                    f"wt_signal is ready: {wt_signal.wave.shape}, {wt_signal.sj}")
+                # φ[var], sj
+                φ[var] = wt_signal.wave
+                φ[f'{var}_qc'] = np.where(ready_signal.signan, 0, wt_signal.coi)
+                φ['info_names'] += [var, f'{var}_qc']
+                logger.debug(f"wt_signal is done.")
+        φ.update({'sj': wt_signal.sj})
+        φ.update({'coi': wt_signal.coi})
     except Exception as e:
         logger.critical(e)
         print(f"Error in decompose_variables: {e}")
@@ -173,6 +181,7 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
     logger.debug(f'\t\tDecompose all variables took {round(time.time() - info_t_startvarloop)} s (run_wt).')
     
     φs_names = []
+    # φs_names = [f'valid_{l}' if l else 'valid' for l in φ.sj]
     logger.debug(f'\t\tφ.info_names ({φ.info_names}).')
     for n in φ.info_names:
         if vars(φ)[n].shape[0] > 1:
@@ -181,6 +190,8 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
                 else: φs_names += [n] 
         else: φs_names += [n]
 
+
+    # transform 2D arrays to DataFrame
     values = [vars(φ)[n] for n in φ.info_names]
     logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names)}`.')
     logger.debug(f'\t\t{[np.array(v).shape for v in values]}.')
@@ -189,7 +200,7 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
     
     __temp__.set_index('TIMESTAMP', inplace=True)
     # logger.debug(f'\t\tpd.MultiIndex.from_tuples: {[tuple(c.split("_")) for c in __temp__.columns]}.')
-    __temp__.columns = pd.MultiIndex.from_tuples([tuple(c.split('_')) for c in __temp__.columns])
+    __temp__.columns = pd.MultiIndex.from_tuples([tuple(c.rsplit('_', 1)) for c in __temp__.columns])
     __temp__ = __temp__.stack(1).reset_index(1).rename(columns={"level_1": "natural_frequency"}).reset_index(drop=False)
 
     #pattern = re.compile(r"^(?P<variable>.+?)_?(?P<natural_frequency>(?<=_)\d+)?$")
@@ -202,14 +213,17 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
 def _calculate_product_from_formula_(data, formula='w*co2|w*h2o'):
     logger = logging.getLogger('wvlt.pipeline._calculate_product_from_formula_')
 
+    φs = {}
+
     formulavar = formula_to_vars(formula) if isinstance(
         formula, str) else formula
     xy_name = ''.join(formulavar.xy)
-    for ci, c in enumerate(formulavar.xy):
-        XY = XY * np.array(data[c]).conjugate() if ci else data[c]
-    φs = {xy_name: XY}
-    logger.debug(
-        f"\t\tDecomposed covariance shape: {XY.shape}.")
+    if xy_name not in data.columns:
+        for ci, c in enumerate(formulavar.xy):
+            XY = XY * np.array(data[c]).conjugate() if ci else data[c]
+        φs[xy_name] = XY
+        logger.debug(
+            f"\t\tDecomposed covariance shape: {XY.shape}, named: {xy_name}.")
     # ({round(XY.shape[1] / (24*60*60/20), 2)} days, for dt=20Hz)
                         
     # logger.debug(f"\t\tformulavar.condsamp_pair: {formulavar.condsamp_pair}.")
@@ -219,7 +233,7 @@ def _calculate_product_from_formula_(data, formula='w*co2|w*h2o'):
     for cs in formulavar.condsamp_pair:
         cs_name = ''.join(cs)
         # logger.debug(f"\t\tcs_name: {cs_name} (from {cs}) | φs.keys(): {φs.keys()}.")
-        if cs_name not in φs.keys():
+        if (cs_name not in φs.keys()) and (cs_name not in data.columns):
             for ci, c in enumerate(cs):
                 # logger.debug(f"\t\tCurrent c: {c}.")
                 # logger.debug(f"\t\tCurrent data: {data.head()}.")
@@ -302,9 +316,10 @@ def __save_cospectra__(data, dst_path, overwrite=False, **meta):
 def process(#ymd, raw_kwargs, 
             datetimerange, fileduration, input_path, acquisition_frequency,
             covariance=None, output_folderpath=None, verbosity=1,
-                  overwrite=False, processing_time_duration="1D", 
-                  internal_averaging=None, dt=0.05, wt_kwargs={}, 
-                  method="dwt", averaging=30, meta={}, **kwargs):
+            overwrite=False, processing_time_duration="1D", 
+            internal_averaging=None, dt=0.05, wt_kwargs={}, 
+            integration_period=None,
+            method="dwt", averaging=30, meta={}, **kwargs):
     logger = logging.getLogger('wvlt.pipeline.process')
     local_args = locals()
 
@@ -358,7 +373,7 @@ def process(#ymd, raw_kwargs,
         return data
     
     def _exit():
-        if output_path and os.path.exists(curoutpath_inprog):
+        if os.path.exists(curoutpath_inprog):
             os.remove(curoutpath_inprog)
 
     # Group parameters for each function
@@ -408,6 +423,9 @@ def process(#ymd, raw_kwargs,
 
     
     run_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+    output_path = ""
+    output_pathmodel = ""
+    curoutpath_inprog = ""
 
     # method = kwargs.get('method', 'dwt')
     # sitename = kwargs.get('sitename', '00000')
@@ -428,11 +446,14 @@ def process(#ymd, raw_kwargs,
             output_pathmodel = str(os.path.join(output_folderpath, 'wavelet_full_cospectra', str(
                 general_config['sitename'])+'_full_cospectra_{}_'+run_time+'.csv'))
         hc24.mkdirs(output_pathmodel)
-        hc24.save_locals(local_args, os.path.join(output_folderpath, f'log/setup_{run_time}.yml'))
+        try:
+            hc24.save_locals(local_args, os.path.join(output_folderpath, f'log/setup_{run_time}.yml'))
+        except Exception as e:
+            logger.warning(f"Could not save local arguments to file: {e}")
         # with open(, 'w+') as stp:
         #     yaml.safe_dump(local_args, stp)
     else:
-        output_pathmodel = None
+        output_pathmodel = ""
     
     logger.debug(f'Output path: {output_pathmodel}.')
     
@@ -514,9 +535,11 @@ def process(#ymd, raw_kwargs,
     
     if output_pathmodel and not fulldata.empty:
         # timestamp = pd.Timestamp.now().strftime('%Y%m%dT%H%M%S_%f')
-        fulldata.to_csv(
-            os.path.join(output_folderpath, os.path.basename(output_pathmodel.format(run_time))),
-            index=False)
+        dst_path = os.path.join(output_folderpath, os.path.basename(
+            output_pathmodel.format(run_time)))
+        if integration_period:
+            fulldata = integrate_cospectra(fulldata, 1/integration_period, dst_path=None)
+        fulldata.to_csv(dst_path, index=False)
     return fulldata
 
 
@@ -535,11 +558,12 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                            verbosity=1, identifier='0000',
                            **kwargs)
     meta.update({'averaging': average_period,
-                 'method': kwargs.get('method', None),
+                 'method': f"{kwargs.get('method', '')} ~{kwargs.get('mother_wavelet', '')}",
                  'dt': kwargs.get('dt', np.nan)})
     
     # select valid dates
     if period: wvvar = wvvar[(wvvar['TIMESTAMP'] > period[0]) & (wvvar['TIMESTAMP'] < period[1])]
+    wvvar = wvvar.reset_index(drop=True)
 
     logger.debug(f'Decompose data is over.')
 
@@ -559,14 +583,13 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     
     logger.debug(f'Calclate covariance is over.')
 
-    # calculate conditional sampling
-    h = [_calculate_conditional_sampling_from_formula_(wvout, f)
-         for f in varstorun]
-    
+    growingdata = pd.concat([wvvar, wvout], axis=1)
+
+    # calculate conditional sampling    
     logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over. 0')
     wvcsp = pd.concat(
         # [wvvar[['TIMESTAMP', 'natural_frequency']]] +
-        [_calculate_conditional_sampling_from_formula_(wvout, f)
+        [_calculate_conditional_sampling_from_formula_(growingdata, f)
          for f in varstorun], axis=1)
     logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over.')
 
@@ -579,10 +602,11 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     #         φcs[i], method='repeat', smoothing=smoothing)
 
     # assemble data
-    fulldata = pd.concat([wvvar, wvout, wvcsp], axis=1)
+    growingdata = pd.concat([growingdata, wvcsp], axis=1)
+    
 
     # average
-    for thisdate, thisdata in fulldata.groupby(fulldata['TIMESTAMP'].dt.floor(
+    for thisdate, thisdata in growingdata.groupby(growingdata['TIMESTAMP'].dt.floor(
             average_period)):
         thisdate_ = thisdate.strftime('%Y%m%d%H%M')
         meta.update({thisdate_: meta})
@@ -591,22 +615,23 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                     'TIMESTAMP_END': max(thisdata['TIMESTAMP']),
                     'N': len(thisdata['TIMESTAMP'])})
 
-    fulldata['TIMESTAMP'] = fulldata['TIMESTAMP'].dt.floor(
+    growingdata['TIMESTAMP'] = growingdata['TIMESTAMP'].dt.floor(
         average_period)
-    __ID_COLS__ = list(set(['TIMESTAMP', 'natural_frequency']) & set(fulldata.columns))
-    fulldata = fulldata.groupby(__ID_COLS__).agg(
+    __ID_COLS__ = list(
+        set(['TIMESTAMP', 'natural_frequency']) & set(growingdata.columns))
+    growingdata = growingdata.groupby(__ID_COLS__).agg(
         np.nanmean).reset_index(drop=False)
     
     # integrate
 
     # save in dataframe and .csv
-    fulldata = (fulldata.sort_values(by=__ID_COLS__)
+    growingdata = (growingdata.sort_values(by=__ID_COLS__)
                 .melt(__ID_COLS__))
     
     logger.debug(f"\tSaving data in {output_kwargs['output_path']}.")
     saved_files = []
     if output_kwargs.get('output_path', None):
-        for thisdate, thisdata in fulldata.groupby(fulldata.TIMESTAMP):
+        for thisdate, thisdata in growingdata.groupby(growingdata.TIMESTAMP):
             thisdate_ = thisdate.strftime('%Y%m%d%H%M')
             dst_path = output_kwargs.get('output_path').format(thisdate_)
             __save_cospectra__(thisdata, dst_path, **meta[thisdate_])
@@ -617,4 +642,4 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     #           )
 
     # save in .nc
-    return type('var_', (object,), {'data': fulldata, 'saved': saved_files})
+    return type('var_', (object,), {'data': growingdata, 'saved': saved_files})
