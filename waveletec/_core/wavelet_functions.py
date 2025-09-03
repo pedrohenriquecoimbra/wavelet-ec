@@ -286,6 +286,41 @@ def prepare_signal(signal, nan_tolerance=0.3, identifier='0000'):
     return type('var_', (object,), {'signal': signal, 'signan': signan, 'N': N, 'Nnan': Nnan})
 
 
+def cone_of_influence(n0, dt, wavelet=None):
+    """ function: calculates the cone of influence.
+    Uses triangualr Bartlett window with non-zero end-points.
+    call: cone_of_influence()
+    Input:
+        n0: number of points in the signal
+        dt: sampling rate (in seconds)
+        wavelet: mother wavelet (w/ cdelta and psi(0) callables). If None, uses Morlet.
+    Return:
+        coi: array with the cone of influence in Fourier periods    
+    """
+
+    if wavelet is None: wavelet = pycwt.wavelet.Morlet(6)
+    if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
+
+    coi = (n0 / 2 - np.abs(np.arange(0, n0) - (n0 - 1) / 2))
+    coi = wavelet.flambda() * wavelet.coi() * dt * coi    
+    return coi
+
+def inside_cone_of_influence(sj, **kwargs):
+    """
+    function: calculates the cone of influence for a given wavelet transform
+    call: inside_cone_of_influence()
+    Input:
+        sj: scales
+        kwargs: keyword arguments for wavelet transform (e.g., dt, wavelet)
+    Return:
+        coi: array with True if inside cone of influence, False otherwise
+    """
+    
+    coi = np.array([[s >= (1 / c)
+                   for c in cone_of_influence(**kwargs)] for s in sj])
+
+    return coi
+
 def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180, 
                  dj=1/12, inv=True, **kwargs):
     """
@@ -346,3 +381,9 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
             waves = waves[0].real
         # wave = waves[0][0]
     return waves, sj
+
+    coi = inside_cone_of_influence(sj=sj, dt=1/fs,
+                                   n0=len(signal), 
+                                   #wavelet=kwargs.get('mother_wavelet', '')
+                                   )
+    
