@@ -86,6 +86,7 @@ def integrate_cospectra(data, f0, dst_path=None):
 
 def integrate_cospectra_from_file(root, f0, pattern='', dst_path=None):
     # use glob.glob to find files matching the pattern
+    logger = logging.getLogger('wvlt.pipeline.integrate_cospectra_from_file')
     if isinstance(root, str):
         saved_files = {}
         for name in os.listdir(root):
@@ -121,12 +122,14 @@ def decompose_variables(data, variables=['w', 'co2'],
 
     # run by couple of variables (e.g.: co2*w -> mean(co2'w'))
     try:
+        logger.debug(f"Debug variables are: {variables} and data columns are: {data.columns.tolist()}")
         assert len(
             variables), 'Empty list of covariances to run. Check available variables and covariances to be performed.'
         for var in variables:
             if var not in φ.keys():
                 ready_signal = prepare_signal(
                     data[var], nan_tolerance=nan_tolerance, identifier=identifier)
+                logger.debug(f"signal is ready: {ready_signal.signal.shape}")
                 wt_signal = universal_wt(
                     signal=ready_signal.signal, **kwargs, inv=True)
                 logger.debug(
@@ -190,6 +193,8 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
                 else: φs_names += [n] 
         else: φs_names += [n]
 
+    logger.debug(f"\t\tvars(φ).keys(): {vars(φ).keys()}")
+    logger.debug(f'\t\tφs_names: {φs_names} ({len(φs_names)}).')
 
     # transform 2D arrays to DataFrame
     values = [vars(φ)[n] for n in φ.info_names]
@@ -214,6 +219,8 @@ def _calculate_product_from_formula_(data, formula='w*co2|w*h2o'):
     logger = logging.getLogger('wvlt.pipeline._calculate_product_from_formula_')
 
     φs = {}
+    logger.debug(
+        f"\t\tformula: {formula} ({type(formula)}).")
 
     formulavar = formula_to_vars(formula) if isinstance(
         formula, str) else formula
@@ -533,6 +540,10 @@ def process(#ymd, raw_kwargs,
 
         _exit()
     
+    logger.debug(f'End date loop at {round(time.time() - info_t_start)} s.')
+    logger.debug(f"integration_period: {integration_period}.")
+    logger.debug(f"output_pathmodel: {output_pathmodel}.")
+    logger.debug(f"fulldata: {fulldata.head()}.")
     if output_pathmodel and not fulldata.empty:
         # timestamp = pd.Timestamp.now().strftime('%Y%m%dT%H%M%S_%f')
         dst_path = os.path.join(output_folderpath, os.path.basename(
@@ -552,6 +563,10 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     vars_unique = list(set([var for f in varstorun for var in formula_to_vars(f).uniquevars]))
     logger.debug(f'Unique vars: {vars_unique}.')
 
+    logger.debug(f'Input data is ready, data shape is {data.shape}.')
+    logger.debug(
+        f'\n{data.head()}\n\n{min(data["TIMESTAMP"])} - {max(data["TIMESTAMP"])}\n\n{period}')
+
     # decompose all required variables
     wvvar = decompose_data(data, vars_unique,
                            nan_tolerance=.3,
@@ -561,11 +576,14 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                  'method': f"{kwargs.get('method', '')} ~{kwargs.get('mother_wavelet', '')}",
                  'dt': kwargs.get('dt', np.nan)})
     
+    logger.debug(f'Decompose data is over, data shape is {wvvar.shape}.')
+    logger.debug(f'\n{wvvar.head()}\n')
+    
     # select valid dates
     if period: wvvar = wvvar[(wvvar['TIMESTAMP'] > period[0]) & (wvvar['TIMESTAMP'] < period[1])]
     wvvar = wvvar.reset_index(drop=True)
 
-    logger.debug(f'Decompose data is over.')
+    logger.debug(f'Screen data over period of interest yielded data shape {wvvar.shape}.')
 
     # calculate covariance
     # wvout = _calculate_product_from_formula_(wvvar, varstorun)
@@ -584,6 +602,7 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     logger.debug(f'Calclate covariance is over.')
 
     growingdata = pd.concat([wvvar, wvout], axis=1)
+    logger.debug(f'Growing data shape {growingdata.shape}.')
 
     # calculate conditional sampling    
     logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over. 0')
@@ -591,7 +610,8 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
         # [wvvar[['TIMESTAMP', 'natural_frequency']]] +
         [_calculate_conditional_sampling_from_formula_(growingdata, f)
          for f in varstorun], axis=1)
-    logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over.')
+         
+    logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over, with data: {wvcsp.head()}.')
 
     # despike
     # denoise
@@ -604,6 +624,8 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     # assemble data
     growingdata = pd.concat([growingdata, wvcsp], axis=1)
     
+    logger.debug(
+        f'Data is assembled: {growingdata.head()}.')
 
     # average
     for thisdate, thisdata in growingdata.groupby(growingdata['TIMESTAMP'].dt.floor(
@@ -634,6 +656,7 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
         for thisdate, thisdata in growingdata.groupby(growingdata.TIMESTAMP):
             thisdate_ = thisdate.strftime('%Y%m%d%H%M')
             dst_path = output_kwargs.get('output_path').format(thisdate_)
+            logger.debug(f"\t\t\t... in {dst_path}.")
             __save_cospectra__(thisdata, dst_path, **meta[thisdate_])
             saved_files += [dst_path]
     
