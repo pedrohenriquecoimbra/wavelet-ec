@@ -28,6 +28,7 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor, QuantileRegressor
 import zipfile
 from io import StringIO
+from pandas.api.types import is_numeric_dtype, is_object_dtype
 
 # project modules
 from .commons import update_nested_dicts, structuredData
@@ -343,7 +344,7 @@ def universal_reader(path, lookup=[], fill=False, fmt={}, onlynumeric=True, verb
 
 
 def loaddatawithbuffer(d0, d1=None, freq=None, buffer=None, 
-                       tname="TIMESTAMP", f_freq=30, **kwargs):
+                       tname="TIMESTAMP", f_freq=30, sort=True, **kwargs):
     """
     Load data with buffer.
     d0: start date
@@ -375,6 +376,9 @@ def loaddatawithbuffer(d0, d1=None, freq=None, buffer=None,
     if data == None or data.data.empty:
         return data.data
     data.data[tname] = pd.to_datetime(data.data[tname])
+
+    if sort:
+        data.data = data.data.sort_values(by=tname).reset_index(drop=True)
     
     if buffer:
         d0 = pd.to_datetime(d0) - pd.Timedelta(buffer*1.1, unit='s')
