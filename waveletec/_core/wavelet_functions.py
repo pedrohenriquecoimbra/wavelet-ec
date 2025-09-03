@@ -89,7 +89,7 @@ try:
                 break
         return (n0-N) * fs**-1
 except Exception as e:
-    print(e)
+    print(f"Error in bufferforfrequency_dwt:\n{e}")
 
 
 try:
@@ -108,7 +108,7 @@ try:
         N = int(np.ceil(n0 * dt))
         return N
 except Exception as e:
-    print(e)
+    print(f"Error in bufferforfrequency:\n{e}")
 
 
 def formula_to_vars(formula):
