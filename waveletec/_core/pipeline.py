@@ -132,7 +132,7 @@ def decompose_variables(data, variables=['w', 'co2'],
         φ.update({'sj': sj})
     except Exception as e:
         logger.critical(e)
-        print(str(e))
+        print(f"Error in decompose_variables: {e}")
     # return φ
     return type('var_', (object,), φ)
 
