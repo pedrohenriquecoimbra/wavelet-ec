@@ -166,7 +166,8 @@ def extract_info_from_eddypro_setup(eddypro=None, metadata=None):
         try:
             gas4_col = eddypro_setup['Project']['col_n2o']
             eddypro_metad = read_eddypro_metadata_file(metadata)
-            args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
+            if (not gas4_col) or (str(gas4_col) != '0'):
+                args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
         except Exception as e:
             print(f"Error extracting gas4 name: {e}")
 
