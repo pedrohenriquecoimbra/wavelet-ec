@@ -1,12 +1,14 @@
 .git
 *.part
 *.pyc
+.deprecated
 dist/*
 history_dist/*
 build/*
 waveletec.egg-info/*
 scripts/__pycache__/*
 sample/**/input/20Hz/*.csv
-deprecated/*
+sample/**/output/eddypro_raw_datasets/level_6/*.txt
 sample/*/output/wavelet_flux_*
+sample/*/output/history/*
 sample/*/test*
