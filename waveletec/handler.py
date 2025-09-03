@@ -49,8 +49,8 @@ def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, filedur
 def run_from_eddypro(path,
                      #="input/EP/FR-Gri_sample.eddypro",
                     #  covariance=["w*co2|w|co2|h2o", "w*co2|w*h2o", "w*h2o",],
-                    #  processduration='6H', 
-                     **kwargs):
+                    #  processduration='6H',
+                    **kwargs):
     c = eddypro.extract_info_from_eddypro_setup(eddypro=path)
     c.update(**kwargs)
 
@@ -73,7 +73,7 @@ def run_from_eddypro(path,
     
 
 def eddypro_wavelet_run(site_name, input_path, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
-         processduration='1D', integratioperiod=None, preaverage=None,
+         processduration='1D', integration_period=None, preaverage=None,
          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
          method = 'dwt', wave_mother='db6', **kwargs):
     local_args = locals()
@@ -117,13 +117,13 @@ def eddypro_wavelet_run(site_name, input_path, outputpath, datetimerange, acquis
     return data
 
 
-def integrate_full_spectra_into_file(site_name, output_folderpath, integratioperiod=60*30, **kwargs):
+def integrate_full_spectra_into_file(site_name, output_folderpath, integration_period=60*30, **kwargs):
     # CONCAT INTO SINGLE FILE
     dst_path = os.path.join(output_folderpath, str(
         site_name)+f'_CDWT_full_cospectra.csv')
     
     pipeline.integrate_cospectra_from_file(os.path.join(output_folderpath, 'wavelet_full_cospectra'),
-                                          1/integratioperiod, '_CDWT_full_cospectra_([0-9]{12}).csv$', dst_path)
+                                          1/integration_period, '_CDWT_full_cospectra_([0-9]{12}).csv$', dst_path)
     #hc24.concat_into_single_file(
     #    os.path.join(outputpath, 'wavelet_full_cospectra'), str(site_name)+f'_CDWT_full_cospectra.+.{fileduration}mn.csv', 
     #    output_path=dst_path, skiprows=10)
@@ -213,104 +213,133 @@ def set_cwd(workingdir=None):
         logger.debug("No working directory specified, using current directory.")
 
 
-if __name__ == '__main__':
+def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-ep', '--eddypro',   type=str, help='Path to EddyPro setup file')
-    parser.add_argument('-m', '--metadata',   type=str, help='Path to EddyPro metadata file')
-    parser.add_argument('-s', '--site_name',   type=str, help='Site name for the processing')
-    parser.add_argument('-i', '--input_path',  type=str, help='Path to the input data folder')
-    parser.add_argument('-o', '--output_folderpath', type=str, 
+
+    parser.add_argument('-ep', '--eddypro',   type=str,
+                        help='Path to EddyPro setup file')
+    parser.add_argument('-m', '--metadata',   type=str,
+                        help='Path to EddyPro metadata file')
+    parser.add_argument('-s', '--site_name',   type=str,
+                        help='Site name for the processing')
+    parser.add_argument('-i', '--input_path',  type=str,
+                        help='Path to the input data folder')
+    parser.add_argument('-o', '--output_folderpath', type=str,
                         help='Path to the output folder where results will be saved')
-    parser.add_argument('-d', '--datetimerange', type=str, 
+    parser.add_argument('-d', '--datetimerange', type=str,
                         help='Date and time range for processing, format: YYYYMMDD-HHMM-YYYYMMDD-HHMM')
-    parser.add_argument('-af', '--acquisition_frequency', type=int, default=20, 
+    parser.add_argument('-af', '--acquisition_frequency', type=int, default=20,
                         help='Acquisition frequency in Hz (default: 20 Hz)')
-    parser.add_argument('-fd', '--fileduration', type=int, default=30, 
+    parser.add_argument('-fd', '--fileduration', type=int, default=30,
                         help='File duration in minutes (default: 30 minutes)')
-    parser.add_argument('-ip', '--integratioperiod', type=int, default=None, 
+    parser.add_argument('-ip', '--integration_period', type=int, default=None,
                         help='Integration period in seconds (default: None)')
-    parser.add_argument('-v', '--variables_available', type=str, nargs='+', 
+    parser.add_argument('-v', '--variables_available', type=str, nargs='+',
                         help='List of available variables (default: ["u", "v", "w", "ts", "co2", "h2o"])')
     # parser.add_argument('-dk', '--despike', type=int)  # , nargs=1)
     # parser.add_argument('-dn', '--denoise', type=int)  # , nargs=1)
     # parser.add_argument('-db', '--deadband', type=str, nargs='+')
-    parser.add_argument('-cov', '--covariance', type=str, nargs='+', 
+    parser.add_argument('-cov', '--covariance', type=str, nargs='+',
                         help='List of covariances to compute (default: None)')
-    parser.add_argument('--method', type=str, default='dwt', choices=['cov', 'dwt', 'cwt'], 
+    parser.add_argument('--method', type=str, default='dwt', choices=['cov', 'dwt', 'cwt'],
                         help='Method to use for wavelet processing (default: "dwt")')
-    parser.add_argument('--wave_mother', type=str, default='db6', 
+    parser.add_argument('--wave_mother', type=str, default='db6',
                         help='Mother wavelet to use for wavelet processing (default: "db6")')
-    parser.add_argument('--run', type=int, default=1, 
+    parser.add_argument('--run', type=int, default=1,
                         help='Run the wavelet processing (default: 1)')
-    parser.add_argument('--concat', type=int, default=1, 
+    parser.add_argument('--concat', type=int, default=1,
                         help='Concatenate results into a single file (default: 1)')
-    parser.add_argument('--partition', type=int, default=1, 
+    parser.add_argument('--partition', type=int, default=1,
                         help='Run partitioning on the results (default: 1)')
-    parser.add_argument('--processing_time_duration', type=str, default='1D', 
+    parser.add_argument('--processing_time_duration', type=str, default='1D',
                         help='Processing time duration for the wavelet processing (default: "1D")')
     # parser.add_argument('--preaverage', type=str, default=None)
-    parser.add_argument('-cwd', '-workingdir', type=str, default=None, 
+    parser.add_argument('-cwd', '-workingdir', type=str, default=None,
                         help='Set the current working directory (default: None)')
     parser.add_argument('--log_level', type=str, default='INFO', choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], 
+                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Set the logging level')
 
     args = parser.parse_args()
-    args = vars(args)
+    return vars(args)
 
+
+def prepare_args(args):
     # Set the current working directory if specified
-    set_cwd(os.chdir(args['cwd']))
+    if args.get('cwd'):
+        set_cwd(os.chdir(args['cwd']))
 
-    # Set logging level from argument
-    log_level = getattr(logging, args.pop('log_level', 'INFO').upper(), logging.INFO)
+    # Set logging level
+    log_level = getattr(logging, args.pop(
+        'log_level', 'INFO').upper(), logging.INFO)
     args['logging_kwargs'] = {'level': log_level}
 
-    # Convert string to boolean
-    run = args.pop('run')
-    concat = args.pop('concat')
-    partition = args.pop('partition')
+    # Extract and pop run flags
+    run = args.pop('run', 1)
+    concat = args.pop('concat', 1)
+    partition = args.pop('partition', 1)
     ep_setup = args.pop('eddypro')
     ep_meta = args.pop('metadata')
-    
 
     # Retrieve eddypro setup
-    exta = eddypro.extract_info_from_eddypro_setup(
-        ep_setup, ep_meta)
-
+    exta = eddypro.extract_info_from_eddypro_setup(ep_setup, ep_meta)
     args = eddypro.update_args_with_extracted_info(args, exta)
 
-    # Default
-    args['integratioperiod'] = args['integratioperiod'] if args['integratioperiod'] is not None else args['fileduration'] * 60
+    # Default integration period
+    logger.debug(
+        f"Integration period {args['integration_period']}, setting to {args['fileduration']} minutes.")
+    if args['integration_period'] is None:
+        args['integration_period'] = args['fileduration'] * 60
+
+    # Sanitize site name
     args['site_name'] = args['site_name'].replace('/', '_').replace('\\', '_')
 
-    print('Start run w/')
-    # replace os.get_cwd() for '' if str
-    print('\n'.join(
-        [f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
-
-    # Assert variables have been assigned
-    missing_args = [f'`{k}`' for k in ['site_name', 'input_path', 'output_folderpath',
-                                       'datetimerange', 'acquisition_frequency', 'fileduration'] if args[k] is None]
-    assert len(
-        missing_args) == 0, f'Missing argument in: {", ".join(missing_args)}.'
-
-    # with open(args['output_folderpath']+f'/wavelet_processing_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.py', 'w+') as p:
-    #    p.write('python wavelet_handler.py ' +
-    #            ''.join([f'--{k} {" ".join(v)}' if isinstance(v, list) else f'--{k} {v}' for k, v in args.items()]))
-
+    # Convert paths
     for path in ['input_path', 'output_folderpath', 'eddypro', 'metadata']:
-        # Convert paths to absolute paths
-        if args.get(path, None) is not None:
+        if args.get(path):
             args[path] = os.path.abspath(args[path])
+
+    # Return args and control flags
+    return args, run, concat, partition, ep_setup
+
+
+def validate_args(args):
+    required = ['site_name', 'input_path', 'output_folderpath',
+                'datetimerange', 'acquisition_frequency', 'fileduration']
+    missing = [f'`{k}`' for k in required if args.get(k, None) is None]
+    if missing:
+        raise ValueError(f'Missing argument(s): {", ".join(missing)}')
+
+
+def log_args(args):
+    # print('\n'.join(
+    #     [f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
+
+    print('Start run with:')
+    for k, v in args.items():
+        if isinstance(v, str) and len(v) > 30:
+            v = f"{v[:5]}~{v[-25:]}"
+        print(f"{k}:\t{v}")
+    print()
+
+
+def main(**args):
+    args, run, concat, partition, ep_setup = prepare_args(args)
+    validate_args(args)
+    log_args(args)
 
     if args['method'] == 'cov':
         concat = partition = False
 
     if run:
-        # eddypro_wavelet_run(**args)
-        run_from_eddypro(args.get('eddypro'), **args)
-    if concat:
-        integrate_full_spectra_into_file(**args)
+        run_from_eddypro(ep_setup, **args)
+    # if concat:
+    #     integrate_full_spectra_into_file(**args)
     if partition:
         condition_sampling_partition(**args)
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(**args)
