@@ -380,10 +380,10 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
             waves = __idwt__(*waves, N=N, **kwargs)
             waves = waves[0].real
         # wave = waves[0][0]
-    return waves, sj
 
     coi = inside_cone_of_influence(sj=sj, dt=1/fs,
                                    n0=len(signal), 
                                    #wavelet=kwargs.get('mother_wavelet', '')
                                    )
     
+    return type('var_', (object,), {'wave': waves, 'sj': sj, 'coi': coi, 'method': method, 'fs': fs, 'f0': f0, 'f1': f1, 'fn': fn})
