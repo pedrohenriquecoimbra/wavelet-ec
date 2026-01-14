@@ -64,10 +64,208 @@ except ImportError as e:
 from . import commons as hc24
 from .read_data import loaddatawithbuffer
 from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal, bufferforfrequency_dwt, bufferforfrequency
-from ..partitioning.coimbra_et_al_2025 import conditional_sampling
+from ..partitioning.coimbra_et_al_2025 import conditional_sampling, partition_DWCS, partition_DWCS_CO, partition_DWCS_H2O
+from .._extra import eddypro_tools as eddypro
 
-logger = logging.getLogger('wvlt.pipeline')
 
+logger = logging.getLogger(__name__)
+
+
+
+# def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, fileduration=30, **kwargs):
+#     raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
+#     kwargs['fmt'] = kwargs.get('fmt', {})
+#     if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+#     raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
+
+#     ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min']
+#     _, _, _f = ymd
+#     ymd = hc24.list_time_in_period(*ymd, '1D', include='both')
+
+#     for ymd_i, yl in enumerate(ymd):
+#         data = hc24.loaddatawithbuffer(
+#             yl, d1=None, freq=_f, buffer=0, f_freq=_f, **raw_kwargs)
+#         break
+#     return data
+
+
+# def sample_raw_data(input_path, datetimerange, acquisition_frequency=20, fileduration=30, processduration='1D'):
+#     ymd = [datetimerange.split(
+#         '-')[0], datetimerange.split('-')[1], f'{fileduration}min']
+#     _, _, _f = ymd
+#     ymd = waveletec._core.list_time_in_period(
+#         *ymd, processduration, include='both')
+
+#     for ymd_i, yl in enumerate(ymd):
+#         data = waveletec._core.loaddatawithbuffer(
+#             yl, d1=None, freq=_f, buffer=0, f_freq=_f, **{'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}})
+#         break
+#     return data
+
+# raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
+# kwargs['fmt'] = kwargs.get('fmt', {})
+# if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+# raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
+
+# ymd, raw_kwargs, output_folderpath = None, verbosity = 1,
+# overwrite = False, processing_time_duration = "1D",
+# internal_averaging = None, dt = 0.05, wt_kwargs = {},
+# method = "dwt", averaging = 30, **kwargs)
+
+    
+
+# def eddypro_wavelet_run(site_name, input_path, outputpath, datetimerange, acquisition_frequency=20, fileduration=30, 
+#          processduration='1D', integration_period=None, preaverage=None,
+#          covariance = None, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], denoise=0, deadband=[], 
+#          method = 'dwt', wave_mother='db6', **kwargs):
+#     local_args = locals()
+
+#     if outputpath is not None:
+#         hc24.start_logging(outputpath)
+
+#         # Select output file path
+#         if method == 'cov':
+#             outputpath = str(os.path.join(outputpath, str(site_name)+'{}_{}.csv'))
+#         else:
+#             outputpath = str(os.path.join(outputpath, 'wavelet_full_cospectra', str(site_name)+'_CDWT{}_{}.csv'))
+
+#         # Save args for run
+#         hc24.mkdirs(outputpath)
+#         with open(os.path.join(os.path.dirname(os.path.dirname(outputpath)), f'log/setup_{datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")}.yml'), 'w+') as stp:
+#             yaml.safe_dump(local_args, stp)
+
+#     # Select covariances
+#     # x*y → Cov(x, y)
+#     # x*y|x*z|x*... → Cov(x, y)|Cov(x, z),Cov(x, ...)
+#     if covariance is None:
+#         covariance = hc24.available_combinations(
+#             hc24.DEFAULT_COVARIANCE, variables_available)
+
+#     # RUN WAVELET FLUX PROCESSING
+#     # ymd = [START_DATE, END_DATE, FILE_FREQUENCY]
+#     raw_kwargs = {'path': input_path, 'fkwargs': {'dt': 1/acquisition_frequency}}
+#     kwargs['fmt'] = kwargs.get('fmt', {})
+#     if 'gas4_name' in kwargs.keys(): kwargs['fmt'].update({kwargs.pop('gas4_name'): '4th gas'})
+#     raw_kwargs.update({k: v for k, v in kwargs.items() if k in ['fmt']})
+#     data = wavelet_functions.load_data_and_loop(ymd = [datetimerange.split('-')[0], datetimerange.split('-')[1], f'{fileduration}min'],
+#                                          output_path = outputpath,
+#                                          varstorun = covariance,
+#                                          averaging = [fileduration],
+#                                          processing_time_duration = processduration,
+#                                          method = method,
+#                                          wt_kwargs = {'fs': acquisition_frequency, 'wavelet': wave_mother},
+#                                          raw_kwargs = raw_kwargs,
+#                                          verbosity=5)
+#     return data
+
+ 
+
+def condition_sampling_partition(folder, output_name=None, 
+                                 id_columns=None,
+                                 variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
+    # RUN PARTITIONING
+    # dst_path = os.path.join(folder, str(
+    #     site_name)+f'_CDWT_full_cospectra.csv')
+    output_name = output_name or '0000_CDWT_partitioning'
+    input_file = glob.glob(os.path.join(folder, '*_full_cospectra*.csv'))
+
+    assert input_file, 'File not found.'
+    
+    input_file = input_file[0]
+    logger.debug(f"pd.read_file('{input_file}')")
+    data = pd.read_file(input_file)
+
+    id_columns = id_columns or ['TIMESTAMP'] + [c for c in ['natural_frequency'] if c in data]
+
+    if (len(data.columns) < 5) & ('variable' in data.columns) & ('value' in data.columns):
+        data = (data
+                .dropna(subset=id_columns)
+                .groupby(id_columns + ['variable'])
+                .mean()
+                .reset_index()
+                .pivot(
+                    index=id_columns,
+                    columns='variable',
+                    values='value'
+                )
+                .reset_index())
+
+    h2o_dw_required_variables = ['w','co2','h2o']
+    is_lacking_variable = sum([v not in variables_available for v in h2o_dw_required_variables])
+    if not is_lacking_variable:
+        logger.debug("partition_DWCS_H2O")
+        try:
+            partition_DWCS_H2O(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
+                CO2neg_H2Opos='wco2-wh2o+', 
+                CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco'])\
+                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_H2O.csv'), index=False)
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in h2o_dw_required_variables if v not in variables_available])}.")
+    
+    h2o_co_dw_required_variables = ['w','co2','h2o','co']
+    is_lacking_variable = sum([v not in variables_available for v in h2o_co_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2', 
+                CO2neg_H2Opos='wco2-wh2o+', 
+                CO2neg_H2Oneg='wco2-wh2o-', 
+                CO2pos_COpos='wco2+wco+', 
+                CO2pos_COneg='wco2+wco-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
+                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_H2O_CO.csv'), index=False)
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in h2o_co_dw_required_variables if v not in variables_available])}.")
+    
+    co_dw_required_variables = ['w','co2','co']
+    is_lacking_variable = sum([v not in variables_available for v in co_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2', 
+                CO2neg_H2Opos=['wco2-wco+', 'wco2-wco-'], 
+                CO2neg_H2Oneg=None, 
+                CO2pos_COpos='wco2+wco+', 
+                CO2pos_COneg='wco2+wco-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
+                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_CO.csv'), index=False)
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in co_dw_required_variables if v not in variables_available])}.")
+        
+    ch4_dw_required_variables = ['w','co2','ch4']
+    is_lacking_variable = sum([v not in variables_available for v in ch4_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2', 
+                CO2neg_H2Opos=['wco2-wch4+', 'wco2-wch4-'], 
+                CO2neg_H2Oneg=None, 
+                CO2pos_COpos='wco2+wch4+', 
+                CO2pos_COneg='wco2+wch4-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
+                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_CH4.csv'), index=False)
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
 
 def integrate_cospectra(data, f0, dst_path=None):
     data0 = data[(np.isnan(data['natural_frequency']) == False) * (data['natural_frequency'] >= f0)
@@ -84,9 +282,9 @@ def integrate_cospectra(data, f0, dst_path=None):
         datai.to_file(dst_path, index=False)
     return datai
 
-def integrate_cospectra_from_file(root, f0, pattern='', dst_path=None):
+
+def integrate_cospectra_from_file(root, f0, pattern='_full_cospectra_([0-9]+)_', dst_path=None):
     # use glob.glob to find files matching the pattern
-    logger = logging.getLogger('wvlt.pipeline.integrate_cospectra_from_file')
     if isinstance(root, str):
         saved_files = {}
         for name in os.listdir(root):
@@ -129,21 +327,21 @@ def decompose_variables(data, variables=['w', 'co2'],
             if var not in φ.keys():
                 ready_signal = prepare_signal(
                     data[var], nan_tolerance=nan_tolerance, identifier=identifier)
-                logger.debug(f"signal is ready: {ready_signal.signal.shape}")
+                # logger.debug(f"signal is ready: {ready_signal.signal.shape}")
                 wt_signal = universal_wt(
-                    signal=ready_signal.signal, **kwargs, inv=True)
-                logger.debug(
-                    f"wt_signal is ready: {wt_signal.wave.shape}, {wt_signal.sj}")
+                    signal=ready_signal.signal, **kwargs, iwt=True)
+                # logger.debug(
+                #     f"wt_signal is ready: {wt_signal.wave.shape}, {wt_signal.sj}")
                 # φ[var], sj
                 φ[var] = wt_signal.wave
                 φ[f'{var}_qc'] = np.where(ready_signal.signan, 0, wt_signal.coi)
                 φ['info_names'] += [var, f'{var}_qc']
-                logger.debug(f"wt_signal is done.")
+                # logger.debug(f"wt_signal is done.")
         φ.update({'sj': wt_signal.sj})
         φ.update({'coi': wt_signal.coi})
     except Exception as e:
         logger.critical(e)
-        print(f"Error in decompose_variables: {e}")
+        # logger.error(f"Error in decompose_variables: {e}")
     # return φ
     return type('var_', (object,), φ)
 
@@ -151,7 +349,6 @@ def decompose_variables(data, variables=['w', 'co2'],
 def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tolerance=.3, verbosity=1, **kwargs):
     """    Calculate data decomposed with wavelet transform
     """
-    logger = logging.getLogger('wvlt.pipeline.decompose_data')
     assert method in [
         'dwt', 'cwt', 'fcwt'], "Method not found. Available methods are: dwt, cwt, fcwt"
     
@@ -181,7 +378,7 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
     #         N = len(signal)
         
 
-    logger.debug(f'\t\tDecompose all variables took {round(time.time() - info_t_startvarloop)} s (run_wt).')
+    logger.debug(f'\t\tDecompose all variables took {round(time.time() - info_t_startvarloop)} s.')
     
     φs_names = []
     # φs_names = [f'valid_{l}' if l else 'valid' for l in φ.sj]
@@ -193,15 +390,19 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
                 else: φs_names += [n] 
         else: φs_names += [n]
 
-    logger.debug(f"\t\tvars(φ).keys(): {vars(φ).keys()}")
-    logger.debug(f'\t\tφs_names: {φs_names} ({len(φs_names)}).')
+    # logger.debug(f"\t\tvars(φ).keys(): {vars(φ).keys()}")
+    # logger.debug(f'\t\tφs_names: {φs_names} ({len(φs_names)}).')
 
     # transform 2D arrays to DataFrame
     values = [vars(φ)[n] for n in φ.info_names]
-    logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names)}`.')
-    logger.debug(f'\t\t{[np.array(v).shape for v in values]}.')
+    # logger.debug(f'\t\tTransform 2D arrays to DataFrame with columns `{"`; `".join(φs_names)}`.')
+    # logger.debug(f'\t\t{[np.array(v).shape for v in values]}.')
+
+    info_t_mattime = time.time()
     __temp__ = hc24.matrixtotimetable(np.array(data.TIMESTAMP),
                                       np.concatenate(values, axis=0), columns=φs_names)
+    logger.debug(
+        f'\t\t\tMatrix to timetable took {round(time.time() - info_t_mattime)} s.')
     
     __temp__.set_index('TIMESTAMP', inplace=True)
     # logger.debug(f'\t\tpd.MultiIndex.from_tuples: {[tuple(c.split("_")) for c in __temp__.columns]}.')
@@ -212,6 +413,8 @@ def decompose_data(data, variables=['w', 'co2'], dt=0.05, method='dwt', nan_tole
     #__temp__ = __temp__.melt(['TIMESTAMP'] + φ.keys())
     #__temp__ = pd.concat([__temp__.pop('variable').str.extract(pattern, expand=True), __temp__], axis=1)
     __temp__['natural_frequency'] = __temp__['natural_frequency'].apply(lambda j: 1/hc24.j2sj(j, 1/dt) if j else np.nan)
+
+    logger.debug(f'\t\tDecompose data (full) took {round(time.time() - info_t_startvarloop)} s.')
     return __temp__
 
 
@@ -258,7 +461,7 @@ def _calculate_conditional_sampling_from_formula_(data, formula='w*co2|w*h2o'):
     logger.debug(f"\t\tformula: {formula}.")
     formulavar = formula_to_vars(formula) if isinstance(formula, str) else formula
     
-    logger.debug(f"\t\tformulavar: {formulavar}.")
+    # logger.debug(f"\t\tformulavar: {formulavar}.")
     names = [''.join(formulavar.xy)] + [''.join(cs)
                                         for cs in formulavar.condsamp_pair]
 
@@ -327,8 +530,9 @@ def process(#ymd, raw_kwargs,
             internal_averaging=None, dt=0.05, wt_kwargs={}, 
             integration_period=None,
             method="dwt", averaging=30, meta={}, **kwargs):
-    logger = logging.getLogger('wvlt.pipeline.process')
+    logger.debug('--- Starting process ---')
     local_args = locals()
+    info_t_start = time.time()
 
     def _date_from_yl(date):
         date = re.sub('[-: ]', '', str(date))
@@ -376,7 +580,7 @@ def process(#ymd, raw_kwargs,
             if verbosity > 1:
                 logger.warning(f"UserWarning: No file found ({date}, path: {load_kwargs.get('path', 'default')}).")
             return None
-        logger.info(f'\tLoading data took {round(time.time() - start_time)} s.')
+        logger.debug(f'\tLoading data took {round(time.time() - start_time)} s.')
         return data
     
     def _exit():
@@ -473,11 +677,6 @@ def process(#ymd, raw_kwargs,
     #     internal_averaging = averaging
     
     fulldata = pd.DataFrame()
-    info_t_start = time.time()
-    logger.info(f'In load_main.')
-
-    if verbosity:
-        print(f'\nRUNNING WAVELET TRASNFORM ({method})')
     
     _, _, _f = ymd
     ymd = hc24.list_time_in_period(*ymd, processing_time_duration, include='both')
@@ -487,12 +686,14 @@ def process(#ymd, raw_kwargs,
         else bufferforfrequency(wt_kwargs.get("f0", 1/(3*60*60))) / 2
     )
     meta.update({'buffer': buffer})
-    logger.debug(f"Buffer (s): {buffer}.")
-    logger.info(f'Start date loop at {round(time.time() - info_t_start)} s (load_main).')
+    # logger.debug(f"Buffer (s): {buffer}.")
+    logger.debug(
+        f'Start date loop at {round(time.time() - info_t_start)} s.')
 
     # Skip two line
     prev_print = '\n'
     for yl in ymd:
+        info_t_yl_ymd = time.time()
         date = _date_from_yl(yl[0])
 
         print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
@@ -538,6 +739,8 @@ def process(#ymd, raw_kwargs,
             logger.critical(e)
             print(str(e))
 
+        logger.debug(
+            f'Date loop ({yl}) took {round(time.time() - info_t_yl_ymd)} s.')
         _exit()
     
     logger.debug(f'End date loop at {round(time.time() - info_t_start)} s.')
@@ -551,21 +754,20 @@ def process(#ymd, raw_kwargs,
         if integration_period:
             fulldata = integrate_cospectra(fulldata, 1/integration_period, dst_path=None)
         fulldata.to_csv(dst_path, index=False)
+
+    logger.debug(
+        f'\t\tFull process took {round(time.time() - info_t_start)} s (run_wt).')
     return fulldata
 
 
 def main(data, varstorun, period=None, average_period='30min', output_kwargs={}, meta={}, **kwargs):
-    logger = logging.getLogger('wvlt.pipeline.main')
-    logger.info('In main.')
-    logger.debug(f'Input data shape: {data.shape}.')
-    # logger.debug(f'Input data shape: {data.head(1)}.')
-
+    info_t_main = time.time()
     vars_unique = list(set([var for f in varstorun for var in formula_to_vars(f).uniquevars]))
-    logger.debug(f'Unique vars: {vars_unique}.')
 
-    logger.debug(f'Input data is ready, data shape is {data.shape}.')
     logger.debug(
-        f'\n{data.head()}\n\n{min(data["TIMESTAMP"])} - {max(data["TIMESTAMP"])}\n\n{period}')
+        f'Input data is ready, data shape is {data.shape}, with unique vars: {vars_unique}, based on {"; ".join(varstorun)}.')
+    # logger.debug(
+    #     f'\n{data.head()}\n\n{min(data["TIMESTAMP"])} - {max(data["TIMESTAMP"])}\n\n{period}')
 
     # decompose all required variables
     wvvar = decompose_data(data, vars_unique,
@@ -576,21 +778,22 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
                  'method': f"{kwargs.get('method', '')} ~{kwargs.get('mother_wavelet', '')}",
                  'dt': kwargs.get('dt', np.nan)})
     
-    logger.debug(f'Decompose data is over, data shape is {wvvar.shape}.')
-    logger.debug(f'\n{wvvar.head()}\n')
+    # logger.debug(f'Decompose data is over, data shape is {wvvar.shape}.')
+    # logger.debug(f'\n{wvvar.head()}\n')
     
     # select valid dates
     if period: wvvar = wvvar[(wvvar['TIMESTAMP'] > period[0]) & (wvvar['TIMESTAMP'] < period[1])]
     wvvar = wvvar.reset_index(drop=True)
 
-    logger.debug(f'Screen data over period of interest yielded data shape {wvvar.shape}.')
+    # logger.debug(f'Screen data over period of interest yielded data shape {wvvar.shape}.')
 
     # calculate covariance
+    info_t_calc_product = time.time()
     # wvout = _calculate_product_from_formula_(wvvar, varstorun)
-    logger.debug(f'varstorun. {varstorun}')
+    # logger.debug(f'varstorun. {varstorun}')
     uniquecovs = list(set(
         [c for f in varstorun for c in formula_to_vars(f).combinations]))
-    logger.debug(f'uniquecovs. {uniquecovs}')
+    # logger.debug(f'uniquecovs. {uniquecovs}')
 
     wvout = pd.concat(
         # [wvvar[['TIMESTAMP', 'natural_frequency']]] +
@@ -598,20 +801,22 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
         #   .drop(columns=formula_to_vars(f).uniquevars if i == 0 else ['TIMESTAMP'] + formula_to_vars(f).uniquevars)
           )
          for i, f in enumerate(uniquecovs)], axis=1)
-    
-    logger.debug(f'Calclate covariance is over.')
+    logger.debug(
+        f'\tCalculate product from formula took {round(time.time() - info_t_calc_product)} s.')
 
     growingdata = pd.concat([wvvar, wvout], axis=1)
-    logger.debug(f'Growing data shape {growingdata.shape}.')
+    # logger.debug(f'Growing data shape {growingdata.shape}.')
 
     # calculate conditional sampling    
-    logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over. 0')
+    info_t_calc_cond_samp = time.time()
     wvcsp = pd.concat(
         # [wvvar[['TIMESTAMP', 'natural_frequency']]] +
         [_calculate_conditional_sampling_from_formula_(growingdata, f)
          for f in varstorun], axis=1)
+    logger.debug(
+        f'\tCalculate conditional sampling took {round(time.time() - info_t_calc_cond_samp)} s.')
          
-    logger.debug(f'Calclate _calculate_conditional_sampling_from_formula_ is over, with data: {wvcsp.head()}.')
+    # logger.debug(f'Calculate _calculate_conditional_sampling_from_formula_ is over, with data: {wvcsp.head()}.')
 
     # despike
     # denoise
@@ -622,12 +827,13 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     #         φcs[i], method='repeat', smoothing=smoothing)
 
     # assemble data
+    info_t_assemble_data = time.time()
     growingdata = pd.concat([growingdata, wvcsp], axis=1)
-    
     logger.debug(
-        f'Data is assembled: {growingdata.head()}.')
+        f'\tAssemble data took {round(time.time() - info_t_assemble_data)} s.')
 
     # average
+    info_t_average = time.time()
     for thisdate, thisdata in growingdata.groupby(growingdata['TIMESTAMP'].dt.floor(
             average_period)):
         thisdate_ = thisdate.strftime('%Y%m%d%H%M')
@@ -644,25 +850,48 @@ def main(data, varstorun, period=None, average_period='30min', output_kwargs={},
     growingdata = growingdata.groupby(__ID_COLS__).agg(
         np.nanmean).reset_index(drop=False)
     
+    logger.debug(
+        f'\tAveraging data took {round(time.time() - info_t_average)} s.')
+    
     # integrate
 
     # save in dataframe and .csv
     growingdata = (growingdata.sort_values(by=__ID_COLS__)
                 .melt(__ID_COLS__))
     
-    logger.debug(f"\tSaving data in {output_kwargs['output_path']}.")
     saved_files = []
     if output_kwargs.get('output_path', None):
+        logger.debug(f"\tSaving data in {output_kwargs['output_path']}.")
+        info_t_save_cospectra = time.time()
         for thisdate, thisdata in growingdata.groupby(growingdata.TIMESTAMP):
             thisdate_ = thisdate.strftime('%Y%m%d%H%M')
             dst_path = output_kwargs.get('output_path').format(thisdate_)
             logger.debug(f"\t\t\t... in {dst_path}.")
             __save_cospectra__(thisdata, dst_path, **meta[thisdate_])
             saved_files += [dst_path]
+        logger.debug(
+            f'\tSaving data took {round(time.time() - info_t_save_cospectra)} s.')
     
     # rename saved files when done
     # os.rename(output_kwargs['output_path'].format(suffix, pd.datetime.now().strftime('%Y%m%dT%H%M%S_%f')),
     #           )
 
+    logger.debug(
+        f'\tMain took {round(time.time() - info_t_main)} s.')
     # save in .nc
     return type('var_', (object,), {'data': growingdata, 'saved': saved_files})
+
+
+def run_from_eddypro(path,
+                     # ="input/EP/FR-Gri_sample.eddypro",
+                     #  covariance=["w*co2|w|co2|h2o", "w*co2|w*h2o", "w*h2o",],
+                     #  processduration='6H',
+                     **kwargs):
+    c = eddypro.extract_info_from_eddypro_setup(eddypro=path)
+    c.update(**kwargs)
+
+    for path in ['input_path', 'output_folderpath']:
+        if c.get(path, None) is not None:
+            c[path] = os.path.abspath(c[path])
+
+    return process(**c)

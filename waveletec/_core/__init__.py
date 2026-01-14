@@ -3,7 +3,7 @@ from . import read_data
 from . import corrections
 from . import meteo
 from . import wavelet_functions
-from . import pipeline
+from . import handlers
 from .commons import *
 from .read_data import *
 from .meteo import *
