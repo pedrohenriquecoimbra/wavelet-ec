@@ -49,4 +49,12 @@ setup(
         'Programming Language :: Python :: 3.14',
         'Topic :: Other/Nonlisted Topic'],
     python_requires='>=3.8',
+    entry_points={
+        "console_scripts": [
+            "waveletEC-eddypro_run=waveletec.main:eddypro_run",
+            "waveletEC-partition=waveletec.main:partition",
+            "waveletEC-integrate=waveletec.main:integrate",
+            "waveletEC-exec=waveletec.main:exec",
+        ],
+    },
 )
