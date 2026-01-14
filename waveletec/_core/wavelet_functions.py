@@ -57,7 +57,7 @@ except ImportError as e:
 
 # project modules
 
-logger = logging.getLogger('wvlt')
+logger = logging.getLogger(__name__)
 
 
 def __wavemother_str_pycwt__(name):
@@ -74,7 +74,7 @@ def bufferforfrequency_dwt(N=0, n_=None, fs=20, level=None, f0=None, max_iterati
     try:
         import pywt
     except Exception as e:
-        print(f"Error in bufferforfrequency_dwt:\n{e}")
+        logger.error(f"Error in bufferforfrequency_dwt:\n{e}")
     if level is None and f0 is None: f0 = 1/(2*60*60)  # 18
     lvl = level if level is not None else int(np.ceil(np.log2(fs/f0)))
     if n_ is None: n_ = fs * 60 * 30
@@ -96,7 +96,7 @@ def bufferforfrequency(f0, dt=0.05, param=6, mother="MORLET", wavelet=None):
     try:
         import pywt
     except Exception as e:
-        print(f"Error in bufferforfrequency:\n{e}")
+        logger.error(f"Error in bufferforfrequency:\n{e}")
     wavelet = wavelet or pycwt.Morlet(6)
     #check if f0 in right units
     # f0 ↴
@@ -331,7 +331,7 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
         f1: lowest scale (2x sampling rate)
         fn: number of scales (only used for CWT)
         dj: frequency resolution (only used for CWT)
-        inv: . Default is True
+        iwt: . Default is True
         **kwargs: keyword arguments sent to wavelet transform and inverse functions 
     Return:
         wave: 2D array

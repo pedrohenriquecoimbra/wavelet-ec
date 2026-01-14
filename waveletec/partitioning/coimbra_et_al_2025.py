@@ -9,11 +9,11 @@ import itertools
 # project modules
 from .._core.commons import __input_to_series__
 
+logger = logging.getLogger(__name__)
 
 def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
-    logger = logging.getLogger('wvlt.partition.conditional_sampling')
-    logger.debug(
-        f"Start conditional_sampling with Y12: {Y12},\n\n args: {args},\n names: {names},\n label: {label},\n false: {false}")
+    # logger.debug(
+    #     f"Start conditional_sampling with Y12: {Y12},\n\n args: {args},\n names: {names},\n label: {label},\n false: {false}")
 
     # label can also be {1: "+", -1: "-", 0: "·"}
     # guarantee names are enough to name all arguments
@@ -72,6 +72,7 @@ def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
     if isinstance(data, str): data = pd.read_file(data)
     else: data = data.copy()
     
+    logger.debug('CO2 = __input_to_series__(data, CO2)')
     CO2 = __input_to_series__(data, CO2)
     CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
     CO2neg_H2Oneg = __input_to_series__(data, CO2neg_H2Oneg)
@@ -81,8 +82,10 @@ def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
         islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
     else:
         islight = np.array([1] * len(data))
-    
+
+    logger.debug('data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)')
     data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)
+    logger.debug('data[Reco] = (CO2 - data[GPP])')
     data[Reco] = (CO2 - data[GPP])
 
     data[NEE] = CO2
