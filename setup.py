@@ -27,6 +27,8 @@ setup(
         'scipy>=1.10.0',
         'scikit-learn',
         'PyYAML',
+        'xarray',
+        'dask',
     ],
     extras_require={
         'cwt': ['pycwt'],

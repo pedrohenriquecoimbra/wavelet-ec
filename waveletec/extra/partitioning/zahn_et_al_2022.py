@@ -9,8 +9,8 @@ import pandas as pd
 import numpy as np
 # Project modules
 import yaml
-from waveletec._core import commons as hc24
-from waveletec._core import wavelet_functions as wavelet_functions
+from waveletec.core import commons as hc24
+from waveletec.core import wavelet_functions as wavelet_functions
 
 logger = logging.getLogger('cond_ec')
 

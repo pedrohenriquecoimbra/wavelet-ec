@@ -8,9 +8,9 @@ import argparse
 # 3rd party modules
 import yaml
 # Project modules
-from . import _core as hc24
-from ._extra import eddypro_tools as eddypro
-from ._core import handlers
+from . import core as hc24
+from .extra import eddypro as eddypro
+from .core import handlers
 
 
 logger = logging.getLogger(__name__)

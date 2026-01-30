@@ -4,51 +4,59 @@ import logging
 # 3rd party modules
 import numpy as np
 import pandas as pd
+import xarray as xr
 import itertools
 
 # project modules
-from .._core.commons import __input_to_series__
+from ...core.commons import __input_to_series__
 
 logger = logging.getLogger(__name__)
 
-def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
-    # logger.debug(
-    #     f"Start conditional_sampling with Y12: {Y12},\n\n args: {args},\n names: {names},\n label: {label},\n false: {false}")
 
-    # label can also be {1: "+", -1: "-", 0: "·"}
-    # guarantee names are enough to name all arguments
+def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
+    """
+    Perform conditional sampling on xarray.DataArray objects.
+
+    Parameters:
+    - Y12: xarray.DataArray (main variable)
+    - *args: xarray.DataArray objects for conditional sampling
+    - names: list of names for each variable
+    - label: dictionary mapping condition values to labels, e.g. {1: "+", -1: "-", 0: "·"}
+    - false: value to use for false conditions
+
+    Returns:
+    - xarray.Dataset with conditionally sampled variables
+    """
     nargs = len(args)
     if nargs < len(names):
         names = names[:nargs]
     if nargs > len(names):
         names = names + ['b'] * (nargs-len(names))
-    # [Y12] + list(args)
+        
     YS = list(args)
-    Ys = {}
-
-    logger.debug(f"YS: {YS}")
-
+    Ys = xr.Dataset()  # Initialize as an empty xarray.Dataset
+    
     # run for all unique combinations of + and - for groups of size n
     # (e.g., n=2: ++, +-, -+, --, n=3 : +++, ++-, ...)
     for co in set(itertools.combinations(list(label.keys())*nargs, nargs)):
+        if not co:
+            continue
         sign = ''.join([label[c] for c in co])
         name = ''.join([c for cs in zip(names, sign) for c in cs])
         Ys[name] = Y12
         logger.debug(f"name: {name}, co: {co}, sign: {sign}")
-        # condition by sign
+
+        # Apply conditions by sign
         for i, c in enumerate(co):
             if c:
-                mask = 1 * (c*YS[i] > 0)
+                mask = xr.where(c * YS[i] > 0, 1, false)
             else:
-                mask = 1 * (YS[i] == 0)
-            # xy[xy==0] = false
+                mask = xr.where(YS[i] == 0, 1, false)
+            
             mask = np.where(mask == 0, false, mask)
             Ys[name] = Ys[name] * mask
     
     return Ys
-    # Ys['info_vars'] = list(Ys.keys())
-    # Ys['info_names'] = names
-    # return type('var_', (object,), Ys)
 
 
 def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2', 
