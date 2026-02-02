@@ -58,155 +58,6 @@ from ..extra import eddypro as eddypro
 
 logger = logging.getLogger(__name__)
 
-
-def condition_sampling_partition(folder, output_name=None, 
-                                 id_columns=None,
-                                 variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
-    # RUN PARTITIONING
-    # dst_path = os.path.join(folder, str(
-    #     site_name)+f'_CDWT_full_cospectra.csv')
-    output_name = output_name or '0000_CDWT_partitioning'
-    input_file = glob.glob(os.path.join(folder, '*_full_cospectra*.csv'))
-
-    assert input_file, 'File not found.'
-    
-    input_file = input_file[0]
-    logger.debug(f"pd.read_file('{input_file}')")
-    data = pd.read_file(input_file)
-
-    id_columns = id_columns or ['TIMESTAMP'] + [c for c in ['natural_frequency'] if c in data]
-
-    if (len(data.columns) < 5) & ('variable' in data.columns) & ('value' in data.columns):
-        data = (data
-                .dropna(subset=id_columns)
-                .groupby(id_columns + ['variable'])
-                .mean()
-                .reset_index()
-                .pivot(
-                    index=id_columns,
-                    columns='variable',
-                    values='value'
-                )
-                .reset_index())
-
-    h2o_dw_required_variables = ['w','co2','h2o']
-    is_lacking_variable = sum([v not in variables_available for v in h2o_dw_required_variables])
-    if not is_lacking_variable:
-        logger.debug("partition_DWCS_H2O")
-        try:
-            partition_DWCS_H2O(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
-                CO2neg_H2Opos='wco2-wh2o+', 
-                CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco'])\
-                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_H2O.csv'), index=False)
-        except Exception as e:
-            logging.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in h2o_dw_required_variables if v not in variables_available])}.")
-    
-    h2o_co_dw_required_variables = ['w','co2','h2o','co']
-    is_lacking_variable = sum([v not in variables_available for v in h2o_co_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2', 
-                CO2neg_H2Opos='wco2-wh2o+', 
-                CO2neg_H2Oneg='wco2-wh2o-', 
-                CO2pos_COpos='wco2+wco+', 
-                CO2pos_COneg='wco2+wco-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
-                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_H2O_CO.csv'), index=False)
-        except Exception as e:
-            logging.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in h2o_co_dw_required_variables if v not in variables_available])}.")
-    
-    co_dw_required_variables = ['w','co2','co']
-    is_lacking_variable = sum([v not in variables_available for v in co_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2', 
-                CO2neg_H2Opos=['wco2-wco+', 'wco2-wco-'], 
-                CO2neg_H2Oneg=None, 
-                CO2pos_COpos='wco2+wco+', 
-                CO2pos_COneg='wco2+wco-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
-                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_CO.csv'), index=False)
-        except Exception as e:
-            logging.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in co_dw_required_variables if v not in variables_available])}.")
-        
-    ch4_dw_required_variables = ['w','co2','ch4']
-    is_lacking_variable = sum([v not in variables_available for v in ch4_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2', 
-                CO2neg_H2Opos=['wco2-wch4+', 'wco2-wch4-'], 
-                CO2neg_H2Oneg=None, 
-                CO2pos_COpos='wco2+wch4+', 
-                CO2pos_COneg='wco2+wch4-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])\
-                .to_file(os.path.join(folder, f'{str(output_name)}.CO2_CH4.csv'), index=False)
-        except Exception as e:
-            logging.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
-
-def integrate_cospectra(data, f0, dst_path=None):
-    data0 = data[(np.isnan(data['natural_frequency']) == False) * (data['natural_frequency'] >= f0)
-                 ].groupby(['variable', 'TIMESTAMP'])['value'].agg(np.nansum).reset_index(drop=False)
-    data1 = data[np.isnan(data['natural_frequency'])].drop(
-        'natural_frequency', axis=1)
-
-    datai = pd.concat([data1[np.isin(
-        data1['variable'], data0['variable'].unique()) == False], data0]).drop_duplicates()
-    datai = datai.pivot_table('value', 'TIMESTAMP',
-                              'variable').reset_index(drop=False)
-
-    if dst_path:
-        datai.to_file(dst_path, index=False)
-    return datai
-
-
-def integrate_cospectra_from_file(root, f0, pattern='_full_cospectra_([0-9]+)_', dst_path=None):
-    # use glob.glob to find files matching the pattern
-    if isinstance(root, str):
-        saved_files = {}
-        for name in os.listdir(root):
-            dateparts = re.findall(pattern, name, flags=re.IGNORECASE)
-            if len(dateparts) == 1:
-                saved_files[dateparts[0]] = os.path.join(root, name)
-
-        def __read__(date, path):
-            r = pd.read_csv(path, skiprows=11, sep=',')
-            if 'natural_frequency' not in r.columns: 
-                logger.warning(f'Skipping spectral file. Natural frequency column not found ({path}).')
-                return pd.DataFrame()
-            if r.natural_frequency.dtype != float: print(date, r.natural_frequency.dtype)
-            r['TIMESTAMP'] = pd.to_datetime(date, format='%Y%m%d%H%M')
-            return r
-
-        data = pd.concat([__read__(k, v) for k, v in saved_files.items()])
-    else:
-        data = root
-    
-    return integrate_cospectra(data, f0, dst_path=dst_path)
-
-
 def decompose_variables(data, variables=['w', 'co2'],
                         nan_tolerance=.3, **kwargs):
     """
@@ -266,7 +117,7 @@ def decompose_variables(data, variables=['w', 'co2'],
     return result
 
 
-def _calculate_product_from_formula_(data, formula='w*co2|w*h2o'):
+def data_compute_product(data, formula='w*co2|w*h2o'):
     """
     Calculate the product of variables specified by a formula for xarray.Dataset.
 
@@ -301,7 +152,7 @@ def _calculate_product_from_formula_(data, formula='w*co2|w*h2o'):
     return data
 
 
-def _calculate_conditional_sampling_from_formula_(data, formula='w*co2|w*h2o'):
+def data_conditional_sampling(data, formula='w*co2|w*h2o'):
     """
     Calculate conditional sampling from a formula for xarray.Dataset.
 
@@ -318,6 +169,10 @@ def _calculate_conditional_sampling_from_formula_(data, formula='w*co2|w*h2o'):
     names = [''.join(formulavar.xy)] + [''.join(cs)
                                         for cs in formulavar.condsamp_pair]
 
+    # If name in names not in data, calculate it
+    for n in names:
+        data = data_compute_product(data, formula=n)
+
     # Extract data arrays for conditional sampling
     data_arrays = [data[names[0]]] + [data[n] for n in names[1:]]
 
@@ -329,103 +184,133 @@ def _calculate_conditional_sampling_from_formula_(data, formula='w*co2|w*h2o'):
     return φc
 
 
-def __save_cospectra__(data, dst_path, overwrite=False, **meta):
-    logger = logging.getLogger('wvlt.pipeline.__save_cospectra__')
+def open_files_in_folder(path):
+    ds = xr.open_mfdataset(
+        os.path.join(path, '*.nc'), combine='nested', concat_dim='TIMESTAMP')
+    ds = ds.mean(dim=[d for d in ds.dims if d not in {
+                'TIMESTAMP', 'natural_frequency'}])
+    # ds = ds.compute()
+    return ds
 
-    # saved_files = []
 
-    info_t_startsaveloop = time.time()
+def data_partition(data, dst=None,
+                   id_columns=None,
+                   variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
+    id_columns = id_columns or ['TIMESTAMP'] + \
+        [c for c in ['natural_frequency'] if c in data]
 
-    # for __datea__, __tempa__ in data.groupby(data.TIMESTAMP):
-    # dst_path = output_path.format(pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
-    logger.debug(f'\t\tSaving {dst_path} with shape {data.shape}.')
-    # if os.path.exists(dst_path): continue
-    use_header = False
+    ds_pH2O = xr.Dataset()
+    ds_pH2O_CO = xr.Dataset()
+    ds_pCO = xr.Dataset()
+    ds_pCH4 = xr.Dataset()
 
-    if overwrite or (not os.path.exists(dst_path)):
-        use_header = True
-        header  = "wavelet_based_(co)spectra\n"
-        header += f"--------------------------------------------------------------\n"
-        header += f"TIMESTAMP_START = {meta.get('TIMESTAMP_START', min(data.TIMESTAMP))}\n"
-        header += f"TIMESTAMP_END = {meta.get('TIMESTAMP_END', max(data.TIMESTAMP))}\n"
-        header += f"N: {meta.get('N', len(data.TIMESTAMP))}\n"
-        header += f"TIME_BUFFER [min] = {meta.get('buffer', np.nan)/60}\n"
-        header += f"frequency [Hz]\n"
-        header += f"y-axis -> wavelet_reconstructed\n"
-        header += f"mother_wavelet -> {meta.get('method', '')}\n"
-        header += f"acquisition_frequency [Hz] = {1/meta.get('dt', np.nan)}\n"
-        header += f"averaging_interval [Min] = {meta.get('averaging', '')}\n"
-        commons.mkdirs(dst_path)
-        with open(dst_path, 'w+') as part: part.write(header)
-        # legitimate_to_write = 1
-        logger.debug(f'\t\tSaving header of DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
-        # saved_files.append(dst_path)
-    
-    # if not legitimate_to_write: continue
-    
-    data.drop('TIMESTAMP', axis=1, inplace=True)
-    with open(dst_path, 'a+', newline='') as part:
-        data.to_file(part, header=use_header, chunksize=500, index=False)
-    logger.debug(f'\t\tSaving DataFrame took {round(time.time() - info_t_startsaveloop)} s.')
-    
-    # del data
-        
-    #arr_slice = np.unique(data.TIMESTAMP, return_index=True)
-    #for __datea__ in arr_slice[0]:
-    #    dst_path = output_path.format(suffix, pd.to_datetime(__datea__).strftime('%Y%m%d%H%M'))
-    #    if os.path.exists(dst_path+'.part'): os.rename(dst_path+'.part', dst_path)
-    
-    # return saved_files
-    return
+    h2o_dw_required_variables = ['w', 'co2', 'h2o']
+    is_lacking_variable = sum(
+        [v not in variables_available for v in h2o_dw_required_variables])
+    if not is_lacking_variable:
+        logger.debug("partition_DWCS_H2O")
+        try:
+            ds_pH2O = partition_DWCS_H2O(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
+                CO2neg_H2Opos='wco2-wh2o+',
+                CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco'])
 
-def process_to_xr(path, importer, dst=None):
-    if dst and os.path.exists(dst):
-        return
+            if dst:
+                ds_pH2O.to_netcdf(dst + ".FCO2_condH2O")
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in h2o_dw_required_variables if v not in variables_available])}.")
 
-    df = importer(path)
-    wld = main(
-        df.drop(columns='TIMESTAMP').rename(
-            columns={'TIMESTAMP_ns': 'TIMESTAMP'}),
-        varstorun=['w*co2|w*h2o', 'w*h2o|w*co2', 'w*co2|w*ts'], dt=0.1)
-    id_columns = ['TIMESTAMP', 'natural_frequency']
-    wld.d = (wld.data
-             .dropna(subset=id_columns)
-             .groupby(id_columns + ['variable'])
-             .mean()
-             .reset_index()
-             .pivot(
-                 index=id_columns,
-                 columns='variable',
-                 values='value'
-             )
-             .reset_index())
+    h2o_co_dw_required_variables = ['w', 'co2', 'h2o', 'co']
+    is_lacking_variable = sum(
+        [v not in variables_available for v in h2o_co_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            ds_pH2O_CO = partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2',
+                CO2neg_H2Opos='wco2-wh2o+',
+                CO2neg_H2Oneg='wco2-wh2o-',
+                CO2pos_COpos='wco2+wco+',
+                CO2pos_COneg='wco2+wco-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
 
-    wld.d['natural_frequency'] = wld.d.natural_frequency.astype(float)
-    wld.partition = partition_DWCS_H2O(
-        wld.d)
-    wld.xr = wld.partition.set_index(
-        ['TIMESTAMP', 'natural_frequency']).to_xarray()
-    wld.xr_ = wld.xr.where(wld.xr.natural_frequency ==
-                           wld.xr.natural_frequency.min(), drop=True).mean('natural_frequency')
-    wld.xr = wld.xr.where(wld.xr.natural_frequency >
-                          wld.xr.natural_frequency.min(), drop=True)
-    wld.xr30 = wld.xr.where(wld.xr.natural_frequency >=
-                            1/(30*60), drop=True).sum('natural_frequency')
+            if dst:
+                ds_pH2O_CO.to_netcdf(dst + ".FCO2_condH2O_CO")
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in h2o_co_dw_required_variables if v not in variables_available])}.")
 
-    wld.ori = df
-    wld.ori['ns'] = wld.ori['TIMESTAMP'] - wld.ori['TIMESTAMP_ns']
-    wld.ori.drop(columns='TIMESTAMP_ns', inplace=True)
-    wld.ori = wld.ori.set_index(
-        ['TIMESTAMP', 'ns']).to_xarray()
+    co_dw_required_variables = ['w', 'co2', 'co']
+    is_lacking_variable = sum(
+        [v not in variables_available for v in co_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            ds_pCO = partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2',
+                CO2neg_H2Opos=['wco2-wco+', 'wco2-wco-'],
+                CO2neg_H2Oneg=None,
+                CO2pos_COpos='wco2+wco+',
+                CO2pos_COneg='wco2+wco-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
 
-    wld.ori = wld.ori.rename({var: f"{var}_ori" for var in wld.ori.data_vars})
-    wld.xr = wld.xr.rename({var: f"{var}~" for var in wld.xr.data_vars})
-    wld.xr_ = wld.xr_.rename({var: f"{var}_" for var in wld.xr_.data_vars})
+            if dst:
+                ds_pCO.to_netcdf(dst + ".FCO2_condCO")
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in co_dw_required_variables if v not in variables_available])}.")
 
-    current = xr.merge([wld.ori, wld.xr, wld.xr_, wld.xr30])
-    if dst:
-        current.to_netcdf(dst)
-    return current
+    ch4_dw_required_variables = ['w', 'co2', 'ch4']
+    is_lacking_variable = sum(
+        [v not in variables_available for v in ch4_dw_required_variables])
+    if not is_lacking_variable:
+        try:
+            ds_pCH4 = partition_DWCS_CO(
+                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
+                CO2='wco2',
+                CO2neg_H2Opos=['wco2-wch4+', 'wco2-wch4-'],
+                CO2neg_H2Oneg=None,
+                CO2pos_COpos='wco2+wch4+',
+                CO2pos_COneg='wco2+wch4-',
+                NIGHT=None)\
+                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
+
+            if dst:
+                ds_pCH4.to_netcdf(dst + ".FCO2_condCH4")
+        except Exception as e:
+            logging.warning(str(e))
+    else:
+        logger.debug(
+            f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
+
+    return xr.merge([data, ds_pH2O, ds_pH2O_CO, ds_pCO, ds_pCH4])
+
+
+def open_files_in_folder(path):
+    ds = xr.open_mfdataset(
+        os.path.join(path, '*.nc'), combine='nested', concat_dim='TIMESTAMP')
+    return ds
+
+
+def data_average_dims(data, id_cols={'TIMESTAMP', 'natural_frequency'}):
+    ds = data.mean(dim=[d for d in data.dims if d not in id_cols])
+    return ds
+
+
+def data_integrate_in_frequency(data, f0, freq='natural_frequency'):
+    assert freq in data.dims, f'Dim `{freq}` not found in data.'
+    ds = data.where(data[freq] >= f0, drop=True).sum(dim=freq)
+    return ds
 
 
 def process(datetimerange, fileduration, input_path, acquisition_frequency,
@@ -435,6 +320,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             internal_averaging=None, dt=0.05,
             integration_period=None,
             identifier=None,
+            filter_criteria={},
             method="dwt", averaging=30, **kwargs):
     logger.debug('--- Starting process ---')
     local_args = locals()
@@ -484,16 +370,24 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             return date.strftime('%Y%m%d-%H%M')
 
         start_time = time.time()
+        paths = [
+            file
+            for name in [date2name(d) for d in yl]
+            for file in glob.glob(f'{os.path.join(input_path, name)}*')
+        ]
+
+        data = []
+
+        for p in paths:
+            try:
+                data += [READERS.get(reader_method)(p)]
+            except Exception as e:
+                logger.error(f"Error when reading {p}: {e}")
+
         try:
-            paths = [
-                file
-                for name in [date2name(d) for d in ymd[0]]
-                for file in glob.glob(f'{os.path.join(input_path, name)}*')
-            ]
-            data = xr.concat(
-                [READERS.get(reader_method)(p) for p in paths],
-                dim='TIMESTAMP')
+            data = xr.concat(data, dim='TIMESTAMP')
         except Exception as e:
+            data = xr.Dataset()
             logger.error(str(e))
         # if data.size == 0:
         #     logger.warning(
@@ -566,7 +460,8 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
         if output_folderpath is not None:
             output_path = str(os.path.join(
                 output_folderpath,
-                f"wavelet_full_cospectra{identifier}_full_cospectra_{date}_{run_time}.nc"))
+                f"wavelet_full_cospectra",
+                f"{identifier}_full_cospectra_{date}_{run_time}.nc"))
             commons.mkdirs(output_path)
             curoutpath_inprog = f"{output_path}.inprogress"
             logger.debug(f'In progress file: {curoutpath_inprog}.')
@@ -585,7 +480,14 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
 
         try:
             # main run
-            ds = main(data, sel={'TIMESTAMP': slice(min(yl), max(yl))},
+            for var, criteria in filter_criteria.items():
+                if var in data:
+                    data[var] = data[var].where(
+                        (data[var] >= criteria.start) & (data[var] < criteria.stop))
+                else:
+                    logger.warning(f"Trying to filter {var}, but variable not found in data.")
+
+            ds = data_run(data, sel={'TIMESTAMP': slice(min(yl), max(yl))},
                       dst=output_path, **run_kwargs)
             ds_collection += [ds.mean(dim=[d for d in ds.dims if d not in {
                 'TIMESTAMP', 'natural_frequency'}])]
@@ -594,7 +496,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             # saved_files = []
             # for f in allvars:
             #     run_kwargs['varstorun'] = [f]
-            #     output = main(data, period=[min(yl), max(yl)],
+            #     output = data_run(data, period=[min(yl), max(yl)],
             #                   meta=meta,
             #                   dst=output_path, **run_kwargs)
             #     saved_files.append(output.saved)
@@ -655,7 +557,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
     return ds_collection
 
 
-def main(data, varstorun, sel=None, average_period='30min', dst=None, **kwargs):
+def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwargs):
     """
     Main function to decompose, calculate covariance, and average data using xarray.Dataset.
 
@@ -671,10 +573,12 @@ def main(data, varstorun, sel=None, average_period='30min', dst=None, **kwargs):
     Returns:
     - xarray.Dataset with processed data
     """
+    logger.debug(
+        f'Start data_run.')
     info_t_main = time.time()
     vars_unique = list(
         set([var for f in varstorun for var in formula_to_vars(f).uniquevars]))
-
+    
     # Decompose all required variables
     data_decomposed = decompose_variables(
         data.stack(z=data.dims), vars_unique, nan_tolerance=.3, **kwargs).unstack()
@@ -695,7 +599,7 @@ def main(data, varstorun, sel=None, average_period='30min', dst=None, **kwargs):
 
     # Calculate product from formula for each unique covariance
     data_product = [
-        _calculate_product_from_formula_(data_decomposed, formula=f)
+        data_compute_product(data_decomposed, formula=f)
         for f in uniquecovs]
     logger.debug(
         f'\tCalculate product from formula took {round(time.time() - info_t_calc_product)} s.')
@@ -705,7 +609,7 @@ def main(data, varstorun, sel=None, average_period='30min', dst=None, **kwargs):
     # Calculate conditional sampling
     info_t_calc_cond_samp = time.time()
     data_condsamp = [
-        _calculate_conditional_sampling_from_formula_(data_product, f)
+        data_conditional_sampling(data_product, f)
         for f in varstorun
     ]
     logger.debug(

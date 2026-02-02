@@ -12,6 +12,7 @@ import datetime
 # 3rd party modules
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 # project modules
 from ..core.commons import get_all_sites
@@ -37,9 +38,13 @@ DEFAULT_READ_EP_RAW_LVL = {
 
 @READERS.register('ep_raw_lvl')
 def read_eddypro_raw_level(path, **kwargs):
+    if not os.path.exists(path):
+        logger.error(f"File not found: {path}")
+        return xr.Dataset()
+    
     kw = DEFAULT_READ_EP_RAW_LVL.copy()
     kw.update(kwargs)
-    df = pd.read_csv(path, **kw)
+    # df = pd.read_csv(path, **kw)
 
     with open(path, 'r') as file:
         header = [c.replace('\n', '').strip()
