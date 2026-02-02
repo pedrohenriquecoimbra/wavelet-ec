@@ -8,9 +8,9 @@ import argparse
 # 3rd party modules
 import yaml
 # Project modules
-from . import _core as hc24
-from ._extra import eddypro_tools as eddypro
-from ._core import handlers
+from . import core as hc24
+from .extra import eddypro as eddypro
+from .core import handlers
 
 
 logger = logging.getLogger(__name__)
@@ -246,12 +246,16 @@ def integrate():
 
     logging.basicConfig(level=args.verbosity.upper(),
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    passed_args = {"root": os.path.join(args.folder, 'wavelet_full_cospectra'),
-                   "f0": 1/args.integration_period,
-                   "dst_path": args.dst_path,
-                   **custom_params}
     log_args(vars(args))
-    handlers.integrate_cospectra_from_file(**passed_args)
+
+    data = handlers.open_files_in_folder(
+        os.path.join(args.folder, 'wavelet_full_cospectra')).sortby('TIMESTAMP')
+    data = handlers.data_average_dims(data)
+    data = handlers.data_integrate_in_frequency(
+        data, 1/args.integration_period)
+
+    data.to_netcdf(args.dst_path)
+    return
     
 def partition():
     parser = argparse.ArgumentParser(
@@ -278,27 +282,111 @@ def partition():
     passed_args = {"folder": args.folder,
                    **custom_params}
     log_args(vars(args))
-    handlers.condition_sampling_partition(**passed_args)
+    handlers.data_partition(**passed_args)
 
 
 def exec():
-    pass
+    parser = argparse.ArgumentParser(
+        description="Run wavelet-based edy covariance workflows.")
+    parser.add_argument('-dr', '--datetimerange', type=str,
+                        help='Date-time range as a string (e.g., "202208010000-202209010000")')
+    parser.add_argument('-fd', '--fileduration', type=int, default=30,
+                        help='File duration in minutes (default: 30)')
+    parser.add_argument('-ip', '--input_path', type=str,
+                        default='eddypro_output/eddypro_raw_datasets/level_6',
+                        help='Path to the input folder containing raw datasets (default: "eddypro_output/eddypro_raw_datasets/level_6")')
+    parser.add_argument('-id', '--identifier', type=str, default='00000',
+                        help='Site identifier (e.g., "FR-Gri")')
+    parser.add_argument('-af', '--acquisition_frequency', type=int, default=10,
+                        help='Data acquisition frequency in Hz (default: 10)')
+    parser.add_argument('-o', '--output_folderpath', type=str, default='output',
+                        help='Path to the output folder (default: "output")')
+    parser.add_argument('-c', '--covariance', type=str, nargs='+', default=None,
+                        help='Covariance type (e.g., "w*co2|w*h2o")')
+    parser.add_argument('-ptd', '--processing_time_duration', type=str, default="1D",
+                        help='Processing time duration (e.g., "1D" for 1 day) (default: "1D")')
+    parser.add_argument("--verbosity", default="INFO", choices=[
+                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
+    parser.add_argument('--overwrite', action='store_true',
+                        help='Overwrite existing files (default: False)')
+    
+    # Parse known arguments and capture the rest
+    args, unknown_args = parser.parse_known_args()
 
-def main(**args):
-    # waveleEC --setup "path/to/.eddypro"
-    args, run, concat, partition, ep_setup = prepare_args(args)
-    validate_args(args)
-    log_args(args)
+    # args.dst_path = args.dst_path or os.path.join(
+    #     args.folder, f'{args.identifier}_full_cospectra.csv')
 
-    if args['method'] == 'cov':
-        concat = partition = False
+    # Validate logging level
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if args.verbosity.upper() not in valid_levels:
+        logger.error(
+            f"Invalid verbosity level. Choose from: {valid_levels}")
+        args.verbosity = "0"
 
-    if run:
-        handlers.run_from_eddypro(ep_setup, **args)
-    # if concat:
-    #     integrate_full_spectra_into_file(**args)
-    if partition:
-        handlers.condition_sampling_partition(**args)
+    custom_params = __custom_params__(unknown_args)
+
+    log_args(vars(args))
+    handlers.process(**args, **custom_params)
+    return
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run wavelet-based edy covariance workflows.")
+    parser.add_argument('-dr', '--datetimerange', type=str,
+                        help='Date-time range as a string (e.g., "202208010000-202209010000")')
+    parser.add_argument('-fd', '--fileduration', type=int, default=30,
+                        help='File duration in minutes (default: 30)')
+    parser.add_argument('-i', '--input_path', type=str,
+                        default='eddypro_output/eddypro_raw_datasets/level_6',
+                        help='Path to the input folder containing raw datasets (default: "eddypro_output/eddypro_raw_datasets/level_6")')
+    parser.add_argument('-id', '--identifier', type=str, default='00000',
+                        help='Site identifier (e.g., "FR-Gri")')
+    parser.add_argument('-af', '--acquisition_frequency', type=int, default=10,
+                        help='Data acquisition frequency in Hz (default: 10)')
+    parser.add_argument('-o', '--output_folderpath', type=str, default='output',
+                        help='Path to the output folder (default: "output")')
+    parser.add_argument('-c', '--covariance', type=str, nargs='+', default=None,
+                        help='Covariance type (e.g., "w*co2|w*h2o")')
+    parser.add_argument('-ptd', '--processing_time_duration', type=str, default="1D",
+                        help='Processing time duration (e.g., "1D" for 1 day) (default: "1D")')
+    parser.add_argument('-ip', '--integration_period', type=int, default=1800,
+                        help='Integration period in seconds (default: 1800)')
+    parser.add_argument("--verbosity", default="INFO", choices=[
+                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
+    parser.add_argument('--overwrite', action='store_true',
+                        help='Overwrite existing files (default: False)')
+
+    # Parse known arguments and capture the rest
+    args, unknown_args = parser.parse_known_args()
+
+    # Validate logging level
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if args.verbosity.upper() not in valid_levels:
+        logger.error(
+            f"Invalid verbosity level. Choose from: {valid_levels}")
+        args.verbosity = "0"
+
+    custom_params = __custom_params__(unknown_args)
+
+    log_args(vars(args))
+
+    handlers.process(**vars(args), **custom_params)
+
+    data = handlers.open_files_in_folder(
+        os.path.join(args.output_folderpath, 'wavelet_full_cospectra')).sortby('TIMESTAMP')
+    data = handlers.data_average_dims(data)
+    data = handlers.data_integrate_in_frequency(
+        data, 1/args.integration_period)
+    data = handlers.data_partition(data)
+
+    data.to_netcdf(os.path.join(
+        args.output_folderpath, 
+        f'{args.identifier}_full_output_{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}.nc'))
+    
+    return
 
 
 if __name__ == '__main__':

@@ -5,16 +5,105 @@ import os
 import warnings
 import logging
 from functools import reduce
+import zipfile
+from io import StringIO
+import datetime
 
 # 3rd party modules
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 # project modules
-from .._core.commons import get_all_sites
-from .._core import corrections
+from ..core.commons import get_all_sites
+from ..core import corrections
+from ..io import READERS
 
 logger = logging.getLogger('wvlt.eddypro_tools')
+
+
+DEFAULT_READ_GHG = {
+    'skiprows': 7,
+    'sep': r"\t",
+    'engine': 'python'
+}
+
+
+DEFAULT_READ_EP_RAW_LVL = {
+    'skiprows': 10,
+    'sep': "\s+",
+    'na_values': ['NaN', 'nan', -9999]
+}
+
+
+@READERS.register('ep_raw_lvl')
+def read_eddypro_raw_level(path, **kwargs):
+    if not os.path.exists(path):
+        logger.error(f"File not found: {path}")
+        return xr.Dataset()
+    
+    kw = DEFAULT_READ_EP_RAW_LVL.copy()
+    kw.update(kwargs)
+    # df = pd.read_csv(path, **kw)
+
+    with open(path, 'r') as file:
+        header = [c.replace('\n', '').strip()
+                            for c in file.readlines()[9].split('  ') if c]
+        kw.update(dict(names = header))
+
+    df = pd.read_csv(path, **kw)
+
+    # dt = (((30*60) / len(df))//0.025)*0.025
+    # ns = df.index * pd.to_timedelta(f'{dt}s')
+    df.insert(0, 'ns', df.index)
+
+    date = os.path.basename(path).split('_', 1)[0]
+    date = datetime.datetime.strptime(date, '%Y%m%d-%H%M')
+    df.insert(0, 'TIMESTAMP', np.datetime64(date))
+
+    ds = df.set_index(['TIMESTAMP', 'ns']).to_xarray()
+    return ds
+
+
+@READERS.register('ghg')
+def read_ghg(path, **kwargs):
+    kw = DEFAULT_READ_GHG.copy()
+    kw.update(kwargs)
+
+    with zipfile.ZipFile(path, 'r') as zip_ref:
+        datafile = [zip_ref.read(
+            name) for name in zip_ref.namelist() if name.endswith(".data")][0]
+
+    datafile = str(datafile, 'utf-8')
+    path = StringIO(datafile)
+
+    df = pd.read_csv(path, **kw)
+
+    ds = df.set_index('TIMESTAMP').to_xarray()
+    return ds
+
+
+@READERS.register('ep_output')
+def read_eddypro_output(path, **kwargs):
+    kw = dict(na_values=[-9999, 'NAN'])
+    kw.update(kwargs)
+
+    # Read only the first row to check for the 'date' column
+    df_header = pd.read_csv(path, nrows=1, **kw)
+
+    if 'date' not in df_header:
+        kw.update(dict(skiprows=[0, 2]))
+
+    df = pd.read_csv(path, **kw)
+
+    df['TIMESTAMP'] = pd.to_datetime(
+        df['date'] + ' ' + df['time'])  # .dt.tz_localize('UTC')
+
+    df = df.drop(columns=['date', 'time'])
+
+    ds = df.set_index('TIMESTAMP').to_xarray()
+    return ds
+
 
 def read_eddypro_metadata_file(filename):
     metadata = {}

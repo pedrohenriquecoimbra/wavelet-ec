@@ -100,14 +100,18 @@ def available_combinations(interesting_combinations, variables_available=['u', '
         return varstorun
 
 
-def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
+def matrixtotimetable(time, mat, c0name="TIMESTAMP", ids={}, **kwargs):
+    # def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
     assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
+    # assert all(len(v) == len(next(iter(ids.values()))) for v in ids.values()
+    #            ), f"ID columns shape do not match."
     mat = np.array(mat)
 
     if len(time) != mat.shape[0] and len(time) == mat.shape[1]:
         mat = mat.T
 
     __temp__ = pd.DataFrame(mat, **kwargs)
+
     __temp__.insert(0, c0name, time)
 
     return __temp__

@@ -264,15 +264,15 @@ def __idwt__(coef, N, wavelet='db6', mode='symmetric'):
     return reconstructed_signal
 
 
-def prepare_signal(signal, nan_tolerance=0.3, identifier='0000'):
+def prepare_signal(signal, nan_tolerance=0.3):
     signal = np.array(signal)
     signan = np.isnan(signal)
-    N = len(signal)
+    N = signal.size
     Nnan = np.sum(signan)
     if Nnan:
         if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
             logger.warning(
-                f"UserWarning ({identifier}): Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%).")
+                f"UserWarning: Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%).")
     if Nnan and Nnan < N:
         signal = np.interp(np.linspace(0, 1, N),
                             np.linspace(0, 1, N)[
@@ -375,7 +375,7 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
             """Run Discrete Wavelet Transform"""
             lvl = kwargs.pop('level', int(np.ceil(np.log2(fs/f0))))
             # _l if s0*2^j; fs*2**(-_l) if Hz; (1/fs)*2**_l if sec.
-            sj = [_l for _l in np.arange(1, lvl+2, 1)]
+            sj = [(fs*(2**-float(_l))) for _l in np.arange(1, lvl+2, 1)]
             wave = __dwt__(signal, level=lvl, **kwargs)
     else:
         wave = signal
