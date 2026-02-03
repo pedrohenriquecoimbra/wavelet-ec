@@ -35,6 +35,7 @@ dependencies = [
     "PyWavelets>=1.4.0",
     "scipy>=1.10.0",
     "scikit-learn",
+    "PyYAML",
     "xarray",
     "dask",
 ]

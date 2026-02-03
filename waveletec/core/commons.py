@@ -19,6 +19,7 @@ import time
 import datetime
 
 # 3rd party modules
+import yaml
 import numpy as np
 from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor
@@ -77,13 +78,13 @@ def start_logging(outputpath, **kwargs):
     logging.info("STARTING THE RUN")
 
 
-# def save_locals(locals_, path, **kwargs):
-#     locals_ = {
-#         k: v for k, v in locals_.items()
-#         if isinstance(v, (str, int, float, list, dict, bool, type(None)))
-#     }
-#     with open(path, 'w') as stp:
-#         yaml.safe_dump(locals_, stp)
+def save_locals(locals_, path, **kwargs):
+    locals_ = {
+        k: v for k, v in locals_.items()
+        if isinstance(v, (str, int, float, list, dict, bool, type(None)))
+    }
+    with open(path, 'w') as stp:
+        yaml.safe_dump(locals_, stp)
 
 
 def available_combinations(interesting_combinations, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o']):
