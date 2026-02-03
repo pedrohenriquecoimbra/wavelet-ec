@@ -34,24 +34,20 @@ The main function is:
 # built-in modules
 import os
 import re
-import warnings
 import logging
-import copy
 import time
 import datetime
 import glob
 
 # 3rd party modules
-from functools import reduce
 import numpy as np
-import pandas as pd
 import xarray as xr
 
 # project modules
 from . import commons
 from ..io import READERS
 # from .read_data import loaddatawithbuffer
-from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal, bufferforfrequency_dwt, bufferforfrequency
+from .wavelet_functions import universal_wt, formula_to_vars, prepare_signal
 from ..extra.partitioning.coimbra_et_al_2025 import conditional_sampling, partition_DWCS, partition_DWCS_CO, partition_DWCS_H2O
 from ..extra import eddypro as eddypro
 
@@ -78,37 +74,36 @@ def decompose_variables(data, variables=['w', 'co2'],
     # Add the original coordinates
     result = result.assign_coords(data.coords)
 
-    # Placeholder for wavelet scales and COI
-    sj = None
-    coi = None
+    # # Placeholder for wavelet scales and COI
+    # sj = None
+    # coi = None
 
     try:
         for var in variables:
             if var not in data.data_vars:
                 raise ValueError(f"Variable {var} not found in dataset.")
-
+            
             # Prepare signal (assuming prepare_signal is adapted for xarray)
             ready_signal = prepare_signal(
                 data[var], nan_tolerance=nan_tolerance)
-
+            
             # Perform wavelet transform
             wt_signal = universal_wt(
                 signal=ready_signal.signal, **kwargs, iwt=True)
-
+            
             # Store results
-            result[var] = (('natural_frequency', *data[var].dims), wt_signal.wave)
-            result[f'{var}_qc'] = (('natural_frequency', *data[var].dims), np.where(
-                ready_signal.signan, 0, wt_signal.coi))
+            wt_signal = wt_signal.rename(
+                {'wave': var,
+                 'approximation': f'{var}_lf',
+                 'coi': f'{var}_qc'}
+            )
+            wt_signal = wt_signal.drop('signal')
+            wt_signal[f'{var}_qc'] = wt_signal[f'{var}_qc'].where(
+                ready_signal.signan != 0, 0)
+            result = xr.merge([wt_signal, result], compat='override')
 
-            # Update scales and COI (assuming they are the same for all variables)
-            sj = wt_signal.sj
-            coi = wt_signal.coi
-
-        # Add scales as a coordinate
-        result = result.assign_coords({'natural_frequency': sj})
-
-        # Add COI as a variable
-        result['coi'] = (('natural_frequency', *data[var].dims), coi)
+        # # Add COI as a variable
+        # result['coi'] = wt_signal.coi
 
     except Exception as e:
         logger.error(f"Error in decompose_variables: {e}")
@@ -117,7 +112,26 @@ def decompose_variables(data, variables=['w', 'co2'],
     return result
 
 
-def data_compute_product(data, formula='w*co2|w*h2o'):
+def data_statistics(data, formula='w*co2'):
+    formulavar = formula_to_vars(formula) if isinstance(
+        formula, str) else formula
+    xy_name = ''.join(formulavar.xy)
+
+    if len(formulavar.xy) == 2:
+        data[f'cov_{xy_name}'] = xr.cov(
+            data[formulavar.xy[0]], data[formulavar.xy[1]], 
+            dim=[d for d in data.dims if d not in {
+                'TIMESTAMP', 'natural_frequency'}])
+
+        data[f'adv_{xy_name}'] = (
+            data[formulavar.xy[0]].mean(dim=[d for d in data.dims if d not in {
+                'TIMESTAMP', 'natural_frequency'}]) *
+            data[formulavar.xy[1]].mean(dim=[d for d in data.dims if d not in {
+                'TIMESTAMP', 'natural_frequency'}]))
+    return data
+
+
+def data_compute_product(data, formula='w*co2|w*h2o', name=None):
     """
     Calculate the product of variables specified by a formula for xarray.Dataset.
 
@@ -130,7 +144,7 @@ def data_compute_product(data, formula='w*co2|w*h2o'):
     """
     formulavar = formula_to_vars(formula) if isinstance(
         formula, str) else formula
-    xy_name = ''.join(formulavar.xy)
+    xy_name = name or ''.join(formulavar.xy)
 
     # Calculate the product for the main variables
     if xy_name not in data.data_vars:
@@ -214,7 +228,9 @@ def data_partition(data, dst=None,
                 data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
                 CO2neg_H2Opos='wco2-wh2o+',
                 CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco'])
+                [['NEE', 'GPP', 'Reco']]
+            # ds_pH2O = ds_pH2O.rename(
+            #     {var: f"{var}_pCH4" for var in ds_pH2O.data_vars})
 
             if dst:
                 ds_pH2O.to_netcdf(dst + ".FCO2_condH2O")
@@ -236,8 +252,9 @@ def data_partition(data, dst=None,
                 CO2neg_H2Oneg='wco2-wh2o-',
                 CO2pos_COpos='wco2+wco+',
                 CO2pos_COneg='wco2+wco-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
+                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
+            ds_pH2O_CO = ds_pH2O_CO.rename(
+                {var: f"{var}_pCH4" for var in ds_pH2O_CO.data_vars})
 
             if dst:
                 ds_pH2O_CO.to_netcdf(dst + ".FCO2_condH2O_CO")
@@ -259,8 +276,9 @@ def data_partition(data, dst=None,
                 CO2neg_H2Oneg=None,
                 CO2pos_COpos='wco2+wco+',
                 CO2pos_COneg='wco2+wco-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
+                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
+            ds_pCO = ds_pCO.rename(
+                {var: f"{var}_pCH4" for var in ds_pCO.data_vars})
 
             if dst:
                 ds_pCO.to_netcdf(dst + ".FCO2_condCO")
@@ -282,8 +300,9 @@ def data_partition(data, dst=None,
                 CO2neg_H2Oneg=None,
                 CO2pos_COpos='wco2+wch4+',
                 CO2pos_COneg='wco2+wch4-',
-                NIGHT=None)\
-                .filter(id_columns + ['NEE', 'GPP', 'Reco', 'ffCO2'])
+                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
+            ds_pCH4 = ds_pCH4.rename(
+                {var: f"{var}_pCH4" for var in ds_pCH4.data_vars})
 
             if dst:
                 ds_pCH4.to_netcdf(dst + ".FCO2_condCH4")
@@ -293,7 +312,7 @@ def data_partition(data, dst=None,
         logger.debug(
             f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
 
-    return xr.merge([data, ds_pH2O, ds_pH2O_CO, ds_pCO, ds_pCH4])
+    return xr.merge([data, ds_pH2O, ds_pH2O_CO, ds_pCO, ds_pCH4], compat='override')
 
 
 def open_files_in_folder(path):
@@ -309,7 +328,8 @@ def data_average_dims(data, id_cols={'TIMESTAMP', 'natural_frequency'}):
 
 def data_integrate_in_frequency(data, f0, freq='natural_frequency'):
     assert freq in data.dims, f'Dim `{freq}` not found in data.'
-    ds = data.where(data[freq] >= f0, drop=True).sum(dim=freq)
+    ds = data.sel({freq: slice(f0)}
+                  ).sum(dim=freq)
     return ds
 
 
@@ -488,9 +508,11 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
                     logger.warning(f"Trying to filter {var}, but variable not found in data.")
 
             ds = data_run(data, sel={'TIMESTAMP': slice(min(yl), max(yl))},
-                      dst=output_path, **run_kwargs)
-            ds_collection += [ds.mean(dim=[d for d in ds.dims if d not in {
-                'TIMESTAMP', 'natural_frequency'}])]
+                      dst=None, **run_kwargs)
+            ds_average = ds.mean(dim=[d for d in ds.dims if d not in {
+                'TIMESTAMP', 'natural_frequency'}])
+            ds_average.to_netcdf(output_path)
+            ds_collection += [ds_average]
 
             # allvars = run_kwargs['varstorun']
             # saved_files = []
@@ -531,13 +553,11 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             {var: f"csp_{var}" for var in ds_collection.data_vars if 'natural_frequency' in ds_collection[var].dims})
 
         if integration_period:
-            ds_collection_i = (
-                ds_collection[
-                    [var for var in ds_collection.data_vars
-                    if 'natural_frequency' in ds_collection[var].dims]]
-                .where(ds_collection.natural_frequency >= 1/(integration_period*60), drop=True)
-                .mean('natural_frequency')
-            )
+            ds_collection_i = data_integrate_in_frequency(
+                ds_collection, 1/(integration_period*60))
+            ds_collection_i = ds_collection_i.rename(
+                {var: f"{var}_int" for var in ds_collection_i.data_vars})
+
             ds_collection = ds_collection.merge(ds_collection_i)
     else:
         logger.error('No data was collected.')
@@ -597,6 +617,12 @@ def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwar
     uniquecovs = list(
         set([c for f in varstorun for c in formula_to_vars(f).combinations]))
 
+    # Calculate statistics
+    data_stats = [
+        data_statistics(data, formula=f)
+        for f in uniquecovs]
+    data_stats = xr.merge(data_stats)
+
     # Calculate product from formula for each unique covariance
     data_product = [
         data_compute_product(data_decomposed, formula=f)
@@ -616,6 +642,16 @@ def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwar
         f'\tCalculate conditional sampling took {round(time.time() - info_t_calc_cond_samp)} s.')
     data_condsamp = xr.merge(data_condsamp)
 
+    # Low-frequency
+    xycovs = list(
+        set(["*".join([f"{c}_lf" for c in formula_to_vars(f).xy]) for f in varstorun]))
+    data_lf = [
+        data_compute_product(data_decomposed, formula=f, name=f.replace('_lf', '') + "_lf")
+        for f in xycovs]
+    logger.debug(
+        f'\tCalculate product from formula took {round(time.time() - info_t_calc_product)} s.')
+    data_lf = xr.merge(data_lf)
+
     # Average data
     # data_averaged = data_product.groupby('TIMESTAMP').sum('natural_frequency')
     # data_integrated = data_product.where(data_product.natural_frequency >=
@@ -625,8 +661,13 @@ def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwar
     data_product = data_product.rename(
         {var: f"{var}~" for var in data_product.data_vars})
 
-    response = xr.merge([data, data_product,
+    # Merge data
+    response = xr.merge([data, data_stats, data_product, data_lf,
                         data_condsamp], compat='override')
+    
+    # Merge attrs
+    for ds in [data, data_stats, data_product, data_lf, data_condsamp]:
+        response.attrs.update(ds.attrs)
 
     # Save data
     if dst:

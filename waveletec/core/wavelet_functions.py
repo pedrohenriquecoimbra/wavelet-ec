@@ -44,6 +44,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 import pywt
+import xarray as xr
 try: 
     import pycwt
 except ImportError as e:
@@ -265,20 +266,40 @@ def __idwt__(coef, N, wavelet='db6', mode='symmetric'):
 
 
 def prepare_signal(signal, nan_tolerance=0.3):
-    signal = np.array(signal)
-    signan = np.isnan(signal)
+    # Ensure the input is an xarray.DataArray
+    if not isinstance(signal, xr.DataArray):
+        signal = xr.DataArray(signal)
+
+    # Create a mask for NaN values
+    signan = signal.isnull()
     N = signal.size
-    Nnan = np.sum(signan)
+    Nnan = signan.sum()
+
     if Nnan:
         if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
-            logger.warning(
-                f"UserWarning: Too much nans ({np.sum(signan)}, {np.round(100*np.sum(signan)/len(signal), 1)}%).")
+            print(
+                f"UserWarning: Too many NaNs ({Nnan}, {np.round(100 * Nnan / N, 1)}%).")
+
     if Nnan and Nnan < N:
-        signal = np.interp(np.linspace(0, 1, N),
-                            np.linspace(0, 1, N)[
+        # Interpolate NaNs using xarray's built-in interpolation
+        # signal = signal.interpolate_na(
+        #     dim='ns', method='linear')
+        signal.values = np.interp(np.linspace(0, 1, N),
+                                  np.linspace(0, 1, N)[
             signan == False],
             signal[signan == False])
-    return type('var_', (object,), {'signal': signal, 'signan': signan, 'N': N, 'Nnan': Nnan})
+
+    # Create a Dataset with both the processed signal and the NaN mask
+    result = xr.Dataset({
+        'signal': signal,
+        'signan': signan.astype(int),
+    })
+
+    # Add metadata as attributes
+    result.attrs['N'] = N
+    result.attrs['Nnan'] = int(Nnan)
+
+    return result
 
 
 def cone_of_influence(n0, dt, wavelet=None):
@@ -385,15 +406,20 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
         if method == 'fcwt':
             sj = kwargs.pop('sj', None)
             wave = __icwt__(wave, sj=sj, dt=fs, dj=dj, **kwargs, 
-                        wavelet=pycwt.wavelet.Morlet(6))
+                            wavelet=pycwt.wavelet.Morlet(6))
+            approximation = signal.values - wave.sum(axis=0)
         
         elif method == 'cwt':
             sj = kwargs.pop('sj', None)
             wave = __icwt__(wave, sj=sj, dt=fs**-1, dj=dj, **kwargs)
+            approximation = signal.values - wave.sum(axis=0)
         
         elif method== "dwt":
             N = np.array(signal).shape[-1]
             wave = __idwt__(wave, N=N, **kwargs).real
+            approximation = wave[-1]
+            wave = wave[:-1]
+            sj = sj[:-1]
 
     if coi:
         # Cone of Influence (COI)
@@ -407,5 +433,14 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
     else:
         coneoi = None
     
-    return type('var_', (object,), {
-        'wave': wave, 'sj': sj, 'coi': coneoi, 'method': method, 'fs': fs, 'f0': f0, 'f1': f1, 'fn': fn})
+    # Create a Dataset with both the processed signal and the NaN mask
+    result = xr.Dataset({
+        'signal': signal,
+        'wave': (('natural_frequency', *signal.dims), wave),
+        'approximation': (signal.dims, approximation),
+        'coi': (('natural_frequency', *signal.dims), coneoi),
+    })
+    result = result.assign_coords({'natural_frequency': sj, **signal.coords})
+    result.attrs = {'method': method, 'fs': fs, 'f0': f0, 'f1': f1, 'fn': fn}
+
+    return result
