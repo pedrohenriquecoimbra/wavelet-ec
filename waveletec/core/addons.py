@@ -9,7 +9,7 @@ from contextlib import contextmanager
 # 3rd party modules
 import pandas as pd
 
-logger = logging.getLogger('wvlt.addons')
+logger = logging.getLogger(__name__)
 
 # Add-ons
 def _warning(

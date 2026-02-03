@@ -110,8 +110,5 @@ def smooth_data(data, method='convolve', smoothing=3, **kwargs):
         # Group by those indices and apply the function
         return pd.Series(data).groupby(
             chunk_indices).transform(np.nanmean)
-
+    
     return data
-    for i in range(len(φcs)):
-        φcs[i] = np.convolve(φcs[i], np.ones(
-            (smoothing,))/smoothing, mode='same')

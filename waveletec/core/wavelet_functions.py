@@ -32,15 +32,11 @@ The main function is:
 """
 
 # built-in modules
-import os
 import re
 import warnings
 import logging
-import copy
-import time
 
 # 3rd party modules
-from functools import reduce
 import numpy as np
 import pandas as pd
 import pywt
@@ -71,46 +67,46 @@ def __wavemother_str_pycwt__(name):
     return mother
 
 
-def bufferforfrequency_dwt(N=0, n_=None, fs=20, level=None, f0=None, max_iteration=10**4, wavelet='db6'):
-    try:
-        import pywt
-    except Exception as e:
-        logger.error(f"Error in bufferforfrequency_dwt:\n{e}")
-    if level is None and f0 is None: f0 = 1/(2*60*60)  # 18
-    lvl = level if level is not None else int(np.ceil(np.log2(fs/f0)))
-    if n_ is None: n_ = fs * 60 * 30
-    n0 = N
-    cur_iteration = 0
-    while True:
-        n0 += pd.to_timedelta(n_)/pd.to_timedelta("1s") * fs if isinstance(n_, str) else n_
-        if lvl <= pywt.dwt_max_level(n0, wavelet):
-            break
-        cur_iteration += 1
-        if cur_iteration > max_iteration:
-            warnings.warn('Limit of iterations attained before buffer found. Current buffer allows up to {} levels.'.format(
-                pywt.dwt_max_level(n0, wavelet)))
-            break
-    return (n0-N) * fs**-1
+# def bufferforfrequency_dwt(N=0, n_=None, fs=20, level=None, f0=None, max_iteration=10**4, wavelet='db6'):
+#     try:
+#         import pywt
+#     except Exception as e:
+#         logger.error(f"Error in bufferforfrequency_dwt:\n{e}")
+#     if level is None and f0 is None: f0 = 1/(2*60*60)  # 18
+#     lvl = level if level is not None else int(np.ceil(np.log2(fs/f0)))
+#     if n_ is None: n_ = fs * 60 * 30
+#     n0 = N
+#     cur_iteration = 0
+#     while True:
+#         n0 += pd.to_timedelta(n_)/pd.to_timedelta("1s") * fs if isinstance(n_, str) else n_
+#         if lvl <= pywt.dwt_max_level(n0, wavelet):
+#             break
+#         cur_iteration += 1
+#         if cur_iteration > max_iteration:
+#             warnings.warn('Limit of iterations attained before buffer found. Current buffer allows up to {} levels.'.format(
+#                 pywt.dwt_max_level(n0, wavelet)))
+#             break
+#     return (n0-N) * fs**-1
 
 
-def bufferforfrequency(f0, dt=0.05, param=6, mother="MORLET", wavelet=None):
-    try:
-        import pywt
-    except Exception as e:
-        logger.error(f"Error in bufferforfrequency:\n{e}")
-    wavelet = wavelet or pycwt.Morlet(6)
-    #check if f0 in right units
-    # f0 ↴
-    #    /\
-    #   /  \
-    #  /____\
-    # 2 x buffer
+# def bufferforfrequency(f0, dt=0.05, param=6, mother="MORLET", wavelet=None):
+#     try:
+#         import pywt
+#     except Exception as e:
+#         logger.error(f"Error in bufferforfrequency:\n{e}")
+#     wavelet = wavelet or pycwt.Morlet(param)
+#     #check if f0 in right units
+#     # f0 ↴
+#     #    /\
+#     #   /  \
+#     #  /____\
+#     # 2 x buffer
     
-    if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
-    c = wavelet.flambda() * wavelet.coi()
-    n0 = 1 + (2 * (1/f0) * (c * dt)**-1)
-    N = int(np.ceil(n0 * dt))
-    return N
+#     if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
+#     c = wavelet.flambda() * wavelet.coi()
+#     n0 = 1 + (2 * (1/f0) * (c * dt)**-1)
+#     N = int(np.ceil(n0 * dt))
+#     return N
 
 
 def formula_to_vars(formula):

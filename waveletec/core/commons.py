@@ -14,20 +14,14 @@ This script is a key part of the following publications:
 import copy
 import os
 import re
-import warnings
 import logging
 import time
 import datetime
-from functools import reduce
 
 # 3rd party modules
-import yaml
 import numpy as np
-from itertools import chain
 from scipy.optimize import curve_fit
-from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor, QuantileRegressor
-import zipfile
-from io import StringIO
+from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor
 
 # project modules
 from .addons import *
@@ -83,13 +77,13 @@ def start_logging(outputpath, **kwargs):
     logging.info("STARTING THE RUN")
 
 
-def save_locals(locals_, path, **kwargs):
-    locals_ = {
-        k: v for k, v in locals_.items()
-        if isinstance(v, (str, int, float, list, dict, bool, type(None)))
-    }
-    with open(path, 'w') as stp:
-        yaml.safe_dump(locals_, stp)
+# def save_locals(locals_, path, **kwargs):
+#     locals_ = {
+#         k: v for k, v in locals_.items()
+#         if isinstance(v, (str, int, float, list, dict, bool, type(None)))
+#     }
+#     with open(path, 'w') as stp:
+#         yaml.safe_dump(locals_, stp)
 
 
 def available_combinations(interesting_combinations, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o']):
@@ -100,27 +94,25 @@ def available_combinations(interesting_combinations, variables_available=['u', '
         return varstorun
 
 
-def matrixtotimetable(time, mat, c0name="TIMESTAMP", ids={}, **kwargs):
-    # def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
-    assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
-    # assert all(len(v) == len(next(iter(ids.values()))) for v in ids.values()
-    #            ), f"ID columns shape do not match."
-    mat = np.array(mat)
+# def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
+#     # def matrixtotimetable(time, mat, c0name="TIMESTAMP", **kwargs):
+#     assert len(time) in mat.shape, f"Time ({time.shape}) and matrix ({mat.shape}) do not match."
+#     mat = np.array(mat)
 
-    if len(time) != mat.shape[0] and len(time) == mat.shape[1]:
-        mat = mat.T
+#     if len(time) != mat.shape[0] and len(time) == mat.shape[1]:
+#         mat = mat.T
 
-    __temp__ = pd.DataFrame(mat, **kwargs)
+#     __temp__ = pd.DataFrame(mat, **kwargs)
 
-    __temp__.insert(0, c0name, time)
+#     __temp__.insert(0, c0name, time)
 
-    return __temp__
+#     return __temp__
 
 
-def yaml_to_dict(path):
-    with open(path, 'r+') as file:
-        file = yaml.safe_load(file)
-    return file
+# def yaml_to_dict(path):
+#     with open(path, 'r+') as file:
+#         file = yaml.safe_load(file)
+#     return file
 
 
 def list_time_in_period(tmin, tmax, fastfreq, slowfreq, include='both'):
@@ -206,77 +198,77 @@ def update_nested_dicts(*ds, fstr=None):
     return r
 
 
-def concat_into_single_file(path, pattern, output_path=None, **kwargs):
-    print('\nCONSOLIDATING DATASET\n')
-    if output_path is None: output_path = os.path.join(path, 'concat_into_single_file') 
+# def concat_into_single_file(path, pattern, output_path=None, **kwargs):
+#     print('\nCONSOLIDATING DATASET\n')
+#     if output_path is None: output_path = os.path.join(path, 'concat_into_single_file') 
     
-    files_to_concat = []
-    for name in os.listdir(path):
-        if re.findall(pattern, name):
-            files_to_concat += [os.path.join(path, name)]
+#     files_to_concat = []
+#     for name in os.listdir(path):
+#         if re.findall(pattern, name):
+#             files_to_concat += [os.path.join(path, name)]
     
-    files_to_concat = [pd.read_csv(f, **kwargs) for f in files_to_concat]
-    data = reduce(lambda left, right: pd.concat([left, right]), files_to_concat)
+#     files_to_concat = [pd.read_csv(f, **kwargs) for f in files_to_concat]
+#     data = reduce(lambda left, right: pd.concat([left, right]), files_to_concat)
     
-    mkdirs(output_path)
-    data.to_csv(output_path, index=False)
-    print(os.path.basename(output_path), ': Saved.', ' '*15, end='\n', sep='')
+#     mkdirs(output_path)
+#     data.to_csv(output_path, index=False)
+#     print(os.path.basename(output_path), ': Saved.', ' '*15, end='\n', sep='')
     
-    return
+#     return
 
 
-def __input_to_series__(data, request):
-    if data is None: return request
+# def __input_to_series__(data, request):
+#     if data is None: return request
 
-    columns = data.columns
-    if request is None: return 0 
-    elif isinstance(request, str) and request in columns: 
-        request = data[request]
-    elif isinstance(request, (list, tuple)) and all(isinstance(i, str) and (i in columns) for i in request): 
-        request = np.sum(data[request], axis=1)
-    return request
+#     columns = data.columns
+#     if request is None: return 0
+#     elif isinstance(request, str) and request in columns: 
+#         request = data[request]
+#     elif isinstance(request, (list, tuple)) and all(isinstance(i, str) and (i in columns) for i in request): 
+#         request = np.sum(data[request], axis=1)
+#     return request
 
 
-def force_array_dimension(shape, out):
-    """
-    Return array with same shape as base one.
-    """
-    out_ = np.zeros(shape) * np.nan
+# def force_array_dimension(shape, out):
+#     """
+#     Return array with same shape as base one.
+#     """
+#     out_ = np.zeros(shape) * np.nan
 
-    shape_dif = (np.array(shape) - np.array(out.shape)) / 2
-    signal = shape_dif / abs(shape_dif)
+#     shape_dif = (np.array(shape) - np.array(out.shape)) / 2
+#     signal = shape_dif / abs(shape_dif)
 
-    bas_cut = [None] * 4
-    out_cut = [None] * 4
+#     bas_cut = [None] * 4
+#     out_cut = [None] * 4
 
-    for i, s_ in enumerate(signal):
+#     for i, s_ in enumerate(signal):
 
-        dif = [int(np.ceil(abs(shape_dif[i]))), -
-               int(np.floor(abs(shape_dif[i])))]
-        dif = [el if el != 0 else None for el in dif]
+#         dif = [int(np.ceil(abs(shape_dif[i]))), -
+#                int(np.floor(abs(shape_dif[i])))]
+#         dif = [el if el != 0 else None for el in dif]
 
-        if i == 0:
-            if s_ == 1:
-                bas_cut[:2] = dif
+#         if i == 0:
+#             if s_ == 1:
+#                 bas_cut[:2] = dif
 
-            elif s_ == -1:
-                out_cut[:2] = dif
+#             elif s_ == -1:
+#                 out_cut[:2] = dif
 
-        elif i == 1:
-            if s_ == 1:
-                bas_cut[2:] = dif
+#         elif i == 1:
+#             if s_ == 1:
+#                 bas_cut[2:] = dif
 
-            elif s_ == -1:
-                out_cut[2:] = dif
+#             elif s_ == -1:
+#                 out_cut[2:] = dif
 
-    out_[bas_cut[0]:bas_cut[1],
-         bas_cut[2]:bas_cut[3]] = \
-        sum_nan_arrays(out_[bas_cut[0]:bas_cut[1],
-                               bas_cut[2]:bas_cut[3]],
-                          out[out_cut[0]:out_cut[1],
-                              out_cut[2]:out_cut[3]])
+#     out_[bas_cut[0]:bas_cut[1],
+#          bas_cut[2]:bas_cut[3]] = \
+#         sum_nan_arrays(out_[bas_cut[0]:bas_cut[1],
+#                                bas_cut[2]:bas_cut[3]],
+#                           out[out_cut[0]:out_cut[1],
+#                               out_cut[2]:out_cut[3]])
 
-    return out_
+#     return out_
 
 
 ##########################################
@@ -425,64 +417,64 @@ def add_subplot_axes(ax,rect):
 ###     GET DATASETS                           
 ##########################################
 
-def get_all_sites(fc, *args, **kwargs):
-    datasetToReturn = structuredData()
-    datasetToReturn.data = {}
-    for sitename in SITES_TO_STUDY:
-        data = fc(*args, sitename=sitename, **kwargs)
-        if data is None: data = pd.DataFrame({"TIMESTAMP": []})
-        datasetToReturn.data[sitename] = data
-    datasetToReturn.alldata = []
-    for k, v in datasetToReturn.data.items():
-        v.insert(0, 'CO_SITE', k)
-        datasetToReturn.alldata += [copy.deepcopy(v).reset_index(drop=True)]
-    datasetToReturn.alldata = pd.concat(
-        datasetToReturn.alldata).reset_index(drop=True)
-    return datasetToReturn.alldata
+# def get_all_sites(fc, *args, **kwargs):
+#     datasetToReturn = structuredData()
+#     datasetToReturn.data = {}
+#     for sitename in SITES_TO_STUDY:
+#         data = fc(*args, sitename=sitename, **kwargs)
+#         if data is None: data = pd.DataFrame({"TIMESTAMP": []})
+#         datasetToReturn.data[sitename] = data
+#     datasetToReturn.alldata = []
+#     for k, v in datasetToReturn.data.items():
+#         v.insert(0, 'CO_SITE', k)
+#         datasetToReturn.alldata += [copy.deepcopy(v).reset_index(drop=True)]
+#     datasetToReturn.alldata = pd.concat(
+#         datasetToReturn.alldata).reset_index(drop=True)
+#     return datasetToReturn.alldata
 
-def get_cospectra(sitename=None, **kwargs):
-    if sitename is None:
-        return get_all_sites(get_cospectra, **kwargs)
-    mergeorconcat = kwargs.get('mergeorconcat', 'merge')
-    folder        = kwargs.get('folder', 'data')
-    duplicates    = kwargs.get('duplicates', False)
+# def get_cospectra(sitename=None, **kwargs):
+#     if sitename is None:
+#         return get_all_sites(get_cospectra, **kwargs)
+#     mergeorconcat = kwargs.get('mergeorconcat', 'merge')
+#     folder        = kwargs.get('folder', 'data')
+#     duplicates    = kwargs.get('duplicates', False)
 
-    wv_path = os.path.join(folder, sitename, 'output', 'DWCS')
-    data = []
-    for name in os.listdir(wv_path):
-        if any([name.endswith(ext) for ext in ['csv', 'xlsx', 'txt', 'parquet', 'json']]):
-            if re.findall('_full_cospectra', name) and re.findall('.30mn', name):
-                data.append(pd.read_file(os.path.join(wv_path, name)))
+#     wv_path = os.path.join(folder, sitename, 'output', 'DWCS')
+#     data = []
+#     for name in os.listdir(wv_path):
+#         if any([name.endswith(ext) for ext in ['csv', 'xlsx', 'txt', 'parquet', 'json']]):
+#             if re.findall('_full_cospectra', name) and re.findall('.30mn', name):
+#                 data.append(pd.read_file(os.path.join(wv_path, name)))
     
-    if len(data) == 0:
-        return None
-    elif len(data) == 1:
-        data = data[0]
-    elif mergeorconcat == 'concat':
-        data = pd.concat(data)
-    else:
-        if duplicates:
-            data = reduce(lambda left, right: pd.merge(left, right, on=['TIMESTAMP'], how="outer", suffixes=('', '_DUP')),
-                            data)
-        else:
-            print(data)
-            data = reduce(lambda left, right: pd.merge(left, right[['TIMESTAMP'] + list(set(right) - set(left))], 
-                                                       on=['TIMESTAMP'], how="outer", suffixes=('', '_DUP')), data)
+#     if len(data) == 0:
+#         return None
+#     elif len(data) == 1:
+#         data = data[0]
+#     elif mergeorconcat == 'concat':
+#         data = pd.concat(data)
+#     else:
+#         if duplicates:
+#             data = reduce(lambda left, right: pd.merge(left, right, on=['TIMESTAMP'], how="outer", suffixes=('', '_DUP')),
+#                             data)
+#         else:
+#             print(data)
+#             data = reduce(lambda left, right: pd.merge(left, right[['TIMESTAMP'] + list(set(right) - set(left))], 
+#                                                        on=['TIMESTAMP'], how="outer", suffixes=('', '_DUP')), data)
     
-    for tc in data.columnstartswith('TIMESTAMP'):
-        data[tc] = pd.to_datetime(
-            data[tc])
-    return data
+#     for tc in data.columnstartswith('TIMESTAMP'):
+#         data[tc] = pd.to_datetime(
+#             data[tc])
+#     return data
     
-def get_metadata(sitename=None, folder='data'):
-    if sitename is None:
-        return get_all_sites(get_metadata)
+# def get_metadata(sitename=None, folder='data'):
+#     if sitename is None:
+#         return get_all_sites(get_metadata)
     
-    mt_path = os.path.join(folder, sitename, f'{sitename}_metadata.yaml')
-    if os.path.exists(mt_path):
-        meta = yaml.safe_load(open(mt_path, 'r'))
-        return pd.DataFrame(meta, index=[0])
-    return None
+#     mt_path = os.path.join(folder, sitename, f'{sitename}_metadata.yaml')
+#     if os.path.exists(mt_path):
+#         meta = yaml.safe_load(open(mt_path, 'r'))
+#         return pd.DataFrame(meta, index=[0])
+#     return None
 
 
 def j2sj(e, samp_rate=10): return 1/(samp_rate*(2**-float(e)))

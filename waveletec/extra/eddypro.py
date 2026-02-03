@@ -2,7 +2,6 @@
 # built-in modules
 import re
 import os
-import warnings
 import logging
 from functools import reduce
 import zipfile
@@ -15,7 +14,6 @@ import pandas as pd
 import xarray as xr
 
 # project modules
-from ..core.commons import get_all_sites
 from ..core import corrections
 from ..io import READERS
 
@@ -122,9 +120,7 @@ def read_eddypro_metadata_file(filename):
     return metadata
 
 
-def get_eddypro_output(site_name=None, treated=True, **kwargs):
-    if site_name is None:
-        return get_all_sites(get_eddypro_output, **kwargs)
+def get_eddypro_output(site_name, treated=True, **kwargs):
     mergeorconcat = kwargs.get('mergeorconcat', 'merge')
     folder        = kwargs.get('folder', 'data')
     
@@ -186,10 +182,8 @@ def get_eddypro_output(site_name=None, treated=True, **kwargs):
     return data
 
 
-def get_eddypro_cospectra(site_name=None, x='natural_frequency', y='f_nat*cospec(w_co2)/cov(w_co2)', folder='data', subfolder='', help=False):
+def get_eddypro_cospectra(site_name, x='natural_frequency', y='f_nat*cospec(w_co2)/cov(w_co2)', folder='data', subfolder='', help=False):
     assert (x is not None and y is not None) or (help)
-    if site_name is None:
-        return get_all_sites(get_eddypro_cospectra, x=x, y=y, folder=folder, subfolder=subfolder, help=help)
     
     ep_path = os.path.join(folder, site_name, 'output/eddypro_output', subfolder, 'eddypro_binned_cospectra')
     

@@ -8,7 +8,6 @@ import xarray as xr
 import itertools
 
 # project modules
-from ...core.commons import __input_to_series__
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2',
     if NIGHT is not None:
         islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
     else:
-        islight = np.array([1] * len(data))
+        islight = xr.ones_like(data[positive])
     data[labelpositive] = islight * (data[positive] + 0.5*data[negative])
     data[labelnegative] = (data[all] - data[labelpositive])
     return data
@@ -81,15 +80,17 @@ def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
     else: data = data.copy()
     
     logger.debug('CO2 = __input_to_series__(data, CO2)')
-    CO2 = __input_to_series__(data, CO2)
-    CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
-    CO2neg_H2Oneg = __input_to_series__(data, CO2neg_H2Oneg)
+    CO2 = data[CO2] if isinstance(CO2, str) else CO2
+    CO2neg_H2Opos = data[CO2neg_H2Opos] if isinstance(
+        CO2neg_H2Opos, str) else CO2neg_H2Opos
+    CO2neg_H2Oneg = data[CO2neg_H2Oneg] if isinstance(
+        CO2neg_H2Oneg, str) else CO2neg_H2Oneg
     if data is None: data = pd.DataFrame()
 
     if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
+        islight = xr.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
     else:
-        islight = np.array([1] * len(data))
+        islight = xr.ones_like(CO2)
 
     logger.debug('data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)')
     data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)
@@ -104,12 +105,16 @@ def partition_DWCS_CH4(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
                   CO2pos_CH4pos='wco2+wch4+', CO2pos_CH4neg='wco2+wch4-', 
                   CO2neg_CH4pos='wco2-wch4+', CO2neg_CH4neg='wco2-wch4-', NIGHT=None):
     if isinstance(data, str): data = pd.read_file(data)
-    
-    CO2 = __input_to_series__(data, CO2)
-    CO2pos_CH4pos = __input_to_series__(data, CO2pos_CH4pos)
-    CO2pos_CH4neg = __input_to_series__(data, CO2pos_CH4neg)
-    CO2neg_CH4pos = __input_to_series__(data, CO2neg_CH4pos)
-    CO2neg_CH4neg = __input_to_series__(data, CO2neg_CH4neg)
+
+    CO2 = data[CO2] if isinstance(CO2, str) else CO2
+    CO2pos_CH4pos = data[CO2pos_CH4pos] if isinstance(
+        CO2pos_CH4pos, str) else CO2pos_CH4pos
+    CO2pos_CH4neg = data[CO2pos_CH4neg] if isinstance(
+        CO2pos_CH4neg, str) else CO2pos_CH4neg
+    CO2neg_CH4pos = data[CO2neg_CH4pos] if isinstance(
+        CO2neg_CH4pos, str) else CO2neg_CH4pos
+    CO2neg_CH4neg = data[CO2neg_CH4neg] if isinstance(
+        CO2neg_CH4neg, str) else CO2neg_CH4neg
     if data is None: data = pd.DataFrame()
 
     if NIGHT is not None:
@@ -133,12 +138,16 @@ def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2
                      NIGHT=None):
     if isinstance(data, str): data = pd.read_file(data)
     #prefix = 'DWnf_' #NEE.split('_', 1)[0] +'_'
-    #suffix = ''
-    CO2 = __input_to_series__(data, CO2)
-    CO2neg_H2Opos = __input_to_series__(data, CO2neg_H2Opos)
-    CO2neg_H2Oneg = __input_to_series__(data, CO2neg_H2Oneg)
-    CO2pos_COpos =  __input_to_series__(data, CO2pos_COpos)
-    CO2pos_COneg =  __input_to_series__(data, CO2pos_COneg)
+    # suffix = ''
+    CO2 = data[CO2] if isinstance(CO2, str) else CO2
+    CO2neg_H2Opos = data[CO2neg_H2Opos] if isinstance(
+        CO2neg_H2Opos, str) else CO2neg_H2Opos
+    CO2neg_H2Oneg = data[CO2neg_H2Oneg] if isinstance(
+        CO2neg_H2Oneg, str) else CO2neg_H2Oneg
+    CO2pos_COpos = data[CO2pos_COpos] if isinstance(
+        CO2pos_COpos, str) else CO2pos_COpos
+    CO2pos_COneg = data[CO2pos_COneg] if isinstance(
+        CO2pos_COneg, str) else CO2pos_COneg
     if data is None: data = pd.DataFrame()
 
     if NIGHT: NIGHT = data[NIGHT]
