@@ -35,6 +35,7 @@ The main function is:
 import os
 import re
 import logging
+import warnings
 import time
 import datetime
 import glob
@@ -156,7 +157,7 @@ def data_compute_product(data, formula='w*co2|w*h2o', name=None):
     # Calculate the product for conditional sampling pairs
     for cs in formulavar.condsamp_pair:
         cs_name = ''.join(cs)
-        if (cs_name not in data.data_vars) and (cs_name not in data.data_vars):
+        if cs_name not in data.data_vars:
             CS = data[cs[0]]
             for c in cs[1:]:
                 CS = CS * data[c].conj()
@@ -235,7 +236,7 @@ def data_partition(data, dst=None,
             if dst:
                 ds_pH2O.to_netcdf(dst + ".FCO2_condH2O")
         except Exception as e:
-            logging.warning(str(e))
+            logger.warning(str(e))
     else:
         logger.debug(
             f"Missing variables {', '.join([v for v in h2o_dw_required_variables if v not in variables_available])}.")
@@ -259,7 +260,7 @@ def data_partition(data, dst=None,
             if dst:
                 ds_pH2O_CO.to_netcdf(dst + ".FCO2_condH2O_CO")
         except Exception as e:
-            logging.warning(str(e))
+            logger.warning(str(e))
     else:
         logger.debug(
             f"Missing variables {', '.join([v for v in h2o_co_dw_required_variables if v not in variables_available])}.")
@@ -283,7 +284,7 @@ def data_partition(data, dst=None,
             if dst:
                 ds_pCO.to_netcdf(dst + ".FCO2_condCO")
         except Exception as e:
-            logging.warning(str(e))
+            logger.warning(str(e))
     else:
         logger.debug(
             f"Missing variables {', '.join([v for v in co_dw_required_variables if v not in variables_available])}.")
@@ -307,7 +308,7 @@ def data_partition(data, dst=None,
             if dst:
                 ds_pCH4.to_netcdf(dst + ".FCO2_condCH4")
         except Exception as e:
-            logging.warning(str(e))
+            logger.warning(str(e))
     else:
         logger.debug(
             f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
@@ -462,7 +463,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
     ds_collection = []
     
     _, _, _f = ymd
-    ymd = commons.list_time_in_period(*ymd, processing_time_duration, include='both')
+    ymd = commons.list_time_in_period(*ymd, processing_time_duration, include='right')
     # ymd = {y[-1]: y for y in ymd}
     
     logger.debug(
@@ -472,27 +473,33 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
     prev_print = '\n'
     for yl in ymd:
         info_t_yl_ymd = time.time()
-        date = _date_from_yl(yl[0])
+        
+        try:
+            date = _date_from_yl(yl[0])
 
-        print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
-        prev_print = '\x1B[1A\r'
+            print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
+            prev_print = '\x1B[1A\r'
 
-        if output_folderpath is not None:
-            output_path = str(os.path.join(
-                output_folderpath,
-                f"wavelet_full_cospectra",
-                f"{identifier}_full_cospectra_{date}_{run_time}.nc"))
-            commons.mkdirs(output_path)
-            curoutpath_inprog = f"{output_path}.inprogress"
-            logger.debug(f'In progress file: {curoutpath_inprog}.')
-            if not _validate_run(date, yl):
-                continue
+            if output_folderpath is not None:
+                output_path = str(os.path.join(
+                    output_folderpath,
+                    f"wavelet_full_cospectra",
+                    f"{identifier}_full_cospectra_{date}_{run_time}.nc"))
+                commons.mkdirs(output_path)
+                curoutpath_inprog = f"{output_path}.inprogress"
+                logger.debug(f'In progress file: {curoutpath_inprog}.')
+                if not _validate_run(date, yl):
+                    continue
+        except Exception as e:
+            logger.critical(e)
+            warnings.warn(str(e))
+            continue
 
         try:
             data = _load_data()
         except Exception as e:
             logger.critical(e)
-            raise(e)
+            raise
         
         if data is None:
             _exit()
@@ -507,7 +514,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
                 else:
                     logger.warning(f"Trying to filter {var}, but variable not found in data.")
 
-            ds = data_run(data, sel={'TIMESTAMP': slice(min(yl), max(yl))},
+            ds = data_run(data, sel={'TIMESTAMP': slice(min(yl), max(yl) + datetime.timedelta(minutes=fileduration))},
                       dst=None, **run_kwargs)
             ds_average = ds.mean(dim=[d for d in ds.dims if d not in {
                 'TIMESTAMP', 'natural_frequency'}])
@@ -672,7 +679,7 @@ def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwar
     # Save data
     if dst:
         response.to_netcdf(dst)
-        response.attrs.setdefault('pipeout', []).append(f'{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}    Saved in: {dst}.')
+        response.attrs.setdefault('pipeout', []).append(f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}    Saved in: {dst}.")
 
     logger.debug(
         f'\tMain took {round(time.time() - info_t_main)} s.')

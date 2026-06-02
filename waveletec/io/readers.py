@@ -5,7 +5,7 @@
 import pandas as pd
 
 # local modules
-from ..core import registry
+import regorator as registry
 
 
 READERS = registry.Register()

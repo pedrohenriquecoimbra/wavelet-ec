@@ -38,6 +38,7 @@ dependencies = [
     "PyYAML",
     "xarray",
     "dask",
+    "regorator",
 ]
 [project.optional-dependencies]
 cwt = ["pycwt"]
@@ -54,9 +55,9 @@ waveletEC = "waveletec.main:main"
 Homepage = "https://github.com/pedrohenriquecoimbra/wavelete-ec"
 
 [tool.setuptools]
-packages = ["waveletec"]
-exclude-package-data = { "waveletec" = ["sample*", "deprecated*"] }
-include-package-data = true
+packages.find = { where = ["."], include = ["waveletec*"], exclude = ["sample*", "deprecated*"], namespaces = false }
+# exclude-package-data = { "waveletec" = ["sample*", "deprecated*"] }
+# include-package-data = true
 
 [tool.setuptools.dynamic]
 version = { attr = "waveletec.version.__version__" }

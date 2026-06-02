@@ -200,7 +200,7 @@ def eddypro_run():
     try:
         custom_params = __custom_params__(unknown_args)
     except UnboundLocalError:
-        raise(SyntaxError, 'Check command. Possibly kwargs error, kwargs must be passed as `--key value`.')
+        raise SyntaxError('Check command. Possibly kwargs error, kwargs must be passed as `--key value`.')
 
     logging.basicConfig(level=args.verbosity.upper(),
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -380,7 +380,7 @@ def main():
 
     data.to_netcdf(os.path.join(
         args.output_folderpath, 
-        f'{args.identifier}_full_output_{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}.nc'))
+        f"{args.identifier}_full_output_{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}.nc"))
     
     return
 

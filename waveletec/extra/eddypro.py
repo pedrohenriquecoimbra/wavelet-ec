@@ -17,7 +17,7 @@ import xarray as xr
 from ..core import corrections
 from ..io import READERS
 
-logger = logging.getLogger('wvlt.eddypro_tools')
+logger = logging.getLogger(__name__)
 
 
 DEFAULT_READ_GHG = {
