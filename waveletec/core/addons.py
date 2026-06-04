@@ -11,6 +11,18 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "configure_warnings",
+    "patch_pandas",
+    "read_file",
+    "to_file",
+    "columnstartswith",
+    "columnsmatch",
+    "columnsconditioned",
+    "suppress_stdout",
+]
+
+
 # Add-ons
 def _warning(
     message,
@@ -30,58 +42,80 @@ def configure_warnings():
     """
     warnings.showwarning = _warning
 
-import matplotlib.pyplot as plt
-# Reads styles in /styles
-stylesheets = plt.style.core.read_style_directory(os.path.join(os.getcwd(), 'style'))
-# Update dictionary of styles
-plt.style.core.update_nested_dict(plt.style.library, stylesheets)
-plt.style.core.available[:] = sorted(plt.style.library.keys())
 
-import pandas as pd
-from pandas.api.types import is_numeric_dtype, is_object_dtype
-pd.DataFrame.columnstartswith = lambda self, x: [c for c in self.columns if c.startswith(x)]
-pd.DataFrame.columnsmatch = lambda self, x: [c for c in self.columns if re.findall(x, c)]
-def columnsconditioned(self, start, *args):
-    columns = self.columnsmatch(f'^{start}[^_]+$')
-    if args:
-        for a in args:
-            for c in [c for c in columns]:
-                if not re.findall(a, c):
-                    columns.pop(columns.index(c))
-    
+# --- DataFrame helpers (module-level; opt into pandas methods via patch_pandas) ---
+
+def columnstartswith(df, prefix):
+    """Return columns of *df* whose names start with *prefix*."""
+    return [c for c in df.columns if c.startswith(prefix)]
+
+
+def columnsmatch(df, pattern):
+    """Return columns of *df* whose names match the regex *pattern*."""
+    return [c for c in df.columns if re.findall(pattern, c)]
+
+
+def columnsconditioned(df, start, *patterns):
+    """Return columns matching ``^{start}[^_]+$`` and every regex in *patterns*."""
+    columns = columnsmatch(df, f'^{start}[^_]+$')
+    for pattern in patterns:
+        columns = [c for c in columns if re.findall(pattern, c)]
     return columns
-pd.DataFrame.columnsconditioned = columnsconditioned
-def df_to_file(self, file_name, *a, **k): 
-    to_functions = {'csv': pd.DataFrame.to_csv,
-                    'xlsx': pd.DataFrame.to_excel,
-                    'txt': pd.DataFrame.to_csv,
-                    'parquet': pd.DataFrame.to_parquet,
-                    'temporary': pd.DataFrame.to_parquet,
-                    'json': pd.DataFrame.to_json}
-    
+
+
+_TO_WRITERS = {'csv': pd.DataFrame.to_csv,
+               'xlsx': pd.DataFrame.to_excel,
+               'txt': pd.DataFrame.to_csv,
+               'parquet': pd.DataFrame.to_parquet,
+               'temporary': pd.DataFrame.to_parquet,
+               'json': pd.DataFrame.to_json}
+_READERS = {'csv': pd.read_csv,
+            'xlsx': pd.read_excel,
+            'txt': pd.read_csv,
+            'parquet': pd.read_parquet,
+            'temporary': pd.read_parquet,
+            'json': pd.read_json}
+
+
+def to_file(df, file_name, *args, **kwargs):
+    """Write *df* to *file_name*, dispatching on the file-name extension.
+
+    Returns the writer's result, or ``None`` (with a warning) if the extension
+    is unrecognized. A trailing ``.part`` suffix is ignored when matching.
+    """
     file_str = file_name if isinstance(file_name, str) else file_name.name
     if file_str.endswith('.part'):
         file_str = file_str.replace('.part', '')
+    for ext, writer in _TO_WRITERS.items():
+        if file_str.endswith(ext):
+            return writer(df, file_name, *args, **kwargs)
+    logger.warning("File extension not recognized: %s", file_str)
+    return None
 
-    for file_ext, to in to_functions.items():
-        if file_str.endswith(file_ext):
-            return to(self, file_name, *a, **k)
-        
-    logger.warning(f"File extension not recognized: {file_str}")
+
+def read_file(file_name, *args, **kwargs):
+    """Read *file_name* into a DataFrame, dispatching on the file-name extension.
+
+    Returns ``None`` if the extension is unrecognized.
+    """
+    for ext, reader in _READERS.items():
+        if file_name.endswith(ext):
+            return reader(file_name, *args, **kwargs)
     return None
-pd.DataFrame.to_file = df_to_file
-def pd_read_file(file_name, *a, **k):
-    read_functions = {'csv': pd.read_csv,
-                    'xlsx': pd.read_excel,
-                    'txt': pd.read_csv,
-                    'parquet': pd.read_parquet,
-                    'temporary': pd.read_parquet,
-                    'json': pd.read_json}
-    for file_ext, read in read_functions.items():
-        if file_name.endswith(file_ext):
-            return read(file_name, *a, **k)         
-    return None
-pd.read_file = pd_read_file
+
+
+def patch_pandas():
+    """Attach the helpers above onto pandas as methods/functions.
+
+    Opt-in convenience, **not** applied on import. After calling this you can
+    use ``df.to_file(...)``, ``pd.read_file(...)``, ``df.columnsmatch(...)``,
+    etc. Library code should prefer the module-level functions directly.
+    """
+    pd.DataFrame.columnstartswith = lambda self, prefix: columnstartswith(self, prefix)
+    pd.DataFrame.columnsmatch = lambda self, pattern: columnsmatch(self, pattern)
+    pd.DataFrame.columnsconditioned = lambda self, start, *patterns: columnsconditioned(self, start, *patterns)
+    pd.DataFrame.to_file = lambda self, *args, **kwargs: to_file(self, *args, **kwargs)
+    pd.read_file = read_file
 
 @contextmanager
 def suppress_stdout():

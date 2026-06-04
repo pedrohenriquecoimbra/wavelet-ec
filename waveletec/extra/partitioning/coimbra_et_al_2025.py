@@ -8,6 +8,7 @@ import xarray as xr
 import itertools
 
 # project modules
+from waveletec.core.addons import read_file
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
 
 def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2', 
                   positive='wco2-wh2o+', negative='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
+    if isinstance(data, str): data = read_file(data)
     #lightresponse = lambda p: np.where(np.isnan(p), 1, (p-np.nanmin(p))/(np.nanmax(p)-np.nanmin(p)))
     #data["DW_GPP_withPARratio"] = np.where((np.isnan(data.PPFD)==False) * (data.PPFD<10), 0, 1) * (
     #    data["dwt_wco2-+h2o_uStar_f"] + lightresponse(data["PPFD"]) * (data["dwt_wco2--h2o_uStar_f"]))
@@ -76,7 +77,7 @@ def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2',
 
 def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
                   CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
+    if isinstance(data, str): data = read_file(data)
     else: data = data.copy()
     
     logger.debug('CO2 = __input_to_series__(data, CO2)')
@@ -104,7 +105,7 @@ def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
 def partition_DWCS_CH4(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
                   CO2pos_CH4pos='wco2+wch4+', CO2pos_CH4neg='wco2+wch4-', 
                   CO2neg_CH4pos='wco2-wch4+', CO2neg_CH4neg='wco2-wch4-', NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
+    if isinstance(data, str): data = read_file(data)
 
     CO2 = data[CO2] if isinstance(CO2, str) else CO2
     CO2pos_CH4pos = data[CO2pos_CH4pos] if isinstance(
@@ -136,7 +137,7 @@ def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2
                      CO2pos_COpos='wco2+wco+',
                      CO2pos_COneg='wco2+wco-',
                      NIGHT=None):
-    if isinstance(data, str): data = pd.read_file(data)
+    if isinstance(data, str): data = read_file(data)
     #prefix = 'DWnf_' #NEE.split('_', 1)[0] +'_'
     # suffix = ''
     CO2 = data[CO2] if isinstance(CO2, str) else CO2
