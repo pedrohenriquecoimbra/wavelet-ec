@@ -33,12 +33,11 @@ To install the WaveletEC module, clone the repository and install the required d
 
 ```bash
 git clone https://github.com/pedrohenriquecoimbra/wavelet-ec
-cd waveletec
+cd wavelet-ec
 ```
-Then one of the follwoing options:
-- ```pip install -r requirements.txt```
-- ```conda create -n wavec --file requirements.txt```
-- ```conda create -f environment.yml```
+Then one of the following options:
+- ```pip install .```
+- ```conda env create -f environment.yml```
 
 
 ## Usage
@@ -59,9 +58,8 @@ Then one of the follwoing options:
     ```
     Or directly in the command line:
     ```bash
-    cd PATH/TO/WAVELETEC/LIBRARY
-    python -m waveletec.handler --help
-    python -m waveletec.handler [-args...]
+    python -m waveletec.main --help
+    python -m waveletec.main [-args...]
     ```
 
 ### Running _waveletec_
@@ -77,14 +75,14 @@ waveletec.process(...)
 or directly run from a DataFrame or dictionary:
 ```python
 data = ...
-waveletec.main(data, ...)
+waveletec.data_run(data, ...)
 ```
 
 ### Saving Results
 
 If you're using ```waveletec.process```, just pass the ```output_folderpath``` parameter like this: ```waveletec.process(..., output_folderpath='PATH/TO/OUTPUT/FOLDER')```. This will create a new subfolder called 'wavelet_full_cospectra' for you, and you'll find the sum of all your files neatly stored in the output_folderpath you specified.
 
-Prefer using ```waveletec.main```? No problem! Just pass the ```output_kwargs``` parameter like this: ```waveletec.main(data, ..., output_kwargs={'output_path': 'PATH/TO/OUTPUT/FOLDER'})```.
+Prefer using ```waveletec.data_run```? No problem! Pass the ```dst``` parameter (a single output file) like this: ```waveletec.data_run(data, ..., dst='PATH/TO/OUTPUT.nc')```.
 
 
 ### Output Format
@@ -139,8 +137,8 @@ The output file for the wavelet-based (co)spectra analysis is structured as foll
 
 ## Example
 
-For an example follow the [launcher_sample.ipynb](https://github.com/pedrohenriquecoimbra/wavelete-ec/blob/latest/sample/FR-Gri_20220514/launcher_sample.ipynb) file in [sample](https://github.com/pedrohenriquecoimbra/wavelete-ec/blob/latest/sample/).
+For an example follow the [example.ipynb](https://github.com/pedrohenriquecoimbra/wavelet-ec/blob/main/sample/FR-Gri_20220514/example.ipynb) file in [sample](https://github.com/pedrohenriquecoimbra/wavelet-ec/tree/main/sample/).
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE) file for details.
