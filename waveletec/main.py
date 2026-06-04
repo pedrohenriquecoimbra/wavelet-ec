@@ -192,43 +192,51 @@ def __custom_params__(unknown_args):
     return custom_params
 
 
+def _add_common_args(parser):
+    """Add CLI arguments shared by every entry point."""
+    parser.add_argument(
+        "--verbosity", default="INFO",
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        help="Logging level (e.g., DEBUG, INFO, WARNING)")
+
+
+def _finalize(parser):
+    """Parse args, set up logging, log the run, and return (args, custom_params).
+
+    Shared tail for every CLI entry point: parses known args (collecting the
+    rest as ``--key value`` custom params), initialises console logging at
+    ``--verbosity``, and logs the resolved arguments.
+    """
+    args, unknown_args = parser.parse_known_args()
+    try:
+        custom_params = __custom_params__(unknown_args)
+    except UnboundLocalError:
+        raise SyntaxError(
+            'Check command. Possibly kwargs error, kwargs must be passed as `--key value`.')
+    _init_logging(args.verbosity)
+    log_args(vars(args))
+    return args, custom_params
+
+
 def eddypro_run():
     # waveletEC-eddypro_run -p "input/EP/FR-Gri_sample.eddypro" -o "output/wavelet_flux/" -d "20220513T0000-20220516T0000" --processing_time_duration 3H
-    parser = argparse.ArgumentParser(description="Run wavelet-based edy covariance workflows.")     
+    parser = argparse.ArgumentParser(description="Run wavelet-based edy covariance workflows.")
     parser.add_argument('-p', '--path',   type=str,
                         help='Path to EddyPro setup file')
     parser.add_argument('-f', '--folder', type=str,
                         help='Path to the output folder where results will be saved')
     parser.add_argument('-d', '--datetimerange', type=str,
-                        help='Date and time range for processing, format: YYYYMMDDTHHMM-YYYYMMDDTHHMM') 
+                        help='Date and time range for processing, format: YYYYMMDDTHHMM-YYYYMMDDTHHMM')
     parser.add_argument('-cov', '--covariance', type=str, nargs='+',
                         help='List of covariances to compute (e.g.: "w*co2", default: None)')
-    parser.add_argument("--verbosity", default="INFO", choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
-    # Parse known arguments and capture the rest
-    args, unknown_args = parser.parse_known_args()
+    _add_common_args(parser)
+    args, custom_params = _finalize(parser)
 
-    # Validate logging level
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    if args.verbosity.upper() not in valid_levels:
-        logger.error(
-            f"Invalid verbosity level. Choose from: {valid_levels}")
-        args.verbosity = "0"
-
-    try:
-        custom_params = __custom_params__(unknown_args)
-    except UnboundLocalError:
-        raise SyntaxError('Check command. Possibly kwargs error, kwargs must be passed as `--key value`.')
-
-    logging.basicConfig(level=args.verbosity.upper(),
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     passed_args = {"path": args.path,
                    "output_folderpath": args.folder,
                    "datetimerange": args.datetimerange,
                    "covariance": args.covariance,
                    **custom_params}
-    log_args(vars(args))
     handlers.run_from_eddypro(**passed_args)
 
 
@@ -238,30 +246,14 @@ def integrate():
     parser.add_argument('-f', '--folder', type=str,
                         help='Path to the output folder where results will be saved')
     parser.add_argument('-d', '--dst_path', type=str,
-                        help='Path to the output file where results will be saved')    
+                        help='Path to the output file where results will be saved')
     parser.add_argument('-ip', '--integration_period', type=int, default=None,
                         help='Integration period in seconds (default: None)')
-    parser.add_argument("--verbosity", default="INFO", choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
-    # Parse known arguments and capture the rest
-    args, unknown_args = parser.parse_known_args()
+    _add_common_args(parser)
+    args, custom_params = _finalize(parser)
 
     args.dst_path = args.dst_path or os.path.join(
         args.folder, '00000_full_cospectra.csv')
-
-    # Validate logging level
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    if args.verbosity.upper() not in valid_levels:
-        logger.error(
-            f"Invalid verbosity level. Choose from: {valid_levels}")
-        args.verbosity = "0"
-
-    custom_params = __custom_params__(unknown_args)
-
-    logging.basicConfig(level=args.verbosity.upper(),
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    log_args(vars(args))
 
     data = handlers.open_files_in_folder(
         os.path.join(args.folder, 'wavelet_full_cospectra')).sortby('TIMESTAMP')
@@ -271,36 +263,21 @@ def integrate():
 
     data.to_netcdf(args.dst_path)
     return
-    
+
+
 def partition():
     parser = argparse.ArgumentParser(
         description="Run wavelet-based edy covariance workflows.")
     parser.add_argument('-f', '--folder', type=str,
                         help='Path to the output folder where results will be saved')
-    parser.add_argument("--verbosity", default="INFO", choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
-    # Parse known arguments and capture the rest
-    args, unknown_args = parser.parse_known_args()
+    _add_common_args(parser)
+    args, custom_params = _finalize(parser)
 
-    # Validate logging level
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    if args.verbosity.upper() not in valid_levels:
-        logger.error(
-            f"Invalid verbosity level. Choose from: {valid_levels}")
-        args.verbosity = "0"
-
-    custom_params = __custom_params__(unknown_args)
-
-    logging.basicConfig(level=args.verbosity.upper(),
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    passed_args = {"folder": args.folder,
-                   **custom_params}
-    log_args(vars(args))
+    passed_args = {"folder": args.folder, **custom_params}
     handlers.data_partition(**passed_args)
 
 
-def exec():
+def run():
     parser = argparse.ArgumentParser(
         description="Run wavelet-based edy covariance workflows.")
     parser.add_argument('-dr', '--datetimerange', type=str,
@@ -320,29 +297,12 @@ def exec():
                         help='Covariance type (e.g., "w*co2|w*h2o")')
     parser.add_argument('-ptd', '--processing_time_duration', type=str, default="1D",
                         help='Processing time duration (e.g., "1D" for 1 day) (default: "1D")')
-    parser.add_argument("--verbosity", default="INFO", choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite existing files (default: False)')
-    
-    # Parse known arguments and capture the rest
-    args, unknown_args = parser.parse_known_args()
+    _add_common_args(parser)
+    args, custom_params = _finalize(parser)
 
-    # args.dst_path = args.dst_path or os.path.join(
-    #     args.folder, f'{args.identifier}_full_cospectra.csv')
-
-    # Validate logging level
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    if args.verbosity.upper() not in valid_levels:
-        logger.error(
-            f"Invalid verbosity level. Choose from: {valid_levels}")
-        args.verbosity = "0"
-
-    custom_params = __custom_params__(unknown_args)
-
-    log_args(vars(args))
-    handlers.process(**args, **custom_params)
+    handlers.process(**vars(args), **custom_params)
     return
 
 
@@ -368,25 +328,10 @@ def main():
                         help='Processing time duration (e.g., "1D" for 1 day) (default: "1D")')
     parser.add_argument('-ip', '--integration_period', type=int, default=1800,
                         help='Integration period in seconds (default: 1800)')
-    parser.add_argument("--verbosity", default="INFO", choices=[
-                        'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help="Logging level (e.g., DEBUG, INFO, WARNING)")
     parser.add_argument('--overwrite', action='store_true',
                         help='Overwrite existing files (default: False)')
-
-    # Parse known arguments and capture the rest
-    args, unknown_args = parser.parse_known_args()
-
-    # Validate logging level
-    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    if args.verbosity.upper() not in valid_levels:
-        logger.error(
-            f"Invalid verbosity level. Choose from: {valid_levels}")
-        args.verbosity = "0"
-
-    custom_params = __custom_params__(unknown_args)
-
-    log_args(vars(args))
+    _add_common_args(parser)
+    args, custom_params = _finalize(parser)
 
     handlers.process(**vars(args), **custom_params)
 
@@ -398,12 +343,11 @@ def main():
     data = handlers.data_partition(data)
 
     data.to_netcdf(os.path.join(
-        args.output_folderpath, 
+        args.output_folderpath,
         f"{args.identifier}_full_output_{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}.nc"))
-    
+
     return
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    main(**args)
+    main()
