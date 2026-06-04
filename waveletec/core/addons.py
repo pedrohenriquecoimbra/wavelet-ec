@@ -19,8 +19,16 @@ def _warning(
     lineno = -1,
     file = None, 
     line = None):
-    print("%s: %s" % (category.__name__, message))
-warnings.showwarning = _warning
+    logger.warning("%s: %s", category.__name__, message)
+
+
+def configure_warnings():
+    """Route Python warnings through this module's logger.
+
+    Not applied on import; call explicitly (e.g. from an application entry
+    point) if you want ``warnings.showwarning`` overridden.
+    """
+    warnings.showwarning = _warning
 
 import matplotlib.pyplot as plt
 # Reads styles in /styles

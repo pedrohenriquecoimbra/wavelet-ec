@@ -470,15 +470,13 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
         f'Start date loop at {round(time.time() - info_t_start)} s.')
 
     # Skip two line
-    prev_print = '\n'
     for yl in ymd:
         info_t_yl_ymd = time.time()
         
         try:
             date = _date_from_yl(yl[0])
 
-            print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
-            prev_print = '\x1B[1A\r'
+            logger.info("%s reading", date)
 
             if output_folderpath is not None:
                 output_path = str(os.path.join(

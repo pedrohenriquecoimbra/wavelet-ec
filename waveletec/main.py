@@ -12,6 +12,29 @@ from .core import handlers
 logger = logging.getLogger(__name__)
 
 
+def _init_logging(verbosity="INFO"):
+    """Attach a console handler at *verbosity* (application-level setup).
+
+    Sets the root level to DEBUG so a file handler added later (by
+    ``commons.start_logging``) still captures everything, while the console is
+    filtered to *verbosity*. Safe to call more than once.
+    """
+    level = verbosity.upper() if isinstance(verbosity, str) else verbosity
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    console = next(
+        (h for h in root.handlers
+         if isinstance(h, logging.StreamHandler)
+         and not isinstance(h, logging.FileHandler)),
+        None)
+    if console is None:
+        console = logging.StreamHandler()
+        console.setFormatter(logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        root.addHandler(console)
+    console.setLevel(level)
+
+
 def set_cwd(workingdir=None):
     """
     Set the current working directory to the specified path.
@@ -21,7 +44,6 @@ def set_cwd(workingdir=None):
     """
     if workingdir is not None:
         os.chdir(workingdir)
-        print(f"Current working directory set to: {os.getcwd()}")
         logger.info(f"Current working directory set to: {os.getcwd()}")
     else:
         logger.debug("No working directory specified, using current directory.")
@@ -126,15 +148,12 @@ def validate_args(args):
 
 
 def log_args(args):
-    # print('\n'.join(
-    #     [f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
-
-    print('Start run with:')
+    lines = ['Start run with:']
     for k, v in args.items():
         if isinstance(v, str) and len(v) > 30:
             v = f"{v[:5]}~{v[-25:]}"
-        print(f"{k}:\t{v}")
-    print()
+        lines.append(f"{k}:\t{v}")
+    logger.info('\n'.join(lines))
 
 
 # consider local folder + "/wavelet_flux" as default

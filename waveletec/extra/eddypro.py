@@ -194,7 +194,7 @@ def get_eddypro_cospectra(site_name, x='natural_frequency', y='f_nat*cospec(w_co
             if re.findall('_binned_cospectra_', name):
                 binned_cosp = pd.read_csv(os.path.join(ep_path, name), skiprows=11, na_values=[-9999, 'NAN'])
                 if help: 
-                    print(binned_cosp.columns)
+                    logger.info("Available columns: %s", list(binned_cosp.columns))
                     return
                 if x not in binned_cosp.columns or y not in binned_cosp.columns: continue
                 binned_cosp.dropna(subset=[x], inplace=True)
@@ -252,7 +252,7 @@ def extract_info_from_eddypro_setup(eddypro=None, metadata=None):
             if (not gas4_col) or (str(gas4_col) != '0'):
                 args['gas4_name'] = eddypro_metad['FileDescription'][f'col_{gas4_col}_variable']
         except Exception as e:
-            print(f"Error extracting gas4 name: {e}")
+            logger.warning("Could not extract gas4 name: %s", e)
 
     if metadata:
         eddypro_metad = read_eddypro_metadata_file(metadata)

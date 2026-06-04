@@ -33,7 +33,6 @@ def run_cec(ymd, raw_kwargs, output_path,
     logger.info(f'Start date loop at {round(time.time() - info_t_start)} s (run_cec).')
     
     # Skip two line
-    prev_print = '\n'
     for ymd_i, yl in enumerate(ymd):
         info_t_startdateloop = time.time()
 
@@ -41,8 +40,7 @@ def run_cec(ymd, raw_kwargs, output_path,
         if processing_time_duration.endswith("D"): date = date[:8]
         if processing_time_duration.endswith("H") or processing_time_duration.endswith("Min"): date = date[:12]
         
-        print(prev_print, date, 'reading', ' '*10, sep=' ', end='\n')
-        prev_print = '\x1B[1A\r'
+        logger.info("%s reading", date)
         
         # load files
         # data = get_rawdata.open_flux(lookup=yl, **raw_kwargs).data
@@ -88,12 +86,9 @@ def run_cec(ymd, raw_kwargs, output_path,
             
             __date__ = data['TIMESTAMP'].dt.floor(processing_time_duration).unique()[0]
             dst_path = output_path.format(suffix + "_cec", pd.to_datetime(__date__).strftime('%Y%m%d%H%M'))
-            data.to_file(dst_path, index=False)
+            hc24.to_file(data, dst_path, index=False)
         except Exception as e:
             logger.critical(str(e))
-            print(str(e))
-        
-        prev_print = '\x1B[2A\r' + f' {date} {len(yl)} files {int(100*ymd_i/len(ymd))} % ({time.strftime("%d.%m.%y %H:%M:%S")})' + '\n'
             
         logger.info(f'\tFinish {date} took {round(time.time() - info_t_startdateloop)} s, yielded {len(yl)} files (run_cec). Progress: {len(yl)} {int(100*ymd_i/len(ymd))} %')
     
@@ -116,7 +111,7 @@ def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=2
                         force=True)
 
     logging.captureWarnings(True)
-    logging.info("STARTING THE RUN")
+    logger.info("STARTING THE RUN")
 
     # Create setup
     configure = hc24.structuredData()
@@ -157,7 +152,7 @@ def __concat__(sitename, outputpath, **kwargs):
     dst_path = os.path.join(outputpath, str(sitename)+f'_CEC_partition.csv')
 
     root = os.path.join(outputpath, 'processing')
-    print(os.listdir(root))
+    logger.debug("Files in %s: %s", root, os.listdir(root))
     saved_files = {}
     for name in os.listdir(root):
         dateparts = re.findall('_([0-9]{12}).csv$', name, flags=re.IGNORECASE)
@@ -166,7 +161,7 @@ def __concat__(sitename, outputpath, **kwargs):
 
     data = pd.concat([pd.read_csv(v, sep=',') for k, v in saved_files.items()])
 
-    if dst_path: data.to_file(dst_path, index=False)
+    if dst_path: hc24.to_file(data, dst_path, index=False)
     else: return data
     return
 
@@ -217,9 +212,8 @@ if __name__ == '__main__':
     run = args.pop('run')
     concat = args.pop('concat')
 
-    print('Start run w/')
-    # replace os.get_cwd() for '' if str
-    print('\n'.join([f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]), end='\n\n')
+    logger.info('Start run w/\n%s', '\n'.join(
+        [f'{k}:\t{v[:5] + "~" + v[-25:] if isinstance(v, str) and len(v) > 30 else v}' for k, v in args.items()]))
     
     # Assert variables have been assigned
     missing_args = [f'`{k}`' for k in ['sitename', 'inputpath', 'outputpath', 'datetimerange', 'acquisition_frequency', 'fileduration'] if args[k] is None]

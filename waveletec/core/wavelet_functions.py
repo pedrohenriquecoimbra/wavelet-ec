@@ -273,8 +273,8 @@ def prepare_signal(signal, nan_tolerance=0.3):
 
     if Nnan:
         if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
-            print(
-                f"UserWarning: Too many NaNs ({Nnan}, {np.round(100 * Nnan / N, 1)}%).")
+            logger.warning(
+                "Too many NaNs (%s, %s%%).", Nnan, np.round(100 * Nnan / N, 1))
 
     if Nnan and Nnan < N:
         # Interpolate NaNs using xarray's built-in interpolation

@@ -27,6 +27,8 @@ from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegress
 # project modules
 from .addons import *
 
+logger = logging.getLogger(__name__)
+
 ##########################################
 ###     PROJECT CHOICES                           
 ##########################################
@@ -57,25 +59,38 @@ class structuredData:
 
 
 def start_logging(outputpath, **kwargs):
-    """
-    Start logging to a file in the specified output path.
+    """Attach a DEBUG-level file handler for the run log.
+
+    Writes to ``outputpath/log/``. Any existing console handler (e.g. one set
+    up by the CLI) is left in place; only previously-added file handlers are
+    replaced, so repeated calls don't duplicate log lines. This is an explicit
+    setup step and is never run on import.
     """
     logname = str(os.path.join(
         outputpath, f"log/current_{datetime.datetime.now().strftime('%y%m%dT%H%M%S')}.log"))
     mkdirs(logname)
 
-    params = dict(filemode='a',
-                   format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                   datefmt='%Y-%m-%d %H:%M:%S',
-                   level=logging.DEBUG,
-                   force=True)
-    params.update(kwargs)
+    level = kwargs.get('level', logging.DEBUG)
+    formatter = logging.Formatter(
+        kwargs.get('format', '%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s'),
+        datefmt=kwargs.get('datefmt', '%Y-%m-%d %H:%M:%S'))
 
-    # with open(logname, "w+"): pass
-    logging.basicConfig(filename=logname, **params)
+    root = logging.getLogger()
+    root.setLevel(level)
+    # Replace only file handlers we may have added before; keep others (e.g. a
+    # console handler configured by the application) untouched.
+    for handler in list(root.handlers):
+        if isinstance(handler, logging.FileHandler):
+            root.removeHandler(handler)
+            handler.close()
+
+    file_handler = logging.FileHandler(logname, mode=kwargs.get('filemode', 'a'))
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    root.addHandler(file_handler)
 
     logging.captureWarnings(True)
-    logging.info("STARTING THE RUN")
+    logger.info("STARTING THE RUN")
 
 
 def save_locals(locals_, path, **kwargs):
@@ -131,10 +146,10 @@ def list_time_in_period(tmin, tmax, fastfreq, slowfreq, include='both'):
 
 def checkifinprogress(path, LIMIT_TIME_OUT=30*60):
     if os.path.exists(path) and (time.time()-os.path.getmtime(path)) < LIMIT_TIME_OUT:
-        logging.debug(f'Fresh file found ({time.time()-os.path.getmtime(path)} s old, {os.path.getmtime(path)}), skipping.')
+        logger.debug(f'Fresh file found ({time.time()-os.path.getmtime(path)} s old, {os.path.getmtime(path)}), skipping.')
         return 1
     else:
-        if os.path.exists(path): logging.debug(f'Old file found ({time.time()-os.path.getmtime(path)} s old, {time.time()*10**-3}, {os.path.getmtime(path)*10**-3}), new in progress file created.')
+        if os.path.exists(path): logger.debug(f'Old file found ({time.time()-os.path.getmtime(path)} s old, {time.time()*10**-3}, {os.path.getmtime(path)*10**-3}), new in progress file created.')
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "a+"):
             pass
@@ -344,7 +359,7 @@ def summarisestats(X, y, method='Linear', fit_intercept=True, **kw):
     b_ = "+" + str(b_) if b_ >= 0 else str(b_)
     if method == 'Huber':
         statisticsToReturn.outliers = regression.outliers_
-        print(len(regression.outliers_), sum(regression.outliers_))
+        logger.debug("outliers: %s total, %s flagged", len(regression.outliers_), sum(regression.outliers_))
         X = X[regression.outliers_==False]
         y = y[regression.outliers_==False]
         
