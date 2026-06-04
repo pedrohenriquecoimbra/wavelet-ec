@@ -29,7 +29,7 @@ DEFAULT_READ_GHG = {
 
 DEFAULT_READ_EP_RAW_LVL = {
     'skiprows': 10,
-    'sep': "\s+",
+    'sep': r"\s+",
     'na_values': ['NaN', 'nan', -9999]
 }
 

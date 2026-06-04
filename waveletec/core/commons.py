@@ -21,6 +21,8 @@ import datetime
 # 3rd party modules
 import yaml
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor
 

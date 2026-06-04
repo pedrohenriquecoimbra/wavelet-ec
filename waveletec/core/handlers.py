@@ -55,6 +55,31 @@ from ..extra import eddypro as eddypro
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    # decomposition & covariance on xarray.Dataset
+    "decompose_variables",
+    "data_statistics",
+    "data_compute_product",
+    "data_conditional_sampling",
+    "data_partition",
+    "data_average_dims",
+    "data_integrate_in_frequency",
+    "open_files_in_folder",
+    # run entry points
+    "process",
+    "data_run",
+    "run_from_eddypro",
+    # re-exported analysis API (kept public for backwards compatibility)
+    "universal_wt",
+    "formula_to_vars",
+    "prepare_signal",
+    "conditional_sampling",
+    "partition_DWCS",
+    "partition_DWCS_CO",
+    "partition_DWCS_H2O",
+]
+
+
 def decompose_variables(data, variables=['w', 'co2'],
                         nan_tolerance=.3, **kwargs):
     """
@@ -197,15 +222,6 @@ def data_conditional_sampling(data, formula='w*co2|w*h2o'):
     ) if names else {}
 
     return φc
-
-
-def open_files_in_folder(path):
-    ds = xr.open_mfdataset(
-        os.path.join(path, '*.nc'), combine='nested', concat_dim='TIMESTAMP')
-    ds = ds.mean(dim=[d for d in ds.dims if d not in {
-                'TIMESTAMP', 'natural_frequency'}])
-    # ds = ds.compute()
-    return ds
 
 
 def data_partition(data, dst=None,
