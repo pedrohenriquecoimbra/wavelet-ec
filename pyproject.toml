@@ -6,10 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "waveletec"
 dynamic = ["version"]
 description = "Wavelet-based Eddy Covariance"
+readme = "README.md"
 authors = [
     { name = "Pedro Henrique Coimbra", email = "pedro-henrique.herig-coimbra@inrae.fr" }
 ]
-keywords = ["EC", "partitionning", "wavelet"]
+keywords = ["EC", "partitioning", "wavelet"]
 license = { text = "EUPL-1.2" }
 classifiers = [
     "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
@@ -48,11 +49,11 @@ fcwt = ["pycwt", "fcwt"]
 waveletEC-eddypro_run = "waveletec.main:eddypro_run"
 waveletEC-partition = "waveletec.main:partition"
 waveletEC-integrate = "waveletec.main:integrate"
-waveletEC-exec = "waveletec.main:exec"
+waveletEC-exec = "waveletec.main:run"
 waveletEC = "waveletec.main:main"
 
 [project.urls]
-Homepage = "https://github.com/pedrohenriquecoimbra/wavelete-ec"
+Homepage = "https://github.com/pedrohenriquecoimbra/wavelet-ec"
 
 [tool.setuptools]
 packages.find = { where = ["."], include = ["waveletec*"], exclude = ["sample*", "deprecated*"], namespaces = false }
@@ -61,5 +62,3 @@ packages.find = { where = ["."], include = ["waveletec*"], exclude = ["sample*",
 
 [tool.setuptools.dynamic]
 version = { attr = "waveletec.version.__version__" }
-description = { file = "README.md" }
-# long_description = { file = "README.md", content-type = "text/markdown" }
