@@ -1,6 +1,5 @@
 # standard modules
 import os
-import sys
 import re
 import logging
 import time
@@ -11,6 +10,7 @@ import numpy as np
 import yaml
 from waveletec.core import commons as hc24
 from waveletec.core import wavelet_functions as wavelet_functions
+from waveletec.extra.partitioning.coimbra_et_al_2025 import conditional_sampling
 
 logger = logging.getLogger('cond_ec')
 
@@ -20,7 +20,12 @@ def run_cec(ymd, raw_kwargs, output_path,
     """
     Zahn et al. (2022)
     """
-    if isinstance(averaging, (list, tuple)): averaging = averaging[-1]
+    raise NotImplementedError(
+        "run_cec (Zahn et al., 2022 time-domain conditional sampling) depends on "
+        "`commons.loaddatawithbuffer`, which was removed during the xarray "
+        "refactor and has not been re-implemented. Use `waveletec.process(...)` "
+        "together with the wavelet conditional-sampling partitioning in "
+        "`waveletec.extra.partitioning.coimbra_et_al_2025` instead.")
 
     info_t_start = time.time()
     logger.info('Entered wavelet code (run_cec).')
@@ -60,7 +65,7 @@ def run_cec(ymd, raw_kwargs, output_path,
             for v in [w, c, q]:
                 data[v+'_'] = data.groupby('TIMESTAMP')[v].transform(np.nanmean)
             
-            σcec = wavelet_functions.conditional_sampling((data[w]-data[f'{w}_'])*(data[c]-data[f'{c}_']),
+            σcec = conditional_sampling((data[w]-data[f'{w}_'])*(data[c]-data[f'{c}_']),
                                         *[(data[w]-data[f'{w}_']), (data[c]-data[f'{c}_']), (data[q]-data[f'{q}_'])],
                                         names=['w', 'c', 'q'],
                                         label={1: "+", -1: "-"})
@@ -68,7 +73,7 @@ def run_cec(ymd, raw_kwargs, output_path,
             data['fR'] = σcec['w+c+q+']
             data['fP'] = σcec['w+c-q+']
 
-            σcec = wavelet_functions.conditional_sampling((data[w]-data[f'{w}_'])*(data[q]-data[f'{q}_']),
+            σcec = conditional_sampling((data[w]-data[f'{w}_'])*(data[q]-data[f'{q}_']),
                                         *[(data[w]-data[f'{w}_']), (data[c]-data[f'{c}_']), (data[q]-data[f'{q}_'])],
                                         names=['w', 'c', 'q'],
                                         label={1: "+", -1: "-"})
@@ -149,7 +154,7 @@ def main(sitename, inputpath, outputpath, datetimerange, acquisition_frequency=2
 
 def __concat__(sitename, outputpath, **kwargs):
     # CONCAT INTO SINGLE FILE
-    dst_path = os.path.join(outputpath, str(sitename)+f'_CEC_partition.csv')
+    dst_path = os.path.join(outputpath, str(sitename)+'_CEC_partition.csv')
 
     root = os.path.join(outputpath, 'processing')
     logger.debug("Files in %s: %s", root, os.listdir(root))
@@ -167,8 +172,11 @@ def __concat__(sitename, outputpath, **kwargs):
 
 
 def handle_eddypro_setup(**args):
+    # Imported lazily to avoid a circular import at module load time
+    # (eddypro -> core -> handlers -> partitioning -> zahn -> eddypro).
+    from waveletec.extra.eddypro import read_eddypro_metadata_file
     if args['eddypro']:
-        eddypro_setup = hc24.read_eddypro_metadata_file(args['eddypro'])
+        eddypro_setup = read_eddypro_metadata_file(args['eddypro'])
         if args['sitename'] is None: args['sitename'] = eddypro_setup['Project']['project_title']
         if args['inputpath'] is None: args['inputpath'] = eddypro_setup['Project']['out_path']
         if args['outputpath'] is None: args['outputpath'] = eddypro_setup['Project']['out_path'] + '/wavelet_flux'
@@ -181,7 +189,7 @@ def handle_eddypro_setup(**args):
             else: args['metadata'] = args['eddypro'].rsplit('.', 1)[0] + '.metadata'
     
     if args['metadata']:
-        eddypro_metad = hc24.read_eddypro_metadata_file(args['metadata'])
+        eddypro_metad = read_eddypro_metadata_file(args['metadata'])
         if args['acquisition_frequency'] is None: args['acquisition_frequency'] = int(float(eddypro_metad['Timing']['acquisition_frequency']))
         #if args['fileduration'] is None: args['fileduration'] = int(eddypro_metad['Timing']['file_duration'])
     

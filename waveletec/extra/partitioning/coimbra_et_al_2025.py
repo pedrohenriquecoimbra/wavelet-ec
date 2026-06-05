@@ -12,21 +12,55 @@ from waveletec.core.addons import read_file
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "conditional_sampling",
+    "partition_DWCS",
+    "partition_DWCS_H2O",
+    "partition_DWCS_CH4",
+    "partition_DWCS_CO",
+]
 
-def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"}, false=0):
+
+def _as_series(data, x):
+    """Resolve a partition input into a numeric array/series.
+
+    Args:
+        data: Mapping (DataFrame/Dataset) used to look up column names.
+        x: ``None`` (treated as additive identity ``0``), a column name,
+            a list/tuple of column names (summed), or an already-resolved array.
+
+    Returns:
+        The resolved value: ``0`` for ``None``, ``data[x]`` for a string, the
+        element-wise sum for a list/tuple, otherwise ``x`` unchanged.
+    """
+    if x is None:
+        return 0
+    if isinstance(x, str):
+        return data[x]
+    if isinstance(x, (list, tuple)):
+        return sum(data[c] for c in x)
+    return x
+
+
+def conditional_sampling(Y12, *args, names=None, label=None, false=0):
     """
     Perform conditional sampling on xarray.DataArray objects.
 
     Parameters:
     - Y12: xarray.DataArray (main variable)
     - *args: xarray.DataArray objects for conditional sampling
-    - names: list of names for each variable
+    - names: list of names for each variable (defaults to ['xy', 'a'])
     - label: dictionary mapping condition values to labels, e.g. {1: "+", -1: "-", 0: "·"}
+      (defaults to {1: "+", -1: "-"})
     - false: value to use for false conditions
 
     Returns:
     - xarray.Dataset with conditionally sampled variables
     """
+    if names is None:
+        names = ['xy', 'a']
+    if label is None:
+        label = {1: "+", -1: "-"}
     nargs = len(args)
     if nargs < len(names):
         names = names[:nargs]
@@ -59,75 +93,76 @@ def conditional_sampling(Y12, *args, names=['xy', 'a'], label={1: "+", -1: "-"},
     return Ys
 
 
-def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2', 
+def partition_DWCS(data, labelpositive='GPP', labelnegative='Reco', all='wco2',
                   positive='wco2-wh2o+', negative='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = read_file(data)
-    #lightresponse = lambda p: np.where(np.isnan(p), 1, (p-np.nanmin(p))/(np.nanmax(p)-np.nanmin(p)))
-    #data["DW_GPP_withPARratio"] = np.where((np.isnan(data.PPFD)==False) * (data.PPFD<10), 0, 1) * (
-    #    data["dwt_wco2-+h2o_uStar_f"] + lightresponse(data["PPFD"]) * (data["dwt_wco2--h2o_uStar_f"]))
-    #data["DW_Reco_withPARratio"] = (data["DWT_NEE_uStar_f"] - data["DW_GPP_withPARratio"])
-    
-    if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
+    if isinstance(data, str):
+        data = read_file(data)
     else:
-        islight = xr.ones_like(data[positive])
-    data[labelpositive] = islight * (data[positive] + 0.5*data[negative])
-    data[labelnegative] = (data[all] - data[labelpositive])
+        data = data.copy()
+
+    all_ = _as_series(data, all)
+    positive_ = _as_series(data, positive)
+    negative_ = _as_series(data, negative)
+
+    if NIGHT is not None:
+        night = data[NIGHT]
+        islight = xr.where((~night.isnull()) & night.astype(bool), 0, 1)
+    else:
+        islight = xr.ones_like(positive_)
+    data[labelpositive] = islight * (positive_ + 0.5 * negative_)
+    data[labelnegative] = (all_ - data[labelpositive])
     return data
 
-def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
+def partition_DWCS_H2O(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
                   CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None):
-    if isinstance(data, str): data = read_file(data)
-    else: data = data.copy()
-    
-    logger.debug('CO2 = __input_to_series__(data, CO2)')
-    CO2 = data[CO2] if isinstance(CO2, str) else CO2
-    CO2neg_H2Opos = data[CO2neg_H2Opos] if isinstance(
-        CO2neg_H2Opos, str) else CO2neg_H2Opos
-    CO2neg_H2Oneg = data[CO2neg_H2Oneg] if isinstance(
-        CO2neg_H2Oneg, str) else CO2neg_H2Oneg
-    if data is None: data = pd.DataFrame()
+    if isinstance(data, str):
+        data = read_file(data)
+    elif data is None:
+        data = pd.DataFrame()
+    else:
+        data = data.copy()
+
+    CO2 = _as_series(data, CO2)
+    CO2neg_H2Opos = _as_series(data, CO2neg_H2Opos)
+    CO2neg_H2Oneg = _as_series(data, CO2neg_H2Oneg)
 
     if NIGHT is not None:
-        islight = xr.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
+        night = data[NIGHT]
+        islight = xr.where((~night.isnull()) & night.astype(bool), 0, 1)
     else:
         islight = xr.ones_like(CO2)
 
-    logger.debug('data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)')
-    data[GPP] = islight * (CO2neg_H2Opos + 0.5*CO2neg_H2Oneg)
-    logger.debug('data[Reco] = (CO2 - data[GPP])')
+    data[GPP] = islight * (CO2neg_H2Opos + 0.5 * CO2neg_H2Oneg)
     data[Reco] = (CO2 - data[GPP])
-
     data[NEE] = CO2
-    #data_pt = data_pt[[NEE, GPP, Reco]]
     return data
 
 def partition_DWCS_CH4(data=None, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2', 
                   CO2pos_CH4pos='wco2+wch4+', CO2pos_CH4neg='wco2+wch4-', 
                   CO2neg_CH4pos='wco2-wch4+', CO2neg_CH4neg='wco2-wch4-', NIGHT=None):
-    if isinstance(data, str): data = read_file(data)
+    if isinstance(data, str):
+        data = read_file(data)
+    elif data is None:
+        data = pd.DataFrame()
+    else:
+        data = data.copy()
 
-    CO2 = data[CO2] if isinstance(CO2, str) else CO2
-    CO2pos_CH4pos = data[CO2pos_CH4pos] if isinstance(
-        CO2pos_CH4pos, str) else CO2pos_CH4pos
-    CO2pos_CH4neg = data[CO2pos_CH4neg] if isinstance(
-        CO2pos_CH4neg, str) else CO2pos_CH4neg
-    CO2neg_CH4pos = data[CO2neg_CH4pos] if isinstance(
-        CO2neg_CH4pos, str) else CO2neg_CH4pos
-    CO2neg_CH4neg = data[CO2neg_CH4neg] if isinstance(
-        CO2neg_CH4neg, str) else CO2neg_CH4neg
-    if data is None: data = pd.DataFrame()
+    CO2 = _as_series(data, CO2)
+    CO2pos_CH4pos = _as_series(data, CO2pos_CH4pos)
+    CO2pos_CH4neg = _as_series(data, CO2pos_CH4neg)
+    CO2neg_CH4pos = _as_series(data, CO2neg_CH4pos)
+    CO2neg_CH4neg = _as_series(data, CO2neg_CH4neg)
 
     if NIGHT is not None:
-        islight = np.where((np.isnan(data[NIGHT]) == False) * (data[NIGHT]), 0, 1)
+        night = data[NIGHT]
+        islight = xr.where((~night.isnull()) & night.astype(bool), 0, 1)
     else:
-        islight = np.array([1] * len(data))
-    
-    data[Reco] = CO2pos_CH4pos + 0.5 * CO2pos_CH4neg
-    data[GPP] = (CO2 - data[Reco])
+        islight = xr.ones_like(CO2)
 
+    data[Reco] = CO2pos_CH4pos + 0.5 * CO2pos_CH4neg
+    # GPP (photosynthetic uptake) only occurs in daylight; islight gates it.
+    data[GPP] = islight * (CO2 - data[Reco])
     data[NEE] = CO2
-    #data_pt = data_pt[[NEE, GPP, Reco]]
     return data
 
 def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
@@ -137,26 +172,26 @@ def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2
                      CO2pos_COpos='wco2+wco+',
                      CO2pos_COneg='wco2+wco-',
                      NIGHT=None):
-    if isinstance(data, str): data = read_file(data)
-    #prefix = 'DWnf_' #NEE.split('_', 1)[0] +'_'
-    # suffix = ''
-    CO2 = data[CO2] if isinstance(CO2, str) else CO2
-    CO2neg_H2Opos = data[CO2neg_H2Opos] if isinstance(
-        CO2neg_H2Opos, str) else CO2neg_H2Opos
-    CO2neg_H2Oneg = data[CO2neg_H2Oneg] if isinstance(
-        CO2neg_H2Oneg, str) else CO2neg_H2Oneg
-    CO2pos_COpos = data[CO2pos_COpos] if isinstance(
-        CO2pos_COpos, str) else CO2pos_COpos
-    CO2pos_COneg = data[CO2pos_COneg] if isinstance(
-        CO2pos_COneg, str) else CO2pos_COneg
-    if data is None: data = pd.DataFrame()
+    if isinstance(data, str):
+        data = read_file(data)
+    elif data is None:
+        data = pd.DataFrame()
+    else:
+        data = data.copy()
 
-    if NIGHT: NIGHT = data[NIGHT]
-    else: NIGHT = 0
+    CO2 = _as_series(data, CO2)
+    CO2neg_H2Opos = _as_series(data, CO2neg_H2Opos)
+    CO2neg_H2Oneg = _as_series(data, CO2neg_H2Oneg)
+    CO2pos_COpos = _as_series(data, CO2pos_COpos)
+    CO2pos_COneg = _as_series(data, CO2pos_COneg)
+
+    if NIGHT is not None:
+        night = data[NIGHT]
+        islight = xr.where((~night.isnull()) & night.astype(bool), 0, 1)
+    else:
+        islight = xr.ones_like(CO2)
 
     data[NEE] = CO2
-    islight = np.where((np.isnan(NIGHT == False) * NIGHT), 0, 1)
-    
     data[GPP] = islight * (CO2neg_H2Opos + CO2neg_H2Oneg / 3)
 
     data[ffCO2] = CO2pos_COpos
@@ -165,6 +200,5 @@ def partition_DWCS_CO(data=None, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2
     remaining   = CO2 - data[GPP] - data[Reco] - data[ffCO2]
     data[Reco]  = data[Reco]  + remaining / 2
     data[ffCO2] = data[ffCO2] + remaining / 2
-    
-    #data = data[[NEE, GPP, Reco, ffCO2]]
+
     return data

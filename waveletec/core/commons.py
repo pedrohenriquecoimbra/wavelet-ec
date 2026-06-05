@@ -133,7 +133,9 @@ def save_locals(locals_, path, **kwargs):
         yaml.safe_dump(locals_, stp)
 
 
-def available_combinations(interesting_combinations, variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o']):
+def available_combinations(interesting_combinations, variables_available=None):
+        if variables_available is None:
+            variables_available = ['u', 'v', 'w', 'ts', 'co2', 'h2o']
         # Reduce interesting to possible
         possible_combinations = [sum([v not in variables_available for v in re.split('[*|]', t)])==0 for t in interesting_combinations]
         # Limit run to the realm of possible 
@@ -239,7 +241,8 @@ def update_nested_dicts(*ds, fstr=None):
         if isinstance(d, str) and fstr:
             try:
                 d = fstr(d)
-            except Exception as e:
+            except Exception as exc:
+                logger.debug("update_nested_dicts: skipping %r (%s)", d, exc)
                 continue
         r = update_nested_dict(r, d)
     return r
@@ -391,8 +394,8 @@ def summarisestats(X, y, method='Linear', fit_intercept=True, **kw):
     if method == 'Huber':
         statisticsToReturn.outliers = regression.outliers_
         logger.debug("outliers: %s total, %s flagged", len(regression.outliers_), sum(regression.outliers_))
-        X = X[regression.outliers_==False]
-        y = y[regression.outliers_==False]
+        X = X[~regression.outliers_]
+        y = y[~regression.outliers_]
         
     statisticsToReturn.me = np.nanmean((X-y)).round(2)
     statisticsToReturn.mae = np.nanmean(abs(X-y)).round(2)
@@ -410,7 +413,7 @@ def summarisestatstext(meta, xn='x', yn='y'):
     stat_label = f"R²= {np.round(meta.r2, 2)}"
     stat_label = stat_label + f", ME= {np.round(meta.me, 2)} µmol m-2 s-1"
     stat_label = stat_label + f", MAE= {np.round(meta.mae, 2)} µmol m-2 s-1"
-    stat_label = stat_label + f", {yn}={np.round(meta.m, 2)}"+r"$\times$"+"{xn} linear fit" #×
+    stat_label = stat_label + f", {yn}={np.round(meta.m, 2)}"+r"$\times$"+f"{xn} linear fit" #×
     return stat_label
 
 

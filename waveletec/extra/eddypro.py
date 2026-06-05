@@ -263,7 +263,7 @@ def extract_info_from_eddypro_setup(eddypro=None, metadata=None):
         args['variables_available'] = ['u', 'v', 'w'] + [k for k in ['co2',
                                                                      'h2o', 'ch4'] if float(eddypro_setup['Project'][f'col_{k}']) > 0]
 
-    if metadata and float(eddypro_setup['Project']['col_n2o']) > 0:
+    if eddypro and metadata and float(eddypro_setup['Project']['col_n2o']) > 0:
         gas4 = eddypro_metad['FileDescription'][f"col_{eddypro_setup['Project']['col_n2o']}_variable"]
         if gas4:
             args['variables_available'] = args.get(

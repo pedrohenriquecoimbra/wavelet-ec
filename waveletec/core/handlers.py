@@ -80,20 +80,22 @@ __all__ = [
 ]
 
 
-def decompose_variables(data, variables=['w', 'co2'],
+def decompose_variables(data, variables=None,
                         nan_tolerance=.3, **kwargs):
     """
     Calculate data decomposed with wavelet transform for xarray.Dataset.
 
     Parameters:
     - data: xarray.Dataset
-    - variables: list of variable names to decompose
+    - variables: list of variable names to decompose (defaults to ['w', 'co2'])
     - nan_tolerance: tolerance for NaN values
     - **kwargs: additional arguments for universal_wt
 
     Returns:
     - xarray.Dataset with decomposed variables
     """
+    if variables is None:
+        variables = ['w', 'co2']
     # Initialize output dataset
     result = xr.Dataset()
 
@@ -123,7 +125,7 @@ def decompose_variables(data, variables=['w', 'co2'],
                  'approximation': f'{var}_lf',
                  'coi': f'{var}_qc'}
             )
-            wt_signal = wt_signal.drop('signal')
+            wt_signal = wt_signal.drop_vars('signal')
             wt_signal[f'{var}_qc'] = wt_signal[f'{var}_qc'].where(
                 ready_signal.signan != 0, 0)
             result = xr.merge([wt_signal, result], compat='override')
@@ -226,108 +228,80 @@ def data_conditional_sampling(data, formula='w*co2|w*h2o'):
 
 def data_partition(data, dst=None,
                    id_columns=None,
-                   variables_available=['u', 'v', 'w', 'ts', 'co2', 'h2o'], **kwargs):
+                   variables_available=None, **kwargs):
+    """Apply every applicable wavelet conditional-sampling partition to *data*.
+
+    Each gas-channel partition is attempted independently ("best effort"): a
+    channel whose required variables are absent is skipped and logged at DEBUG,
+    while a channel that raises is logged with a full traceback at ERROR and
+    skipped, so the remaining channels still run.
+
+    Args:
+        data: xarray.Dataset of conditionally-sampled covariances.
+        dst: Optional path stem; each channel writes ``f"{dst}.<tag>"`` if set.
+        id_columns: Reserved; currently informational only.
+        variables_available: Variables present in the source data. Defaults to
+            ``['u', 'v', 'w', 'ts', 'co2', 'h2o']`` when ``None``.
+        **kwargs: Ignored; accepted for forward compatibility.
+
+    Returns:
+        xarray.Dataset: *data* merged with the partition outputs. Channels other
+        than the primary H2O one are suffixed (``_pH2O_CO``, ``_pCO``,
+        ``_pCH4``) so their NEE/GPP/Reco variables don't collide on merge.
+    """
+    if variables_available is None:
+        variables_available = ['u', 'v', 'w', 'ts', 'co2', 'h2o']
     id_columns = id_columns or ['TIMESTAMP'] + \
         [c for c in ['natural_frequency'] if c in data]
 
-    ds_pH2O = xr.Dataset()
-    ds_pH2O_CO = xr.Dataset()
-    ds_pCO = xr.Dataset()
-    ds_pCH4 = xr.Dataset()
-
-    h2o_dw_required_variables = ['w', 'co2', 'h2o']
-    is_lacking_variable = sum(
-        [v not in variables_available for v in h2o_dw_required_variables])
-    if not is_lacking_variable:
-        logger.debug("partition_DWCS_H2O")
+    def _run(label, required, fn, columns, suffix, tag):
+        missing = [v for v in required if v not in variables_available]
+        if missing:
+            logger.debug("Skipping %s: missing variables %s.",
+                         label, ', '.join(missing))
+            return xr.Dataset()
         try:
-            ds_pH2O = partition_DWCS_H2O(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
-                CO2neg_H2Opos='wco2-wh2o+',
-                CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None)\
-                [['NEE', 'GPP', 'Reco']]
-            # ds_pH2O = ds_pH2O.rename(
-            #     {var: f"{var}_pCH4" for var in ds_pH2O.data_vars})
-
+            out = fn()[columns]
+            if suffix:
+                out = out.rename(
+                    {var: f"{var}{suffix}" for var in out.data_vars})
             if dst:
-                ds_pH2O.to_netcdf(dst + ".FCO2_condH2O")
-        except Exception as e:
-            logger.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in h2o_dw_required_variables if v not in variables_available])}.")
+                out.to_netcdf(f"{dst}.{tag}")
+            return out
+        except Exception:
+            logger.exception("Partition %s failed; skipping.", label)
+            return xr.Dataset()
 
-    h2o_co_dw_required_variables = ['w', 'co2', 'h2o', 'co']
-    is_lacking_variable = sum(
-        [v not in variables_available for v in h2o_co_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            ds_pH2O_CO = partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2',
-                CO2neg_H2Opos='wco2-wh2o+',
-                CO2neg_H2Oneg='wco2-wh2o-',
-                CO2pos_COpos='wco2+wco+',
-                CO2pos_COneg='wco2+wco-',
-                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
-            ds_pH2O_CO = ds_pH2O_CO.rename(
-                {var: f"{var}_pCH4" for var in ds_pH2O_CO.data_vars})
+    ds_pH2O = _run(
+        "DWCS_H2O", ['w', 'co2', 'h2o'],
+        lambda: partition_DWCS_H2O(
+            data, NEE='NEE', GPP='GPP', Reco='Reco', CO2='wco2',
+            CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-', NIGHT=None),
+        ['NEE', 'GPP', 'Reco'], '', "FCO2_condH2O")
 
-            if dst:
-                ds_pH2O_CO.to_netcdf(dst + ".FCO2_condH2O_CO")
-        except Exception as e:
-            logger.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in h2o_co_dw_required_variables if v not in variables_available])}.")
+    ds_pH2O_CO = _run(
+        "DWCS_H2O_CO", ['w', 'co2', 'h2o', 'co'],
+        lambda: partition_DWCS_CO(
+            data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2', CO2='wco2',
+            CO2neg_H2Opos='wco2-wh2o+', CO2neg_H2Oneg='wco2-wh2o-',
+            CO2pos_COpos='wco2+wco+', CO2pos_COneg='wco2+wco-', NIGHT=None),
+        ['NEE', 'GPP', 'Reco', 'ffCO2'], '_pH2O_CO', "FCO2_condH2O_CO")
 
-    co_dw_required_variables = ['w', 'co2', 'co']
-    is_lacking_variable = sum(
-        [v not in variables_available for v in co_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            ds_pCO = partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2',
-                CO2neg_H2Opos=['wco2-wco+', 'wco2-wco-'],
-                CO2neg_H2Oneg=None,
-                CO2pos_COpos='wco2+wco+',
-                CO2pos_COneg='wco2+wco-',
-                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
-            ds_pCO = ds_pCO.rename(
-                {var: f"{var}_pCH4" for var in ds_pCO.data_vars})
+    ds_pCO = _run(
+        "DWCS_CO", ['w', 'co2', 'co'],
+        lambda: partition_DWCS_CO(
+            data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2', CO2='wco2',
+            CO2neg_H2Opos=['wco2-wco+', 'wco2-wco-'], CO2neg_H2Oneg=None,
+            CO2pos_COpos='wco2+wco+', CO2pos_COneg='wco2+wco-', NIGHT=None),
+        ['NEE', 'GPP', 'Reco', 'ffCO2'], '_pCO', "FCO2_condCO")
 
-            if dst:
-                ds_pCO.to_netcdf(dst + ".FCO2_condCO")
-        except Exception as e:
-            logger.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in co_dw_required_variables if v not in variables_available])}.")
-
-    ch4_dw_required_variables = ['w', 'co2', 'ch4']
-    is_lacking_variable = sum(
-        [v not in variables_available for v in ch4_dw_required_variables])
-    if not is_lacking_variable:
-        try:
-            ds_pCH4 = partition_DWCS_CO(
-                data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2',
-                CO2='wco2',
-                CO2neg_H2Opos=['wco2-wch4+', 'wco2-wch4-'],
-                CO2neg_H2Oneg=None,
-                CO2pos_COpos='wco2+wch4+',
-                CO2pos_COneg='wco2+wch4-',
-                NIGHT=None)[['NEE', 'GPP', 'Reco', 'ffCO2']]
-            ds_pCH4 = ds_pCH4.rename(
-                {var: f"{var}_pCH4" for var in ds_pCH4.data_vars})
-
-            if dst:
-                ds_pCH4.to_netcdf(dst + ".FCO2_condCH4")
-        except Exception as e:
-            logger.warning(str(e))
-    else:
-        logger.debug(
-            f"Missing variables {', '.join([v for v in ch4_dw_required_variables if v not in variables_available])}.")
+    ds_pCH4 = _run(
+        "DWCS_CH4", ['w', 'co2', 'ch4'],
+        lambda: partition_DWCS_CO(
+            data, NEE='NEE', GPP='GPP', Reco='Reco', ffCO2='ffCO2', CO2='wco2',
+            CO2neg_H2Opos=['wco2-wch4+', 'wco2-wch4-'], CO2neg_H2Oneg=None,
+            CO2pos_COpos='wco2+wch4+', CO2pos_COneg='wco2+wch4-', NIGHT=None),
+        ['NEE', 'GPP', 'Reco', 'ffCO2'], '_pCH4', "FCO2_condCH4")
 
     return xr.merge([data, ds_pH2O, ds_pH2O_CO, ds_pCO, ds_pCH4], compat='override')
 
@@ -338,7 +312,9 @@ def open_files_in_folder(path):
     return ds
 
 
-def data_average_dims(data, id_cols={'TIMESTAMP', 'natural_frequency'}):
+def data_average_dims(data, id_cols=None):
+    if id_cols is None:
+        id_cols = {'TIMESTAMP', 'natural_frequency'}
     ds = data.mean(dim=[d for d in data.dims if d not in id_cols])
     return ds
 
@@ -357,8 +333,10 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             internal_averaging=None, dt=0.05,
             integration_period=None,
             identifier=None,
-            filter_criteria={},
+            filter_criteria=None,
             method="dwt", averaging=30, **kwargs):
+    if filter_criteria is None:
+        filter_criteria = {}
     logger.debug('--- Starting process ---')
     local_args = locals()
     info_t_start = time.time()
@@ -497,7 +475,7 @@ def process(datetimerange, fileduration, input_path, acquisition_frequency,
             if output_folderpath is not None:
                 output_path = str(os.path.join(
                     output_folderpath,
-                    f"wavelet_full_cospectra",
+                    "wavelet_full_cospectra",
                     f"{identifier}_full_cospectra_{date}_{run_time}.nc"))
                 commons.mkdirs(output_path)
                 curoutpath_inprog = f"{output_path}.inprogress"
@@ -615,7 +593,7 @@ def data_run(data, varstorun, sel=None, average_period='30min', dst=None, **kwar
     - xarray.Dataset with processed data
     """
     logger.debug(
-        f'Start data_run.')
+        'Start data_run.')
     info_t_main = time.time()
     vars_unique = list(
         set([var for f in varstorun for var in formula_to_vars(f).uniquevars]))

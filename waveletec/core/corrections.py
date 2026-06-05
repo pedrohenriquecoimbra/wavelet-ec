@@ -33,9 +33,9 @@ def __despike__(X, method=mauder2013):
     X = method(X)
     Xna = np.isnan(X)
     try:
-        X = np.interp(np.linspace(0, 1, N), 
-                        np.linspace(0, 1, N)[Xna == False],
-                X[Xna==False])
+        X = np.interp(np.linspace(0, 1, N),
+                        np.linspace(0, 1, N)[~Xna],
+                X[~Xna])
     except Exception as e:
         logger.error(f"UserWarning: {str(e)}")
     return X

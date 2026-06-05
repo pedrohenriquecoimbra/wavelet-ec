@@ -33,24 +33,21 @@ The main function is:
 
 # built-in modules
 import re
-import warnings
 import logging
+from types import SimpleNamespace
 
 # 3rd party modules
 import numpy as np
-import pandas as pd
 import pywt
 import xarray as xr
-try: 
+try:
     import pycwt
-except ImportError as e:
+except ImportError:
     pycwt = None
-    pass
-try: 
+try:
     import fcwt
-except ImportError as e:
+except ImportError:
     fcwt = None
-    pass
 
 # project modules
 
@@ -110,22 +107,32 @@ def __wavemother_str_pycwt__(name):
 
 
 def formula_to_vars(formula):
-    """
-    function: parse formula to variables
-    call: formula_to_vars()
-    Input:
-        formula: string
-    Return:
-        var_: object with attributes xy, condsamp_pair, uniquevars
+    """Parse a covariance formula into its component variables.
+
+    The grouping operator is ``|`` and the product operator is ``*``; e.g.
+    ``"w*co2|w*h2o"`` has primary pair ``[w, co2]`` and one conditional-sampling
+    pair ``[w, h2o]``.
+
+    Args:
+        formula: Formula string such as ``"w*co2|w*h2o"``.
+
+    Returns:
+        types.SimpleNamespace with attributes ``xy``, ``condsamp_pair``,
+        ``condsamp_flat``, ``uniquevars`` and ``combinations``. Deduplication is
+        order-preserving so the result is reproducible across runs.
     """
     # parse formula
     xy = formula.split('|')[0].split('*')
     condsamp_pair = [v.split('*') for v in formula.split('|')[1:]]
     condsamp_flat = [c for cs in condsamp_pair for c in cs]
-    combinations = list(set(['*'.join(xy)] + ['*'.join(cs) for cs in condsamp_pair]))
+    # order-preserving dedup (dict.fromkeys) -> reproducible variable ordering
+    combinations = list(dict.fromkeys(
+        ['*'.join(xy)] + ['*'.join(cs) for cs in condsamp_pair]))
+    uniquevars = list(dict.fromkeys(xy + condsamp_flat))
 
-    return type('var_', (object,), {'xy': xy, 'condsamp_pair': condsamp_pair, 'condsamp_flat': condsamp_flat, 
-                                    'uniquevars': list(set(xy + condsamp_flat)), 'combinations': combinations})
+    return SimpleNamespace(
+        xy=xy, condsamp_pair=condsamp_pair, condsamp_flat=condsamp_flat,
+        uniquevars=uniquevars, combinations=combinations)
 
 
 def __fcwt__(input, fs, f0, f1, fn, nthreads=1, scaling="log", fast=False, norm=True, Morlet=6.0):
@@ -186,14 +193,18 @@ def __icwt__(W, sj, dt, dj, Cd=None, psi=None, wavelet=None):
     if isinstance(wavelet, str): wavelet = __wavemother_str_pycwt__(wavelet)
     if Cd is None: Cd = wavelet.cdelta
     if psi is None: psi = wavelet.psi(0)
-        
+
+    sj = np.asarray(sj)
     a, b = W.shape
     c = sj.size
     if a == c:
         sj_ = (np.ones([b, 1]) * sj).transpose()
     elif b == c:
         sj_ = np.ones([a, 1]) * sj
-    
+    else:
+        raise ValueError(
+            f"Scale count ({c}) does not match either axis of W ({a}, {b}).")
+
     x = (W.real / (sj_ ** .5)) * ((dj * dt ** .5) / (Cd * psi))
     return x
 
@@ -262,14 +273,16 @@ def __idwt__(coef, N, wavelet='db6', mode='symmetric'):
 
 
 def prepare_signal(signal, nan_tolerance=0.3):
-    # Ensure the input is an xarray.DataArray
-    if not isinstance(signal, xr.DataArray):
+    # Work on a copy so we never mutate the caller's array in place.
+    if isinstance(signal, xr.DataArray):
+        signal = signal.copy()
+    else:
         signal = xr.DataArray(signal)
 
     # Create a mask for NaN values
     signan = signal.isnull()
     N = signal.size
-    Nnan = signan.sum()
+    Nnan = int(signan.sum())
 
     if Nnan:
         if (nan_tolerance > 1 and Nnan > nan_tolerance) or (Nnan > nan_tolerance * N):
@@ -277,13 +290,11 @@ def prepare_signal(signal, nan_tolerance=0.3):
                 "Too many NaNs (%s, %s%%).", Nnan, np.round(100 * Nnan / N, 1))
 
     if Nnan and Nnan < N:
-        # Interpolate NaNs using xarray's built-in interpolation
-        # signal = signal.interpolate_na(
-        #     dim='ns', method='linear')
+        # Linear, index-based interpolation across the gaps.
+        mask = ~signan.values
         signal.values = np.interp(np.linspace(0, 1, N),
-                                  np.linspace(0, 1, N)[
-            signan == False],
-            signal[signan == False])
+                                  np.linspace(0, 1, N)[mask],
+                                  signal.values[mask])
 
     # Create a Dataset with both the processed signal and the NaN mask
     result = xr.Dataset({
@@ -293,7 +304,7 @@ def prepare_signal(signal, nan_tolerance=0.3):
 
     # Add metadata as attributes
     result.attrs['N'] = N
-    result.attrs['Nnan'] = int(Nnan)
+    result.attrs['Nnan'] = Nnan
 
     return result
 
@@ -373,6 +384,12 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
                 'UserWarning: Continuous wavelet transform (cwt) not found. Running discrete version.')
             method = 'dwt'
 
+    if not (wt and iwt):
+        raise NotImplementedError(
+            "universal_wt currently supports only wt=True with iwt=True "
+            "(forward transform followed by reconstruction). "
+            f"Got wt={wt}, iwt={iwt}.")
+
     if wt:
         # Wavelet Transform
         if method == 'fcwt':
@@ -394,23 +411,23 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
             # _l if s0*2^j; fs*2**(-_l) if Hz; (1/fs)*2**_l if sec.
             sj = [(fs*(2**-float(_l))) for _l in np.arange(1, lvl+2, 1)]
             wave = __dwt__(signal, level=lvl, **kwargs)
-    else:
-        wave = signal
 
     if iwt:
+        # `sj` was computed by the forward pass above (wt=True is required here),
+        # so do NOT overwrite it from kwargs. Drop any stray 'sj' the caller may
+        # have passed so it isn't supplied twice to __icwt__.
+        kwargs.pop('sj', None)
         # Inverse Wavelet Transform
         if method == 'fcwt':
-            sj = kwargs.pop('sj', None)
-            wave = __icwt__(wave, sj=sj, dt=fs, dj=dj, **kwargs, 
+            wave = __icwt__(wave, sj=sj, dt=fs, dj=dj, **kwargs,
                             wavelet=pycwt.wavelet.Morlet(6))
             approximation = signal.values - wave.sum(axis=0)
-        
+
         elif method == 'cwt':
-            sj = kwargs.pop('sj', None)
             wave = __icwt__(wave, sj=sj, dt=fs**-1, dj=dj, **kwargs)
             approximation = signal.values - wave.sum(axis=0)
-        
-        elif method== "dwt":
+
+        elif method == "dwt":
             N = np.array(signal).shape[-1]
             wave = __idwt__(wave, N=N, **kwargs).real
             approximation = wave[-1]
@@ -430,12 +447,14 @@ def universal_wt(signal, method='dwt', fs=20, f0=1/(3*60*60), f1=10, fn=180,
         coneoi = None
     
     # Create a Dataset with both the processed signal and the NaN mask
-    result = xr.Dataset({
+    data_vars = {
         'signal': signal,
         'wave': (('natural_frequency', *signal.dims), wave),
         'approximation': (signal.dims, approximation),
-        'coi': (('natural_frequency', *signal.dims), coneoi),
-    })
+    }
+    if coneoi is not None:
+        data_vars['coi'] = (('natural_frequency', *signal.dims), coneoi)
+    result = xr.Dataset(data_vars)
     result = result.assign_coords({'natural_frequency': sj, **signal.coords})
     result.attrs = {'method': method, 'fs': fs, 'f0': f0, 'f1': f1, 'fn': fn}
 

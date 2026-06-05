@@ -103,7 +103,7 @@ def parse_args():
 def prepare_args(args):
     # Set the current working directory if specified
     if args.get('cwd'):
-        set_cwd(os.chdir(args['cwd']))
+        set_cwd(args['cwd'])
 
     # Set logging level
     log_level = getattr(logging, args.pop(
@@ -115,7 +115,7 @@ def prepare_args(args):
     concat = args.pop('concat', 1)
     partition = args.pop('partition', 1)
     ep_setup = args.pop('eddypro')
-    ep_meta = args.pop('metadata')
+    args.pop('metadata')  # popped to keep it out of downstream kwargs
 
     # Retrieve eddypro setup
     # exta = eddypro.extract_info_from_eddypro_setup(ep_setup, ep_meta)
@@ -160,6 +160,20 @@ def log_args(args):
 # 
 
 def __custom_params__(unknown_args):
+    """Parse leftover ``--key [value ...]`` CLI tokens into a dict.
+
+    A key with no following value becomes ``True``; a single value is converted
+    to int/float when possible; multiple consecutive values become a list.
+
+    Args:
+        unknown_args: Tokens returned by ``argparse.parse_known_args``.
+
+    Returns:
+        dict mapping option names (without the leading ``--``) to values.
+
+    Raises:
+        ValueError: If a value token appears before any ``--key``.
+    """
     def convert_to_number(value):
         try:
             return int(value)
@@ -169,26 +183,25 @@ def __custom_params__(unknown_args):
             except ValueError:
                 return value
 
-    # Print or process unknown arguments
+    logger.debug("Custom/unknown arguments: %s", unknown_args)
     custom_params = {}
-    i = 0
-    while i < len(unknown_args):
-        logger.debug(f"Custom/unknown arguments: {unknown_args}")
-        # You can store or process these as needed, e.g.:
-        arg = unknown_args[i]
+    key = None
+    for arg in unknown_args:
         if arg.startswith("--"):
             key = arg[2:]
-            # Check if the next argument is a value (not starting with '--')
-            if i + 1 < len(unknown_args) and not unknown_args[i + 1].startswith("--"):
-                custom_params[key] = convert_to_number(unknown_args[i + 1])
-                i += 1  # Skip the next argument as it's the value
-            else:
-                custom_params[key] = True  # Flag argument
+            custom_params[key] = True  # flag, unless value(s) follow
+        elif key is None:
+            raise ValueError(
+                f"Unexpected argument {arg!r}: values must follow a '--key'.")
         else:
-            # Handle values for the previous key if needed
-            custom_params[key].append(convert_to_number(arg))
-            pass
-        i += 1
+            value = convert_to_number(arg)
+            existing = custom_params[key]
+            if existing is True:
+                custom_params[key] = value
+            elif isinstance(existing, list):
+                existing.append(value)
+            else:
+                custom_params[key] = [existing, value]
     return custom_params
 
 
@@ -210,9 +223,9 @@ def _finalize(parser):
     args, unknown_args = parser.parse_known_args()
     try:
         custom_params = __custom_params__(unknown_args)
-    except UnboundLocalError:
+    except ValueError as exc:
         raise SyntaxError(
-            'Check command. Possibly kwargs error, kwargs must be passed as `--key value`.')
+            'Check command. Possibly kwargs error, kwargs must be passed as `--key value`.') from exc
     _init_logging(args.verbosity)
     log_args(vars(args))
     return args, custom_params
@@ -255,6 +268,10 @@ def integrate():
     args.dst_path = args.dst_path or os.path.join(
         args.folder, '00000_full_cospectra.csv')
 
+    if args.integration_period is None:
+        raise ValueError(
+            "`--integration_period` (seconds) is required for integration.")
+
     data = handlers.open_files_in_folder(
         os.path.join(args.folder, 'wavelet_full_cospectra')).sortby('TIMESTAMP')
     data = handlers.data_average_dims(data)
@@ -270,11 +287,19 @@ def partition():
         description="Run wavelet-based edy covariance workflows.")
     parser.add_argument('-f', '--folder', type=str,
                         help='Path to the output folder where results will be saved')
+    parser.add_argument('-d', '--dst_path', type=str, default=None,
+                        help='Path to the output file (default: <folder>/00000_partition.nc)')
     _add_common_args(parser)
     args, custom_params = _finalize(parser)
 
-    passed_args = {"folder": args.folder, **custom_params}
-    handlers.data_partition(**passed_args)
+    data = handlers.open_files_in_folder(
+        os.path.join(args.folder, 'wavelet_full_cospectra')).sortby('TIMESTAMP')
+    data = handlers.data_average_dims(data)
+    data = handlers.data_partition(data, **custom_params)
+
+    dst_path = args.dst_path or os.path.join(args.folder, '00000_partition.nc')
+    data.to_netcdf(dst_path)
+    return
 
 
 def run():
