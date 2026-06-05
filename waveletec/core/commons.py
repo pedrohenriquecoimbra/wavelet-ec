@@ -27,9 +27,38 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression, RANSACRegressor, HuberRegressor
 
 # project modules
-from .addons import *
+from .addons import *  # noqa: F403
 
 logger = logging.getLogger(__name__)
+
+__all__ = [
+    "SITES_TO_STUDY",
+    "DEFAULT_COVARIANCE",
+    "month2season",
+    "structuredData",
+    "start_logging",
+    "save_locals",
+    "available_combinations",
+    "list_time_in_period",
+    "checkifinprogress",
+    "mkdirs",
+    "nearest",
+    "update_nested_dict",
+    "update_nested_dicts",
+    "custom_round",
+    "nanminmax",
+    "get_r2",
+    "sum_nan_arrays",
+    "summarisestats",
+    "summarisestatslabel",
+    "summarisestatstext",
+    "abline",
+    "abline2",
+    "add_subplot_axes",
+    "j2sj",
+    "sj2j",
+    "get_dic_flux_data",
+]
 
 ##########################################
 ###     PROJECT CHOICES                           

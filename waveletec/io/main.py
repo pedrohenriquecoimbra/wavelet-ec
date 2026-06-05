@@ -5,6 +5,4 @@
 
 
 def __universal_reader__(path, reader, **kwargs):
-    reader(path, **kwargs)
-
-    return
+    return reader(path, **kwargs)
