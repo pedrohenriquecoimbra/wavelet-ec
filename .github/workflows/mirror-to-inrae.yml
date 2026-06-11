@@ -1,0 +1,17 @@
+name: Mirror to INRAE Forge
+on: [push]
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+      - name: Push to INRAE Forge
+        run: |
+          git remote add inrae ${{ secrets.INRAE_FORGE_REPO }}
+          git push --mirror inrae
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INRAE_FORGE_TOKEN: ${{ secrets.INRAE_FORGE_TOKEN }}
