@@ -6,12 +6,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches
+          fetch-depth: 0
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.INRAE_FORGE_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan forge.inrae.fr >> ~/.ssh/known_hosts
+
       - name: Push to INRAE Forge
         run: |
           git remote add inrae ${{ secrets.INRAE_FORGE_REPO }}
           git push --mirror inrae
-        env:
-          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INRAE_FORGE_TOKEN: ${{ secrets.INRAE_FORGE_TOKEN }}
