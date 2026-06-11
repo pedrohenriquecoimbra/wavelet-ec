@@ -8,6 +8,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install git-filter-repo
+        run: pip install git-filter-repo
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -15,8 +18,11 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan forge.inrae.fr >> ~/.ssh/known_hosts
 
+      - name: Remove unwanted files from Git history
+        run: |
+          git filter-repo --path sample/*/input/*/*.csv --path sample/*/output/**/*.csv --path sample/*/output/**/*.txt --invert-paths --force
+
       - name: Push to INRAE Forge
         run: |
           git remote add inrae ${{ secrets.INRAE_FORGE_REPO }}
-          git push inrae --all  # Push all local branches
-          git push inrae --tags # Push all tags
+          git push --mirror inrae
