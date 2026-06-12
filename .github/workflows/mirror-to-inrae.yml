@@ -20,10 +20,13 @@ jobs:
 
       - name: Remove unwanted files from Git history
         run: |
-          git filter-repo --path sample/*/input/*/*.csv --path sample/*/output/**/*.csv --path sample/*/output/**/*.txt --invert-paths --force
+          git filter-repo \
+            --path-glob 'sample/*/input/*/*.csv' \
+            --path-glob 'sample/*/output/**/*.csv' \
+            --path-glob 'sample/*/output/**/*.txt' \
+            --invert-paths --force
 
       - name: Push to INRAE Forge
         run: |
           git remote add inrae ${{ secrets.INRAE_FORGE_REPO }}
-          git push inrae --all  # Push all local branches
-          git push inrae --tags # Push all tags
+          git push --mirror inrae
