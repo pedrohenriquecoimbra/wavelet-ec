@@ -1,5 +1,13 @@
 name: Conda build
 
+# Self-contained build/test/publish pipeline for waveletec.
+# Replaces the previous delegation to openalea/action-build-publish-anaconda
+# (external org infrastructure) with this project's own steps:
+#   * test  - install the package via pip (so the PyPI-only `regorator`
+#             dependency resolves) and run the pytest suite
+#   * build - build the noarch conda package from conda/meta.yaml and, on a
+#             tag or release, publish it to Anaconda.org
+
 on:
   push:
     branches:
@@ -15,8 +23,104 @@ on:
     types:
       - published
 
+permissions:
+  contents: read
+
+concurrency:
+  group: conda-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  test:
+    name: Test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.11', '3.13']
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge
+          conda-remove-defaults: true
+          activate-environment: test
+
+      - name: Install package and test deps
+        run: pip install . pytest
+
+      - name: Run tests
+        run: pytest -v tests
+
   build:
-    uses: openalea/action-build-publish-anaconda/.github/workflows/openalea_ci.yml@main
-    secrets:
-      anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
+    name: Build & publish conda package
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          channels: conda-forge
+          conda-remove-defaults: true
+          activate-environment: build
+
+      - name: Install build tooling
+        run: conda install -y conda-build conda-verify anaconda-client
+
+      - name: Resolve package version
+        id: version
+        run: |
+          # Canonical version lives in waveletec/version.py; a pushed tag
+          # (vX.Y.Z) takes precedence so releases are labelled from the tag.
+          version=$(python -c "import re,pathlib;print(re.search(r'^version\s*=\s*[\"\x27]([^\"\x27]+)',pathlib.Path('waveletec/version.py').read_text(),re.M).group(1))")
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            version="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Building waveletec ${version}"
+
+      - name: Build conda package
+        env:
+          # consumed by conda/meta.yaml to stamp the package version
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # --no-test: the recipe's in-recipe test stage is skipped; the code
+          # is exercised by the `test` job above (pip-based, so `regorator`
+          # resolves). conda build only needs to produce the noarch artifact.
+          conda build conda \
+            --channel conda-forge \
+            --no-anaconda-upload \
+            --no-test \
+            --output-folder dist/conda
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: waveletec-conda-${{ steps.version.outputs.version }}
+          path: dist/conda/noarch/waveletec-*
+          if-no-files-found: error
+
+      - name: Publish to Anaconda.org
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          anaconda --token "${ANACONDA_TOKEN}" upload --force \
+            dist/conda/noarch/waveletec-*
